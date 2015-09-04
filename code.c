@@ -40,5 +40,11 @@ void executeCodeServiceWithoutParams(char *serviceName, void (*codeCallback)(boo
 } 
 
 void executeCodeServiceWithParams(char *serviceName, char *params, void (*codeCallback)(bool error, char *result)) {
+	char *authToken = getUserToken();
 
+	if (authToken == NULL) {
+		codeCallback(true, "Cannot execute Code Service. Auth token is NULL. Please initialize with ClearBlade first.\n");
+	} else {
+		execute(serviceName, params, codeCallback);
+	}
 }
