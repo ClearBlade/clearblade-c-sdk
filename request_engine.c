@@ -61,7 +61,7 @@ char *executePOST(struct Header *header) {
 		struct curl_slist *headers = NULL;
 		headers = curl_slist_append(headers, "Accept: application/json, text/plain, */*");
 		headers = curl_slist_append(headers, "Expect:");
-		headers = curl_slist_append(headers, "Content-Type: application/json");
+		headers = curl_slist_append(headers, "Content-Type:");
 		headers = curl_slist_append(headers, systemKeyHeader);
 		if (systemSecretHeader != NULL) {
 			headers = curl_slist_append(headers, systemSecretHeader);
@@ -105,5 +105,6 @@ char *executePOST(struct Header *header) {
 		curl_slist_free_all(headers);
 	}
 	curl_global_cleanup();
+	
 	return s.ptr;
 }

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdlib.h>
 #include "util.h"
 #include "request_engine.h"
 #include "concat_strings.h"
@@ -17,11 +18,11 @@ void execute(char *name, char *params, void codeCallback(bool error, char *resul
 	headers.systemKey = getSystemKey();
 	headers.userToken = getUserToken();
 	headers.serviceName = name;
+	headers.body = params;
 
 	char *response = executePOST(&headers);
 	codeCallback(false, response);
 
-	free(headers);
 	free(tempEndpoint);
 	free(temp);
 	free(restEndpoint);
@@ -34,7 +35,7 @@ void executeCodeServiceWithoutParams(char *serviceName, void (*codeCallback)(boo
 	if (authToken == NULL) {
 		codeCallback(true, "Cannot execute Code Service. Auth token is NULL. Please initialize with ClearBlade first.\n");
 	} else {
-		execute(serviceName, NULL, codeCallback);
+		execute(serviceName, "{}", codeCallback);
 	}
 } 
 

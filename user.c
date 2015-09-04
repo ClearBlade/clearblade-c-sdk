@@ -42,7 +42,6 @@ void authenticateAnonUser(void callback(bool error, char *result)) {
 	char *response = executePOST(&headers);
 	parseAuthToken(response, callback);
 
-	free(headers);
 	free(response);
 	free(restURL);
 }
@@ -57,6 +56,7 @@ void authenticateAuthUser(void callback(bool error, char *result)) {
 	char *endBrace = "\"}";
 
 	char *body = malloc(1 + strlen(emailParam) + strlen(passwordParam) + strlen(endBrace));
+	assert(body != NULL);
 	strcpy(body, emailParam);
 	strcat(body, passwordParam);
 	strcat(body, endBrace);
@@ -70,7 +70,6 @@ void authenticateAuthUser(void callback(bool error, char *result)) {
 	char *response = executePOST(&headers);
 	parseAuthToken(response, callback);
 
-	free(headers);
 	free(response);
 	free(restURL);
 	free(emailParam);
