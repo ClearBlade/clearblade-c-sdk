@@ -9,6 +9,11 @@
 #include "request_engine.h"
 #include "concat_strings.h"
 
+
+/*void parseLogoutResponse(char *response, void logoutCallback(bool error, char *result)) {
+
+}*/
+
 void parseAuthToken(char *response, void callback(bool error, char *message)) {
 	char *authToken = getPropertyValueFromJson(response, "user_token");
     	if (authToken == NULL)
@@ -19,22 +24,14 @@ void parseAuthToken(char *response, void callback(bool error, char *message)) {
     	}
 }
 
-struct User *setUser(char *useremail, char *token) {
-	struct User *user = malloc(sizeof(struct User));
-	assert(user != NULL);
-
-	user->email = useremail;
-	user->authToken = token;
-
-	return user;
-}
-
 void authenticateAnonUser(void callback(bool error, char *result)) {
 	char *restEndpoint = "/api/v/1/user/anon";
 	char *platformurl = getPlatformURL();
 	char *restURL = getConcatString(platformurl, restEndpoint);
 
 	struct Header headers;
+	memset(&headers, 0, sizeof(headers));
+
 	headers.url = restURL;
 	headers.systemKey = getSystemKey();
 	headers.systemSecret = getSystemSecret();
@@ -62,6 +59,8 @@ void authenticateAuthUser(void callback(bool error, char *result)) {
 	strcat(body, endBrace);
 
 	struct Header headers;
+	memset(&headers, 0, sizeof(headers));
+
 	headers.url = restURL;
 	headers.systemKey = getSystemKey();
 	headers.systemSecret = getSystemSecret();
@@ -70,10 +69,36 @@ void authenticateAuthUser(void callback(bool error, char *result)) {
 	char *response = executePOST(&headers);
 	parseAuthToken(response, callback);
 
+	setUserPassword(NULL);
+
 	free(response);
 	free(restURL);
 	free(emailParam);
 	free(passwordParam);
 	free(body);
+}
+
+void logoutUser(void (*logoutCallback)(bool error, char *result)) {
+	char *restEndpoint = "/api/v/1/user/logout";
+	char *platformurl = getPlatformURL();
+	char *restURL = getConcatString(platformurl, restEndpoint);
+
+	struct Header headers;
+	memset(&headers, 0, sizeof(headers));
+
+	headers.url = restURL;
+	headers.systemKey = getSystemKey();
+	headers.systemSecret = getSystemSecret();
+	headers.userToken = getUserToken();
+
+	char *response = executePOST(&headers);
+
+	if (strlen(response) == 0) {
+		logoutCallback(false, "User logged out");
+	} else {
+		logoutCallback(true, response);
+	}
+
+	free(restURL);
 }
 

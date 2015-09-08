@@ -9,5 +9,6 @@ struct User {
 void parseAuthToken(char *response, void callback(bool error, char *message));
 void authenticateAnonUser(void callback(bool error, char *result));
 void authenticateAuthUser(void callback(bool error, char *result));
+void logoutUser(void (*logoutCallback)(bool error, char *result));
 
 #endif
