@@ -77,8 +77,18 @@ void initializeClearBlade(char *systemkey, char *systemsecret, char *platformurl
 	initialize(CB, initCallback);
 }
 
+void logoutCallback(bool error, char *message) {
+	if (!error) {
+		printf("Logout: %s\n", message);
+	}
+}
+
 void codeCallback(bool error, char *message) {
-	printf("Code: %s\n", message);
+	if (error) {
+		printf("ERROR: %s\n", message);
+	} else {
+		printf("SUCCESS: %s\n", message);
+	}
 }
 
 void initCallback(bool error, char *message) {
@@ -92,6 +102,7 @@ void initCallback(bool error, char *message) {
 int main(int argc, char *argv[]) {
 	initializeClearBlade("bccba9de0a94e4daef8ed189aff801", "BCCBA9DE0AF2BAF39FB1EFB0CE47", "https://rtp.clearblade.com", "rtp.clearblade.com:1883", "pi@clearblade.com", "clearblade", initCallback);
 	executeCodeServiceWithoutParams("test", codeCallback);
+	logoutUser(logoutCallback);
 
 	return 0;
 }
