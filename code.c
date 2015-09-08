@@ -1,9 +1,11 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 #include "util.h"
 #include "request_engine.h"
 #include "concat_strings.h"
+#include "json_parser.h"
 #include "code.h"
 
 void execute(char *name, char *params, void codeCallback(bool error, char *result)) {
@@ -14,6 +16,8 @@ void execute(char *name, char *params, void codeCallback(bool error, char *resul
 	char *restURL = getConcatString(platformurl, restEndpoint);
 	
 	struct Header headers;
+	memset(&headers, 0, sizeof(headers));
+
 	headers.url = restURL;
 	headers.systemKey = getSystemKey();
 	headers.userToken = getUserToken();
@@ -21,7 +25,13 @@ void execute(char *name, char *params, void codeCallback(bool error, char *resul
 	headers.body = params;
 
 	char *response = executePOST(&headers);
-	codeCallback(false, response);
+
+	char *result = getPropertyValueFromJson(response, "results");
+    	if (result == NULL)
+    		codeCallback(true, response);
+    	else {
+    		codeCallback(false, result);
+    	}
 
 	free(tempEndpoint);
 	free(temp);
