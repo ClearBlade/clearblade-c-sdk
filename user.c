@@ -10,10 +10,6 @@
 #include "concat_strings.h"
 
 
-/*void parseLogoutResponse(char *response, void logoutCallback(bool error, char *result)) {
-
-}*/
-
 void parseAuthToken(char *response, void callback(bool error, char *message)) {
 	char *authToken = getPropertyValueFromJson(response, "user_token");
     	if (authToken == NULL)
