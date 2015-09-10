@@ -8,37 +8,44 @@
 #include "json_parser.h"
 #include "code.h"
 
+/** 
+  * This function makes a REST call to execute the code service specified by the user and returns the response to the codeCallback
+*/
 void execute(char *name, char *params, void codeCallback(bool error, char *result)) {
-	char *temp = getConcatString("/api/v/1/code/", getSystemKey());
+	char *temp = getConcatString("/api/v/1/code/", getSystemKey()); // REST endpoint to execute code service
 	char *tempEndpoint = getConcatString(temp, "/");
 	char *restEndpoint = getConcatString(tempEndpoint, name);
 	char *platformurl = getPlatformURL();
-	char *restURL = getConcatString(platformurl, restEndpoint);
+	char *restURL = getConcatString(platformurl, restEndpoint); // Complete URL to make the REST call
 	
 	struct Header headers;
-	memset(&headers, 0, sizeof(headers));
+	memset(&headers, 0, sizeof(headers)); // Initialize headers
 
 	headers.url = restURL;
 	headers.systemKey = getSystemKey();
-	headers.userToken = getUserToken();
+	headers.userToken = getUserToken();	// Set headers for the REST call
 	headers.serviceName = name;
 	headers.body = params;
 
-	char *response = executePOST(&headers);
+	char *response = executePOST(&headers); // Make the REST call
 
 	char *result = getPropertyValueFromJson(response, "results");
     	if (result == NULL)
-    		codeCallback(true, response);
+    		codeCallback(true, response); // Code Service execution unsuccessful
     	else {
-    		codeCallback(false, result);
+    		codeCallback(false, result); // Code Service execution successful
     	}
 
-	free(tempEndpoint);
+    /* Clean shit up */	
+	free(tempEndpoint); 
 	free(temp);
 	free(restEndpoint);
 	free(restURL);
 }
 
+/**
+  * Function to execute code service without parameters. Service name and codeCallback are required parameters
+*/
 void executeCodeServiceWithoutParams(char *serviceName, void (*codeCallback)(bool error, char *result)) {
 	char *authToken = getUserToken();
 
@@ -49,6 +56,10 @@ void executeCodeServiceWithoutParams(char *serviceName, void (*codeCallback)(boo
 	}
 } 
 
+/**
+  * Function to execute code service with parameters. Service name, params and codeCallback are required parameters
+  * Params need to be passes as a json string
+*/
 void executeCodeServiceWithParams(char *serviceName, char *params, void (*codeCallback)(bool error, char *result)) {
 	char *authToken = getUserToken();
 

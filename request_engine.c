@@ -6,6 +6,10 @@
 #include "util.h"
 #include "concat_strings.h"
 
+
+/**
+  * Function to initialize the string struct. Allocates memory to char *ptr which is used to store the HTTP response afterwards
+*/
 void init_string(struct string *s) {
   s->len = 0;
   s->ptr = malloc(s->len+1);
@@ -16,6 +20,10 @@ void init_string(struct string *s) {
   s->ptr[0] = '\0';
 }
 
+
+/**
+  * This is the HTTP response callback. This constructs the string containing the response and returns it back
+*/
 size_t writefunc(void *ptr, size_t size, size_t nmemb, struct string *s) {
   size_t new_len = s->len + size*nmemb;
   s->ptr = realloc(s->ptr, new_len+1);
@@ -30,8 +38,14 @@ size_t writefunc(void *ptr, size_t size, size_t nmemb, struct string *s) {
   return size*nmemb;
 }
 
+
+/** 
+  * This executes the POST request and returns the response.
+  * It checks for the custom headers and sets them accordingly. 
+  * It uses the libCURL library to make the HTTP requests.
+*/
 char *executePOST(struct Header *header) {
-	char *systemKeyHeader = getConcatString("ClearBlade-SystemKey: ", header->systemKey);
+	char *systemKeyHeader = getConcatString("ClearBlade-SystemKey: ", header->systemKey); // This is a required header for all calls
 	char *systemSecretHeader = NULL;
 	char *userTokenHeader = NULL;
 	char *serviceNameHeader = NULL;
@@ -60,7 +74,7 @@ char *executePOST(struct Header *header) {
 	if(curl) {
 		struct curl_slist *headers = NULL;
 		headers = curl_slist_append(headers, "Accept: application/json, text/plain, */*");
-		headers = curl_slist_append(headers, "Expect:");
+		headers = curl_slist_append(headers, "Expect:"); // We dont need the Expect header
 		headers = curl_slist_append(headers, "Content-Type:");
 		headers = curl_slist_append(headers, systemKeyHeader);
 		if (systemSecretHeader != NULL) {
@@ -76,9 +90,9 @@ char *executePOST(struct Header *header) {
 		curl_easy_setopt(curl, CURLOPT_URL, header->url);
 		curl_easy_setopt(curl, CURLOPT_POST, 1L);
 		if (header->body != NULL) {
-			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, header->body);
+			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, header->body); // This is the POST body
 		} else {
-			curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0L);
+			curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0L); // Send POST without body
 		}
 		curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writefunc);
@@ -86,11 +100,12 @@ char *executePOST(struct Header *header) {
     	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
     	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 		
-		res = curl_easy_perform(curl);
+		res = curl_easy_perform(curl); // Execute the request
 	
 		if(res != CURLE_OK)
       		fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
 
+      	/* Clean shit up */
     	free(systemKeyHeader);
     	if (systemSecretHeader != NULL) {
     		free(systemSecretHeader);

@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include "die.h"
 
+/**
+  * Function to stop execution of the program if shit's gonna go down!
+*/
 void die(const char *message) {
 	if(errno) {
         perror(message);

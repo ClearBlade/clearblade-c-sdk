@@ -9,6 +9,10 @@
 #include "user.h"
 #include "clearblade.h"
 
+
+/**
+  * This function performs checks on the initialize parameters passed to the initializeClearBlade() function and validates them.
+*/
 void validateInitOptions(struct ClearBlade *CB) {
 	if (CB->systemKey == NULL) {
 		die("SystemKey cannot be empty");
@@ -41,19 +45,27 @@ void validateInitOptions(struct ClearBlade *CB) {
 	}
 }
 
+/**
+  * This function validates the initialize parameters and then calls the authentication function in user.c
+*/
 void initialize(struct ClearBlade *CB, void callback(bool error, char *result)) {
 
-	validateInitOptions(CB);
+	validateInitOptions(CB); // First validate all the parameters passed to the initializeClearBlade() function
 
 	if (CB->email == NULL && CB->password == NULL) {
-		authenticateAnonUser(callback);
+		authenticateAnonUser(callback); // If email and password are NULL, initialize as anonymous user
 	} else {
-		authenticateAuthUser(callback);
+		authenticateAuthUser(callback); // If email and password are present, initialize as authenticated user
 	}
 	
-	free(CB);
+	free(CB); // cleanup the ClearBlade struct after use
 }
 
+/** This is the first function to be called before using any of the other functions in this SDK.
+  * This function initializes with the ClearBlade Platform and sets the auth token in util.c after successful initialization.
+  * Except userEmail and userPassword, all other parameters are required. For Anonymous authentication pass userEmail and 
+  * userPassword as NULL
+*/
 void initializeClearBlade(char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *userEmail, char *userPassword, void (*initCallback)(bool error, char *result)) {
 	struct ClearBlade *CB = malloc(sizeof(struct ClearBlade));
 	assert(CB != NULL);

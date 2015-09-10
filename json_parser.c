@@ -2,6 +2,12 @@
 #include <jansson.h>
 #include "json_parser.h"
 
+
+/**
+  * This functions returns the property value of the passed in property and json string.
+  * It uses the Jansson library to parse the JSON.
+  * It also checks whether the json string is an object or array
+*/
 char const *getPropertyValueFromJson(char *jsonString, char *property) {
 	const char *value = NULL;
 	json_t *root, *jsonValue;

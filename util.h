@@ -1,3 +1,8 @@
+/**
+  * This file contains a bunch of getters and setters to set parameters related to the ClearBlade platform. 
+  * Parameters include SystemKey, SystemSecret, Platform URL, Messaging URL, User Email, User Password and Auth Token/User Token
+*/
+
 #ifndef _util_h
 #define _util_h
 
