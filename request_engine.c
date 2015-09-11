@@ -68,7 +68,7 @@ char *executeRequest(struct Header *header) {
 	}
 
 	struct string s;
-    init_string(&s);
+   	init_string(&s);
 
 	CURL *curl;
 	CURLcode res;
