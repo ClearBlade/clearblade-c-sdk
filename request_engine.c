@@ -40,26 +40,31 @@ size_t writefunc(void *ptr, size_t size, size_t nmemb, struct string *s) {
 
 
 /** 
-  * This executes the POST request and returns the response.
+  * This executes the HTTP request and returns the response.
   * It checks for the custom headers and sets them accordingly. 
   * It uses the libCURL library to make the HTTP requests.
 */
-char *executePOST(struct Header *header) {
+char *executeRequest(struct Header *header) {
 	char *systemKeyHeader = getConcatString("ClearBlade-SystemKey: ", header->systemKey); // This is a required header for all calls
 	char *systemSecretHeader = NULL;
 	char *userTokenHeader = NULL;
 	char *serviceNameHeader = NULL;
+	char *collectionIDHeader = NULL;
 
-	if (header->systemSecret != NULL) {
+	if (header->systemSecret != NULL || header->systemSecret != 0) {
 		systemSecretHeader = getConcatString("ClearBlade-SystemSecret: ", header->systemSecret);
 	}
 
-	if (header->userToken != NULL) {
+	if (header->userToken != NULL || header->userToken != 0) {
 		userTokenHeader = getConcatString("ClearBlade-UserToken: ", header->userToken);
 	}
 
-	if (header->serviceName != NULL) {
+	if (header->serviceName != NULL || header->serviceName != 0) {
 		serviceNameHeader = getConcatString("serviceName: ", header->serviceName);
+	}
+
+	if (header->collectionID != NULL || header->collectionID != 0) {
+		collectionIDHeader = getConcatString("collectionID: ", header->collectionID);
 	}
 
 	struct string s;
@@ -75,7 +80,7 @@ char *executePOST(struct Header *header) {
 		struct curl_slist *headers = NULL;
 		headers = curl_slist_append(headers, "Accept: application/json, text/plain, */*");
 		headers = curl_slist_append(headers, "Expect:"); // We dont need the Expect header
-		headers = curl_slist_append(headers, "Content-Type:");
+		headers = curl_slist_append(headers, "Content-Type: application/json");
 		headers = curl_slist_append(headers, systemKeyHeader);
 		if (systemSecretHeader != NULL) {
 			headers = curl_slist_append(headers, systemSecretHeader);
@@ -86,13 +91,18 @@ char *executePOST(struct Header *header) {
 		if (serviceNameHeader != NULL) {
 			headers = curl_slist_append(headers, serviceNameHeader);
 		}
+		if (collectionIDHeader != NULL) {
+			headers = curl_slist_append(headers, collectionIDHeader);
+		}
 		res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 		curl_easy_setopt(curl, CURLOPT_URL, header->url);
-		curl_easy_setopt(curl, CURLOPT_POST, 1L);
-		if (header->body != NULL) {
-			curl_easy_setopt(curl, CURLOPT_POSTFIELDS, header->body); // This is the POST body
-		} else {
-			curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0L); // Send POST without body
+		if (strcmp("POST", header->requestType) == 0) {
+			curl_easy_setopt(curl, CURLOPT_POST, 1L);
+			if (header->body != NULL) {
+				curl_easy_setopt(curl, CURLOPT_POSTFIELDS, header->body); // This is the POST body
+			} else {
+				curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0L); // Send POST without body
+			}
 		}
 		curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writefunc);
@@ -115,6 +125,9 @@ char *executePOST(struct Header *header) {
     	}
     	if (serviceNameHeader != NULL) {
     		free(serviceNameHeader);
+    	}
+    	if (collectionIDHeader != NULL) {
+    		free(collectionIDHeader);
     	}
 		curl_easy_cleanup(curl);
 		curl_slist_free_all(headers);

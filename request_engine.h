@@ -11,7 +11,9 @@ struct Header {
 	char *userToken;
 	char *url;
 	char *serviceName;
+  char *collectionID;
 	char *body;
+  char *requestType;
 };
 
 
@@ -37,10 +39,11 @@ size_t writefunc(void *ptr, size_t size, size_t nmemb, struct string *s);
 
 
 /** 
-  * This executes the POST request and returns the response.
+  * This executes the HTTP request and returns the response.
   * It checks for the custom headers and sets them accordingly. 
   * It uses the libCURL library to make the HTTP requests.
 */
-char *executePOST(struct Header *header);
+char *executeRequest(struct Header *header);
+
 
 #endif
