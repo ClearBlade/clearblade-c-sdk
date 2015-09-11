@@ -8,7 +8,6 @@
 #include "query.h"
 
 struct Query queryObj;
-char *queryParam = NULL;
 char *filter = NULL;
 //char *EQ = "{\"EQ\":[{\"";
 int PAGENUM = 0;
@@ -98,11 +97,10 @@ void fetch(void (*queryResponse)(bool error, char *result)) {
 		queryResponse(true, "Cannot execute query. Auth token is NULL. Please initialize with the ClearBlade Platform first\n");
 	} else {
 		char *param = getFetchURLParameter();
-		queryParam = param;
-		char *endpointTemp = "/api/v/1/data/";
-		char *endpointTemp2 = getConcatString(getPlatformURL(), endpointTemp);
-		char *endpointTemp3 = getConcatString(endpointTemp2, queryObj.collectionID);
-		char *restEndpoint = getConcatString(endpointTemp3, queryParam);
+		char *restEndpoint = "/api/v/1/data/";
+		restEndpoint = getConcatString(getPlatformURL(), restEndpoint);
+		restEndpoint = getConcatString(restEndpoint, queryObj.collectionID);
+		restEndpoint = getConcatString(restEndpoint, param);
 
 		struct Header headers;
 		memset(&headers, 0, sizeof(headers)); // Make all elements of the Header struct to NULL
@@ -115,10 +113,10 @@ void fetch(void (*queryResponse)(bool error, char *result)) {
 
 		char *response = executeRequest(&headers);
 
-		free(queryParam);
-		free(endpointTemp2);
-		free(endpointTemp3);
+		/* Clean shit up */
+		free(param);
 		free(restEndpoint);
+
 		queryResponse(false, response);
 	}
 }

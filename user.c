@@ -27,9 +27,8 @@ void parseAuthToken(char *response, void callback(bool error, char *message)) {
   * This function gathers all the information required to make a REST call to authenticate the user anonymously
 */
 void authenticateAnonUser(void callback(bool error, char *result)) {
-	char *restEndpoint = "/api/v/1/user/anon"; // Anonymous auth REST endpoint
-	char *platformurl = getPlatformURL();
-	char *restURL = getConcatString(platformurl, restEndpoint); // Construct complete URL for making the REST call
+	char *restURL = "/api/v/1/user/anon"; // Anonymous auth REST endpoint
+	restURL = getConcatString(getPlatformURL(), restURL); // Construct complete URL for making the REST call
 
 	struct Header headers;
 	memset(&headers, 0, sizeof(headers)); // Make all elements of the Header struct to NULL
