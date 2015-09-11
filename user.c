@@ -37,8 +37,10 @@ void authenticateAnonUser(void callback(bool error, char *result)) {
 	headers.url = restURL;						
 	headers.systemKey = getSystemKey();			 // Set Headers	
 	headers.systemSecret = getSystemSecret();
+	headers.collectionID = NULL;
+	headers.requestType = "POST";
 	
-	char *response = executePOST(&headers); // Make the REST Call
+	char *response = executeRequest(&headers); // Make the REST Call
 	parseAuthToken(response, callback);
 
 	free(response);
@@ -69,9 +71,11 @@ void authenticateAuthUser(void callback(bool error, char *result)) {
 	headers.url = restURL;
 	headers.systemKey = getSystemKey();
 	headers.systemSecret = getSystemSecret();	// Set Headers	
+	headers.collectionID = NULL;
 	headers.body = body;
+	headers.requestType = "POST";
 
-	char *response = executePOST(&headers); // Make the REST Call
+	char *response = executeRequest(&headers); // Make the REST Call
 	parseAuthToken(response, callback);
 
 	setUserPassword(NULL); // Do not store password on the client. Make it NULL as soon as user is authenticated.
@@ -98,8 +102,9 @@ void logoutUser(void (*logoutCallback)(bool error, char *result)) {
 	headers.systemKey = getSystemKey();
 	headers.systemSecret = getSystemSecret(); // Set Headers
 	headers.userToken = getUserToken();
+	headers.requestType = "POST";
 
-	char *response = executePOST(&headers); // Make the REST Call
+	char *response = executeRequest(&headers); // Make the REST Call
 
 	if (strlen(response) == 0) {
 		logoutCallback(false, "User logged out"); // Logout successful

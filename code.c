@@ -26,8 +26,9 @@ void execute(char *name, char *params, void codeCallback(bool error, char *resul
 	headers.userToken = getUserToken();	// Set headers for the REST call
 	headers.serviceName = name;
 	headers.body = params;
+	headers.requestType = "POST";
 
-	char *response = executePOST(&headers); // Make the REST call
+	char *response = executeRequest(&headers); // Make the REST call
 
 	char *result = getPropertyValueFromJson(response, "results");
     	if (result == NULL)
