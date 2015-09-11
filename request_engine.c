@@ -106,9 +106,9 @@ char *executeRequest(struct Header *header) {
 		}
 		curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 		curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writefunc);
-    	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s);
-    	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-    	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+     	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s);
+     	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+     	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 		
 		res = curl_easy_perform(curl); // Execute the request
 	
