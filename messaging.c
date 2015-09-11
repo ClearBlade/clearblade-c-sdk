@@ -6,10 +6,10 @@
 #include "util.h"
 #include "messaging.h"
 
-static int qos = 0;
-static bool isConnected = false;
-static bool dataArrived = false;
-static struct mosquitto *mosq = NULL;
+int qos = 0;
+bool isConnected = false;
+bool dataArrived = false;
+struct mosquitto *mosq = NULL;
 void (*messagingCallback)(bool error, char *result) = NULL;
 
 bool mosquittoloop() {
@@ -27,13 +27,18 @@ void runloop() {
 		if (flag)
 			break;
 	}
+	sleep(1);
 	setDataArrivedFlag();
 }
 
 void connectCallback(struct mosquitto *mosq, void *userdata, int result) {
 	isConnected = true;
 	dataArrived = true;
-	messagingCallback(false, "Mosquitto MQTT: Client Connected\n");
+	messagingCallback(false, "Mosquitto MQTT: Client Connected");
+}
+
+void subscribeCallback(struct mosquitto *mosq, void *userdata, int mid, int qos_count, const int *granted_qos) {
+	dataArrived = true;
 }
 
 void messageArrivedCallback(struct mosquitto *mosq, void *userdata, const struct mosquitto_message *message) {
@@ -43,7 +48,7 @@ void messageArrivedCallback(struct mosquitto *mosq, void *userdata, const struct
 
 void publishCallback(struct mosquitto *mosq, void *userdata, int result) {
 	dataArrived = true;
-	printf("Mosquitto MQTT: Published Message\n");
+	//printf("Mosquitto MQTT: Published Message\n");
 }
 
 void disconnectCallback(struct mosquitto *mosq, void *userdata, int result) {
@@ -71,6 +76,7 @@ void connect(char *host, int port, void mqttConnectCallback(bool error, char *re
 void setMosquittoCallbacks() {
 	mosquitto_connect_callback_set(mosq, connectCallback);
 	mosquitto_message_callback_set(mosq, messageArrivedCallback);
+	mosquitto_subscribe_callback_set(mosq, subscribeCallback);
 	mosquitto_publish_callback_set(mosq, publishCallback);
 	mosquitto_disconnect_callback_set(mosq, disconnectCallback);
 }
