@@ -1,21 +1,49 @@
 #ifndef _messaging_h
 #define _messaging_h
 
-void connectCallback(struct mosquitto *mosq, void *userdata, int result);
-void messageArrivedCallback(struct mosquitto *mosq, void *userdata, const struct mosquitto_message *message);
-void publishCallback(struct mosquitto *mosq, void *userdata, int result);
-void disconnectCallback(struct mosquitto *mosq, void *userdata, int result);
 
-bool mosquittoloop();
-void setDataArrivedFlag();
+
+/**
+  * This loop should be used when the client has nothing to do but just wait for messages to be received on a specific topic.
+  * This is highly blocking
+*/
+void runloopForever();
+
+
+/**
+  * This is the main loop that will run after every connect, publish, subscribe and unsubscribe to wait for the
+  * corresponding action to be completed successfully
+*/
 void runloop();
-void connect(char *host, int port, void mqttConnectCallback(bool error, char *result));
-void setMosquittoCallbacks();
-char *getMQTTPort(char *messagingurl);
+
+
+/**
+  * Call this function to connect to the MQTT Broker. clientID, QoS and connect callback are the required parameters.
+*/
 void connectToMQTT(char *clientID, int qos, void (*mqttConnectCallback)(bool error, char *message));
+
+
+/**
+  * Subscribes to a topic and sets the user provided message received callback
+*/
 void subscribeToTopic(char *topic, void (*messageReceivedCallback)(char *receivedMessage));
+
+
+/**
+  * Publishes a message to a topic
+*/
 void publishMessage(char *topic, char *message);
+
+
+/**
+  * Unsubscribes from a topic
+*/
 void unsubscribeFromTopic(char *topic);
+
+
+/**
+  * Disconnects from the MQTT Broker. This also cleans up the mosquitto library and destroy's the mosquitto client
+*/
 void disconnectMQTT();
 
 #endif
