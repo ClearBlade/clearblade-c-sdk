@@ -26,7 +26,7 @@ void connectToMQTT(char *clientID, int qos, void (*mqttConnectCallback)(bool err
 /**
   * Subscribes to a topic and sets the user provided message received callback
 */
-void subscribeToTopic(char *topic, void (*messageReceivedCallback)(char *receivedMessage));
+void subscribeToTopic(char *topic, void (*messageReceivedCallback)(char *topic, char *receivedMessage));
 
 
 /**
