@@ -59,6 +59,9 @@ char *checkForPageNum() {
 	return pagenum;
 }
 
+/**
+  * This checks whether the user has set any filters
+*/
 char *checkForFilters() {
 	if (filter == NULL)
 		return NULL;
@@ -96,12 +99,13 @@ char *getFetchURLParameter() {
 	return param;
 }
 
-void filters(char *filters) {
+/**
+  * This is temporary
+  * Basically this tells users to construct the entire FILTERS array themselves and pass it as a string to this function
+  * Then when the user does a fetch(), this filter array will be added to the query body as it is
+*/
+void addFilters(char *filters) {
 	filter = filters;
-	/*EQ = getConcatString(EQ, field);
-	EQ = getConcatString(EQ, "\": \"");
-	EQ = getConcatString(EQ, value);
-	EQ = getConcatString(EQ, "\"}]}");*/
 }
 
 /**
@@ -195,6 +199,7 @@ void createItem(char *jsonBody, void (*queryResponse)(bool error, char *result))
 struct Query initializeQueryObject(char *collectionID) {
 	struct Query query;
 	query.collectionID = collectionID;
+	query.addFilters = addFilters;
 	query.fetch = fetch;
 	query.fetchAll = fetchAll;
 	query.createItem = createItem;

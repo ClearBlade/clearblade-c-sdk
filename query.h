@@ -8,6 +8,7 @@
 */
 struct Query {
 	char *collectionID;
+	void (*addFilters)(char *filters);
 	void (*fetch)(void (*queryResponse)(bool error, char *result));
 	void (*fetchAll)(void (*queryResponse)(bool error, char *result));
 	void (*createItem)(char *jsonBody, void (*queryResponse)(bool error, char *result));
