@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include "request_engine.h"
+#include "json_parser.h"
 #include "concat_strings.h"
 #include "util.h"
 #include "query.h"
@@ -95,6 +96,8 @@ void filters(char *filters) {
 void fetch(void (*queryResponse)(bool error, char *result)) {
 	if (getUserToken() == NULL) {
 		queryResponse(true, "Cannot execute query. Auth token is NULL. Please initialize with the ClearBlade Platform first\n");
+	} else if (queryObj.collectionID == NULL) {
+		queryResponse(true, "Cannot execute query. Collection ID is NULL. Please initialize the query object first\n");
 	} else {
 		char *param = getFetchURLParameter();
 		char *restEndpoint = "/api/v/1/data/";
@@ -113,18 +116,28 @@ void fetch(void (*queryResponse)(bool error, char *result)) {
 
 		char *response = executeRequest(&headers);
 
+		char *result = getPropertyValueFromJson(response, "DATA");
+    	if (result == NULL)
+    		queryResponse(true, response); // Query execution unsuccessful
+    	else {
+    		queryResponse(false, result); // Query execution successful
+    	}
+
 		/* Clean shit up */
 		free(param);
 		free(restEndpoint);
-
-		queryResponse(false, response);
 	}
+}
+
+void fetchAll(void (*queryResponse)(bool error, char *result)) {
+	fetch(queryResponse);
 }
 
 struct Query initializeQueryObject(char *collectionID) {
 	struct Query query;
 	query.collectionID = collectionID;
 	query.fetch = fetch;
+	query.fetchAll = fetchAll;
 
 	queryObj = query;
 

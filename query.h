@@ -4,6 +4,7 @@
 struct Query {
 	char *collectionID;
 	void (*fetch)(void (*queryResponse)(bool error, char *result));
+	void (*fetchAll)(void (*queryResponse)(bool error, char *result));
 };
 
 void setPageNumber(int pagenumber);
