@@ -3,12 +3,6 @@
 
 
 /**
-  * This function parses the response received from the REST call to authenticate the user to get the auth token.
-*/
-void parseAuthToken(char *response, void callback(bool error, char *message));
-
-
-/**
   * This function gathers all the information required to make a REST call to authenticate the user anonymously
 */
 void authenticateAnonUser(void callback(bool error, char *result));

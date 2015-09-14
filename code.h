@@ -2,12 +2,6 @@
 #define _code_h
 
 
-/** 
-  * This function makes a REST call to execute the code service specified by the user and returns the response to the codeCallback
-*/
-void execute(char *name, char *params, void codeCallback(bool error, char *result));
-
-
 /**
   * Function to execute code service without parameters. Service name and codeCallback are required parameters
 */

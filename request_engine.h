@@ -26,18 +26,6 @@ struct string {
 };
 
 
-/**
-  * Function to initialize the string struct. Allocates memory to char *ptr which is used to store the HTTP response afterwards
-*/
-void init_string(struct string *s);
-
-
-/**
-  * This is the HTTP response callback. This constructs the string containing the response and returns it back
-*/
-size_t writefunc(void *ptr, size_t size, size_t nmemb, struct string *s);
-
-
 /** 
   * This executes the HTTP request and returns the response.
   * It checks for the custom headers and sets them accordingly. 

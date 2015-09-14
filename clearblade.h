@@ -17,20 +17,6 @@ struct ClearBlade {
 
 
 
-/**
-  * This function performs checks on the initialize parameters passed to the initializeClearBlade() function and validates them.
-*/
-void validateInitOptions(struct ClearBlade *CB);
-
-
-
-/**
-  * This function validates the initialize parameters and then calls the authentication function in user.c
-*/
-void initialize(struct ClearBlade *CB, void callback(bool error, char *result));
-
-
-
 /** This is the first function to be called before using any of the other functions in this SDK.
   * This function initializes with the ClearBlade Platform and sets the auth token in util.c after successful initialization.
   * Except userEmail and userPassword, all other parameters are required. For Anonymous authentication pass userEmail and 
