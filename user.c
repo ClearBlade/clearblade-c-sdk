@@ -114,3 +114,32 @@ void logoutUser(void (*logoutCallback)(bool error, char *result)) {
 	free(restURL);
 }
 
+/**
+  * This function checks whether the user is authenticated
+*/
+void checkAuth(void (*checkAuthCallback)(bool error, char *result)) {
+	char *restEndpoint = "/api/v/1/user/checkauth"; // Checkauth REST endpoint
+	char *platformurl = getPlatformURL();
+	char *restURL = getConcatString(platformurl, restEndpoint); // Construct complete URL for making the REST call
+
+	struct Header headers;
+	memset(&headers, 0, sizeof(headers)); // Make all elements of the Header struct to NULL
+
+	headers.url = restURL;
+	headers.systemKey = getSystemKey();
+	headers.systemSecret = getSystemSecret(); // Set Headers
+	headers.userToken = getUserToken();
+	headers.requestType = "POST";
+
+	char *response = executeRequest(&headers); // Make the REST Call
+
+	char *authResponse = getPropertyValueFromJson(response, "is_authenticated");
+    	if (authResponse == NULL)
+    		checkAuthCallback(false, response);
+    	else {
+    		checkAuthCallback(true, authResponse);
+    	}
+
+	free(restURL);
+}
+

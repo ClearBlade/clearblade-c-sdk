@@ -25,4 +25,10 @@ void authenticateAuthUser(void callback(bool error, char *result));
 */
 void logoutUser(void (*logoutCallback)(bool error, char *result));
 
+
+/**
+  * This function checks whether the user is authenticated
+*/
+void checkAuth(void (*checkAuthCallback)(bool error, char *result));
+
 #endif
