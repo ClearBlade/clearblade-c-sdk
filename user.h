@@ -1,6 +1,7 @@
 #ifndef _user_h
 #define _user_h
 
+#include <stdbool.h>
 
 /**
   * This function gathers all the information required to make a REST call to authenticate the user anonymously
