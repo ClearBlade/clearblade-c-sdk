@@ -42,7 +42,7 @@ void unsubscribeFromTopic(char *topic);
 
 
 /**
-  * Disconnects from the MQTT Broker. This also cleans up the mosquitto library and destroy's the mosquitto client
+  * Disconnects from the MQTT Broker. This also cleans up the mosquitto library and destroys the mosquitto client
 */
 void disconnectMQTT();
 
