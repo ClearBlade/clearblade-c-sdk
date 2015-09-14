@@ -8,7 +8,7 @@
 #include "util.h"
 #include "query.h"
 
-struct Query queryObj; // This stored the collection ID and all sets the functions for querying
+struct Query queryObj; // This stores the collection ID and all sets the functions for querying
 char *filter = NULL;
 //char *EQ = "{\"EQ\":[{\"";
 int PAGENUM = 0;
@@ -39,7 +39,6 @@ char *checkForPageSize() {
 	} else {
 		return NULL;
 	}
-
 }
 
 /**
