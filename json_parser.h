@@ -9,4 +9,11 @@
 */
 char const *getPropertyValueFromJson(char *jsonString, char *property);
 
+
+
+/**
+  * Checks if the json string is an array
+*/
+bool checkIfJsonArray(char *jsonString);
+
 #endif

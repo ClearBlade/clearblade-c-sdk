@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 #include <jansson.h>
 #include "json_parser.h"
 
@@ -25,5 +26,21 @@ char const *getPropertyValueFromJson(char *jsonString, char *property) {
 		return value;
 	} else {
 		return NULL;
+	}
+}
+
+/**
+  * Checks if the json string is an array
+*/
+bool checkIfJsonArray(char *jsonString) {
+	json_t *root;
+	json_error_t error;
+
+	root = json_loads(jsonString, 0, &error);
+
+	if (json_is_array(root)) {
+		return true;
+	} else {
+		return false;
 	}
 }
