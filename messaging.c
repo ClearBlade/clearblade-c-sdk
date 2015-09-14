@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <mosquitto.h>
 #include "util.h"
 #include "messaging.h"
@@ -51,6 +52,10 @@ void publishCallback(struct mosquitto *mosq, void *userdata, int result) {
 	//printf("Mosquitto MQTT: Published Message\n");
 }
 
+void unsubscribeCallback(struct mosquitto *mosq, void *userdata, int result) {
+	dataArrived = true;
+}
+
 void disconnectCallback(struct mosquitto *mosq, void *userdata, int result) {
 	printf("Mosquitto MQTT: Client Disconnected\n");
 }
@@ -65,10 +70,13 @@ void connect(char *host, int port, void mqttConnectCallback(bool error, char *re
 	if(connectionResult == MOSQ_ERR_SUCCESS) {
 			
 	} else if (connectionResult == MOSQ_ERR_INVAL) {
+		dataArrived = true;
 		mqttConnectCallback(true, "Mosquitto MQTT ERROR: Could not connect. MOSQ_ERR_INVAL\n");
 	} else if (connectionResult == MOSQ_ERR_ERRNO) {
+		dataArrived = true;
 		mqttConnectCallback(true, mosquitto_strerror(connectionResult));
 	} else {
+		dataArrived = true;
 		mqttConnectCallback(true, "Mosquitto MQTT: Unknown Error\n");
 	}
 }
@@ -78,7 +86,22 @@ void setMosquittoCallbacks() {
 	mosquitto_message_callback_set(mosq, messageArrivedCallback);
 	mosquitto_subscribe_callback_set(mosq, subscribeCallback);
 	mosquitto_publish_callback_set(mosq, publishCallback);
+	mosquitto_unsubscribe_callback_set(mosq, unsubscribeCallback);
 	mosquitto_disconnect_callback_set(mosq, disconnectCallback);
+}
+
+char *getMQTTHost(char *messagingurl) {
+    char *host;
+    char *hostp, *foop;
+
+    host = (char *) malloc(128);
+
+    hostp = host;
+    for (foop = messagingurl; *foop != ':'; foop ++) {
+        *hostp++ = *foop;
+    }
+    *hostp = '\0';
+	return host;
 }
 
 char *getMQTTPort(char *messagingurl) {
@@ -106,6 +129,9 @@ void connectToMQTT(char *clientID, int qualityOfService, void (*mqttConnectCallb
 
 		char *port = getMQTTPort(messagingurl);
 		int mqttPort = atoi(port);
+		
+		char *host = getMQTTHost(messagingurl);
+
 		free(port);
 
 		mosquitto_lib_init();
@@ -119,7 +145,9 @@ void connectToMQTT(char *clientID, int qualityOfService, void (*mqttConnectCallb
 
 		setMosquittoCallbacks();
 		
-		connect("rtp.clearblade.com", mqttPort, mqttConnectCallback);
+		connect(host, mqttPort, mqttConnectCallback);
+
+		free(host);
 
 		runloop();
 	}
@@ -146,6 +174,7 @@ void publishMessage(char *topic, char *message) {
 void unsubscribeFromTopic(char *topic) {
 	if (isConnected) {
 		mosquitto_unsubscribe(mosq, NULL, topic);
+		runloop();
 	} else {
 		printf("Mosquitto MQTT: Could not unsubscribe. Client is not connected\n");
 	}
