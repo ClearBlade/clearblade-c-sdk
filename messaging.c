@@ -207,9 +207,9 @@ void connectToMQTT(char *clientID, int qualityOfService, void (*mqttConnectCallb
 */
 void subscribeToTopic(char *topic, void (*messageReceivedCallback)(char *topic, char *receivedMessage)) {
 	if (isConnected) {
+		dataArrivedCallback = messageReceivedCallback; // Sets the user provided message arrived callback
 		mosquitto_subscribe(mosq, NULL, topic, qos);
 		runloop(); // Wait for the subscribe to complete. When complete go to the internal subscribe callback
-		dataArrivedCallback = messageReceivedCallback; // Sets the user provided message arrived callback
 	} else {
 		printf("Mosquitto MQTT: Could not subscribe. Client is not connected\n");
 	}
