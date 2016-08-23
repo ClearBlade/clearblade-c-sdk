@@ -133,7 +133,7 @@ void fetch(void (*queryResponse)(bool error, char *result)) {
 
 		char *response = executeRequest(&headers);
 
-		char *result = getPropertyValueFromJson(response, "DATA");
+		char *result = (char *) getPropertyValueFromJson(response, "DATA");
     	if (result == NULL)
     		queryResponse(true, response); // Query execution unsuccessful
     	else {

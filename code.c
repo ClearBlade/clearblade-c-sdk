@@ -29,7 +29,7 @@ void execute(char *name, char *params, void codeCallback(bool error, char *resul
 
 	char *response = executeRequest(&headers); // Make the REST call
 
-	char *result = getPropertyValueFromJson(response, "results");
+	char *result = (char *) getPropertyValueFromJson(response, "results");
     	if (result == NULL)
     		codeCallback(true, response); // Code Service execution unsuccessful
     	else {

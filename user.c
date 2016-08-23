@@ -14,7 +14,7 @@
   * This function parses the response received from the REST call to authenticate the user to get the auth token.
 */
 void parseAuthToken(char *response, void callback(bool error, char *message)) {
-	char *authToken = getPropertyValueFromJson(response, "user_token"); // Gets the auth token string from the response json object
+	char *authToken = (char *) getPropertyValueFromJson(response, "user_token"); // Gets the auth token string from the response json object
     	if (authToken == NULL)
     		callback(true, response);
     	else {
@@ -133,7 +133,7 @@ void checkAuth(void (*checkAuthCallback)(bool error, char *result)) {
 
 	char *response = executeRequest(&headers); // Make the REST Call
 
-	char *authResponse = getPropertyValueFromJson(response, "is_authenticated");
+	char *authResponse = (char *) getPropertyValueFromJson(response, "is_authenticated");
     	if (authResponse == NULL)
     		checkAuthCallback(false, response);
     	else {

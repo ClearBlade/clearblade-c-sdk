@@ -2,6 +2,7 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <unistd.h>
 #include <mosquitto.h>
 #include "util.h"
@@ -105,7 +106,7 @@ void logCallback(struct mosquitto *mosq, void *obj, int level, const char *str) 
 /**
   * Attempts to connects to the MQTT Broker and returns error codes if any
 */
-void connect(char *host, int port, void mqttConnectCallback(bool error, char *result)) {
+void connectToTheMQTT(char *host, int port, void mqttConnectCallback(bool error, char *result)) {
 	int connectionResult = mosquitto_connect(mosq, host, port, 60);
 		
 	if(connectionResult == MOSQ_ERR_SUCCESS) {
@@ -115,7 +116,7 @@ void connect(char *host, int port, void mqttConnectCallback(bool error, char *re
 		mqttConnectCallback(true, "Mosquitto MQTT ERROR: Could not connect. MOSQ_ERR_INVAL\n");
 	} else if (connectionResult == MOSQ_ERR_ERRNO) {
 		dataArrived = true;
-		mqttConnectCallback(true, mosquitto_strerror(connectionResult));
+		mqttConnectCallback(true, (char *) mosquitto_strerror(connectionResult));
 	} else {
 		dataArrived = true;
 		mqttConnectCallback(true, "Mosquitto MQTT: Unknown Error\n");
@@ -194,7 +195,7 @@ void connectToMQTT(char *clientID, int qualityOfService, void (*mqttConnectCallb
 
 		setMosquittoCallbacks();
 		
-		connect(host, mqttPort, mqttConnectCallback);
+		connectToTheMQTT(host, mqttPort, mqttConnectCallback);
 
 		free(host);
 
