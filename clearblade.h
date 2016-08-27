@@ -1,6 +1,8 @@
 #ifndef _clearblade_h
 #define _clearblade_h
 
+#include <pthread.h>
+
 
 /**
   * The ClearBlade struct containing the initialize parameters. 
@@ -13,7 +15,10 @@ struct ClearBlade {
 	char *messagingURL;
 	char *email;
 	char *password;
+	pthread_mutex_t connectLock;
 };
+
+extern struct ClearBlade CBGlobal;
 
 
 

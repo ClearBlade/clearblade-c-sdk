@@ -5,137 +5,104 @@
 #include <strings.h>
 #include <unistd.h>
 #include <mosquitto.h>
+#include <pthread.h>
 #include "util.h"
 #include "messaging.h"
 
-int qos = 0;
-bool isConnected = false;
-bool dataArrived = false; // This flag is to check whether data has arrived on the socket using the mosquitto loop
-struct mosquitto *mosq = NULL;
-void (*messagingCallback)(bool error, char *result) = NULL; // User's connect callback that we will set later in the mosquitto internal connect callback
-void (*dataArrivedCallback)(char *topic, char *message) = NULL; // User's message arrived callback that we will set later in the mosquitto internal message arrived callback
+static int connectionCount = 0;
 
-/**
-  * Mosquitto loop to check if data is arrived on the socket
-*/
-bool mosquittoloop() {
-	mosquitto_loop(mosq, -1, 1);
-	return dataArrived;
+//
+//  Forward declaration bullshit. Welcome to 1973. I was there. Wasn't
+//  as cool as you think.
+//
+//  First, all of the callbacks needed:
+//
+void connectCallback(struct mosquitto *mosq, void *userdata, int result);
+void messageReceivedCallback(struct mosquitto *mosq, void *userdata, const struct mosquitto_message *);
+void subscribeCallback(struct mosquitto *mosq, void *userdata, int mid, int qos_count, const int *granted_qos);
+void publishCallback(struct mosquitto *mosq, void *userdata, int result);
+void unsubscribeCallback(struct mosquitto *mosq, void *userdata, int result);
+void disconnectCallback(struct mosquitto *mosq, void *userdata, int result);
+
+void initialize_messaging() {
+	mosquitto_lib_init();
 }
 
-// Reinitializes the dataArrived flag
-void setDataArrivedFlag() {
-	dataArrived = false;
+void setMosquittoCallbacks(MessagingData *md) {
+	mosquitto_connect_callback_set(md->mosq, connectCallback);
+	mosquitto_message_callback_set(md->mosq, messageReceivedCallback);
+	mosquitto_subscribe_callback_set(md->mosq, subscribeCallback);
+	mosquitto_publish_callback_set(md->mosq, publishCallback);
+	mosquitto_unsubscribe_callback_set(md->mosq, unsubscribeCallback);
+	mosquitto_disconnect_callback_set(md->mosq, disconnectCallback);
 }
 
-/**
-  * This is the main loop that will run after every connect, publish, subscribe and unsubscribe to wait for the
-  * corresponding action to be completed successfully
-*/
-void runloop() {
-	while (1) {
-		bool flag = mosquittoloop();
-		if (flag)
-			break;
+MessagingData *initializeMessagingData(char *clientId, int qos) {
+	MessagingData *md = (MessagingData *) malloc(sizeof(MessagingData));
+	if (md == NULL) {
+		fprintf(stderr, "MessagingData: Out of memory.");
+		exit(1);
 	}
-	sleep(1);
-	setDataArrivedFlag();
+	md->mosq = mosquitto_new(clientId, true, NULL);
+	if (!md->mosq) {
+		fprintf(stderr, "Mosquitto MQTT: Out of memory\n");
+		exit(1);
+	}
+	md->qos = qos;
+	md->errno = 0;
+	setMosquittoCallbacks(md);
+	pthread_mutex_lock(md->lock);
+	return md;
 }
 
-/**
-  * This loop should be used when the client has nothing to do but just wait for messages to be received on a specific topic.
-  * This is highly blocking
-*/
-void runloopForever() {
-	mosquitto_loop_forever(mosq, -1, 1);
+void finalizeMessagingData(MessagingData *md) {
+	mosquitto_disconnect(md->mosq);
+	mosquitto_destroy(md->mosq);
+	if (--connectionCount <= 0) {
+		mosquitto_lib_cleanup();
+	}
+	pthread_mutex_unlock(md->lock);
+	free(md);
 }
 
-/**
-  * Mosquitto's internal connect callback
-*/
 void connectCallback(struct mosquitto *mosq, void *userdata, int result) {
-	isConnected = true;
-	dataArrived = true; // Connect complete
-	messagingCallback(false, "Mosquitto MQTT: Client Connected"); // User provided connect callback
+	// TODO -- this assumes the connect worked every time. Duh.
+
+	printf("CONNECT CALLBACK: %d\n", result);
+	MessagingData *md = (MessagingData *)userdata;
+	md->errno = result;
+	mosquitto_loop_start(mosq);
+	pthread_mutex_unlock(md->lock);
 }
 
-/**
-  * Mosquitto's internal subscribe callback
-*/
 void subscribeCallback(struct mosquitto *mosq, void *userdata, int mid, int qos_count, const int *granted_qos) {
-	dataArrived = true; // Subscribe complete
+	MessagingData *md = (MessagingData *)userdata;
+	md->errno = 0; // Don't know what to do here
+	pthread_mutex_unlock(md->lock);
 }
 
-/**
-  * Mosquitto's internal message arrived callback
-*/
-void messageArrivedCallback(struct mosquitto *mosq, void *userdata, const struct mosquitto_message *message) {
-	dataArrived = true; // Message arrived
-	dataArrivedCallback(message->topic, message->payload); // User provided message arrived callback
-	
+void messageReceivedCallback(struct mosquitto *mosq, void *userdata, const struct mosquitto_message *message) {
+	MessagingData *md = (MessagingData *)userdata;
 }
 
-/**
-  * Mosquitto's internal publish callback
-*/
 void publishCallback(struct mosquitto *mosq, void *userdata, int result) {
-	dataArrived = true; // Publish complete
+	MessagingData *md = (MessagingData *)userdata;
+	md->errno = result;
+	pthread_mutex_unlock(md->lock);
 }
 
-/**
-  * Mosquitto's internal unsubscribe callback
-*/
 void unsubscribeCallback(struct mosquitto *mosq, void *userdata, int result) {
-	dataArrived = true; // Unsubscribe complete
+	MessagingData *md = (MessagingData *)userdata;
+	md->errno = result;
+	pthread_mutex_unlock(md->lock);
 }
 
-/**
-  * Mosquitto's internal disconnect callback
-*/
 void disconnectCallback(struct mosquitto *mosq, void *userdata, int result) {
-	printf("Mosquitto MQTT: Client Disconnected\n");
+	MessagingData *md = (MessagingData *)userdata;
+	md->errno = result;
+	pthread_mutex_unlock(md->lock);
 }
 
-/**
-  * Mosquitto's internal Log callback. Only for debugging. Currently not used
-*/
-void logCallback(struct mosquitto *mosq, void *obj, int level, const char *str) {
-	printf("Mosquitto MQTT Log: %s\n", str);
-}
-
-/**
-  * Attempts to connects to the MQTT Broker and returns error codes if any
-*/
-void connectToTheMQTT(char *host, int port, void mqttConnectCallback(bool error, char *result)) {
-	int connectionResult = mosquitto_connect(mosq, host, port, 60);
-		
-	if(connectionResult == MOSQ_ERR_SUCCESS) {
-			
-	} else if (connectionResult == MOSQ_ERR_INVAL) {
-		dataArrived = true; // This is to let the mosquitto loop know that the client could not connect and it should stop the loop and give control back to the program
-		mqttConnectCallback(true, "Mosquitto MQTT ERROR: Could not connect. MOSQ_ERR_INVAL\n");
-	} else if (connectionResult == MOSQ_ERR_ERRNO) {
-		dataArrived = true;
-		mqttConnectCallback(true, (char *) mosquitto_strerror(connectionResult));
-	} else {
-		dataArrived = true;
-		mqttConnectCallback(true, "Mosquitto MQTT: Unknown Error\n");
-	}
-}
-
-/**
-  * This sets all the required internal callbacks for mosquitto
-*/
-void setMosquittoCallbacks() {
-	mosquitto_connect_callback_set(mosq, connectCallback);
-	mosquitto_message_callback_set(mosq, messageArrivedCallback);
-	mosquitto_subscribe_callback_set(mosq, subscribeCallback);
-	mosquitto_publish_callback_set(mosq, publishCallback);
-	mosquitto_unsubscribe_callback_set(mosq, unsubscribeCallback);
-	mosquitto_disconnect_callback_set(mosq, disconnectCallback);
-}
-
-// Parses the messaging URL and returns the mqtt host
 char *getMQTTHost(char *messagingurl) {
     char *host;
     char *hostp, *foop;
@@ -158,97 +125,60 @@ char *getMQTTPort(char *messagingurl) {
 	return port;
 }
 
-/**
-  * Call this function to connect to the MQTT Broker. clientID, QoS and connect callback are the required parameters.
-*/
-void connectToMQTT(char *clientID, int qualityOfService, void (*mqttConnectCallback)(bool error, char *message)) {
+MessagingData *connectToMQTT(char *clientId, int qualityOfService, messageReceivedCallback_t mrcb) {
 	if (getUserToken() == NULL) {
-		mqttConnectCallback(true, "Could not connect to the MQTT broker. Auth token is NULL. Please initialize the ClearBlade platform first\n");
-	} else {
-		if (qualityOfService < 0 || qualityOfService > 2)
-			mqttConnectCallback(true, "Quality of service cannot be less than 0 or greater than 2\n");
-		else
-			qos = qualityOfService;
-		
-		messagingCallback = mqttConnectCallback; // Set the user's connect callback
-		const char *id = clientID;
-		const char *username = getUserToken();
-		const char *password = getSystemKey();
-		char *messagingurl = getMessagingURL();
-		bool clean_session = true;
-
-		char *port = getMQTTPort(messagingurl); // Parse port from messaging url
-		int mqttPort = atoi(port);
-		
-		char *host = getMQTTHost(messagingurl); // Parse host from messaging url
-
-		free(port);
-
-		mosquitto_lib_init(); // Initialize mosquitto
-
-		mosq = mosquitto_new(id, clean_session, NULL);
-		if (!mosq) {
-			fprintf(stderr, "Mosquitto MQTT: Out of memory\n");
-		}
-		
-		mosquitto_username_pw_set(mosq, username, password); // Set username and password
-
-		setMosquittoCallbacks();
-		
-		connectToTheMQTT(host, mqttPort, mqttConnectCallback);
-
-		free(host);
-
-		runloop(); // Wait for the connection to complete. When complete go to the internal connect callback
+		fprintf(stderr, "connectToMQTT called with unset user token\n");
+		return NULL;
 	}
+	if (qualityOfService < 0 || qualityOfService > 2) {
+		fprintf(stderr, "Quality of service cannot be less than 0 or greater than 2\n");
+		return NULL;
+	}
+	
+	const char *username = getUserToken();
+	const char *password = getSystemKey();
+	char *messagingurl = getMessagingURL();
+
+	char *port = getMQTTPort(messagingurl); // Parse port from messaging url
+	int mqttPort = atoi(port);
+	free(port);
+	char *host = getMQTTHost(messagingurl); // Parse host from messaging url
+
+
+	MessagingData *md = initializeMessagingData(clientId, qualityOfService);
+	md->cb = mrcb;
+	
+	mosquitto_username_pw_set(md->mosq, username, password); // Set username and password
+	int connectionResult = mosquitto_connect(md->mosq, host, mqttPort, 60);
+	
+	if (connectionResult != 0) {
+		fprintf(stderr, "Mosquitto connect failed: %d\n", connectionResult);
+		return NULL;
+	}
+	
+	free(host);
+	return md;
 }
 
-/**
-  * Subscribes to a topic and sets the user provided message received callback
-*/
-void subscribeToTopic(char *topic, void (*messageReceivedCallback)(char *topic, char *receivedMessage)) {
-	if (isConnected) {
-		dataArrivedCallback = messageReceivedCallback; // Sets the user provided message arrived callback
-		mosquitto_subscribe(mosq, NULL, topic, qos);
-		runloop(); // Wait for the subscribe to complete. When complete go to the internal subscribe callback
-	} else {
-		printf("Mosquitto MQTT: Could not subscribe. Client is not connected\n");
-	}
+int subscribeToTopic(MessagingData *md, char *topic) {
+	mosquitto_subscribe(md->mosq, NULL, topic, md->qos);
+	pthread_mutex_lock(md->lock);
 }
 
-/**
-  * Publishes a message to a topic
-*/
-void publishMessage(char *topic, char *message) {
-	if (isConnected) {
-		mosquitto_publish(mosq, NULL, topic, strlen(message), message, qos, true);
-		runloop(); // Wait for the publish to complete. When complete go to the internal publish callback
-	} else {
-		printf("Mosquitto MQTT: Could not publish. Client is not connected\n");
-	}
+int publishMessage(MessagingData *md, char *topic, char *message) {
+	mosquitto_publish(md->mosq, NULL, topic, strlen(message), message, md->qos, true);
+	pthread_mutex_lock(md->lock);
+	return md->errno;
 }
 
-/**
-  * Unsubscribes from a topic
-*/
-void unsubscribeFromTopic(char *topic) {
-	if (isConnected) {
-		mosquitto_unsubscribe(mosq, NULL, topic);
-		runloop(); // Wait for the unsubscribe to complete. When complete go to the internal unsubscribe callback
-	} else {
-		printf("Mosquitto MQTT: Could not unsubscribe. Client is not connected\n");
-	}
+int unsubscribeFromTopic(MessagingData *md, char *topic) {
+	md->errno = 0;
+	mosquitto_unsubscribe(md->mosq, NULL, topic);
+	pthread_mutex_lock(md->lock);
+	return md->errno;
 }
 
-/**
-  * Disconnects from the MQTT Broker. This also cleans up the mosquitto library and destroys the mosquitto client
-*/
-void disconnectMQTT() {
-	if (isConnected) {
-		mosquitto_disconnect(mosq);
-		mosquitto_destroy(mosq);
-		mosquitto_lib_cleanup();
-	} else {
-		printf("Client already disconnected\n");
-	}
+int disconnectMQTT(MessagingData *md) {
+	finalizeMessagingData(md);
+	return 0;
 }

@@ -3,11 +3,14 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <stdbool.h>
+#include <mosquitto.h>
 #include "die.h"
 #include "request_engine.h"
 #include "util.h"
 #include "user.h"
 #include "clearblade.h"
+
+struct ClearBlade CBGlobal;
 
 
 /**
@@ -58,7 +61,7 @@ void initialize(struct ClearBlade *CB, void callback(bool error, char *result)) 
 		authenticateAuthUser(callback); // If email and password are present, initialize as authenticated user
 	}
 	
-	free(CB); // cleanup the ClearBlade struct after use
+	//free(CB); // cleanup the ClearBlade struct after use
 }
 
 /** This is the first function to be called before using any of the other functions in this SDK.
@@ -67,15 +70,28 @@ void initialize(struct ClearBlade *CB, void callback(bool error, char *result)) 
   * userPassword as NULL
 */
 void initializeClearBlade(char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *userEmail, char *userPassword, void (*initCallback)(bool error, char *result)) {
+/*
 	struct ClearBlade *CB = malloc(sizeof(struct ClearBlade));
 	assert(CB != NULL);
+*/
 
-	CB->systemKey = systemkey;
-	CB->systemSecret = systemsecret;
-	CB->platformURL = platformurl;
-	CB->messagingURL = messagingurl;
-	CB->email = userEmail;
-	CB->password = userPassword;
+	CBGlobal.systemKey = systemkey;
+	CBGlobal.systemSecret = systemsecret;
+	CBGlobal.platformURL = platformurl;
+	CBGlobal.messagingURL = messagingurl;
+	CBGlobal.email = userEmail;
+	CBGlobal.password = userPassword;
 
-	initialize(CB, initCallback);
+	initialize(&CBGlobal, initCallback);
+}
+
+void syncConnectCallback(bool error, char *result) {
+}
+
+void syncInitCallback(bool error, char *result) {
+}
+
+void initializeClearBladeSync(char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *userEmail, char *userPassword/*, void (*initCallback)(bool error, char *result)*/) {
+
+	initializeClearBlade(systemkey, systemsecret, platformurl, messagingurl, userEmail, userPassword, syncInitCallback);
 }
