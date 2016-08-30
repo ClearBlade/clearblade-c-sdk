@@ -85,13 +85,16 @@ void initializeClearBlade(char *systemkey, char *systemsecret, char *platformurl
 	initialize(&CBGlobal, initCallback);
 }
 
+/*
 void syncConnectCallback(bool error, char *result) {
 }
 
 void syncInitCallback(bool error, char *result) {
+	initialize_messaging();
 }
 
-void initializeClearBladeSync(char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *userEmail, char *userPassword/*, void (*initCallback)(bool error, char *result)*/) {
+void initializeClearBladeSync(char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *userEmail, char *userPassword) {
 
 	initializeClearBlade(systemkey, systemsecret, platformurl, messagingurl, userEmail, userPassword, syncInitCallback);
 }
+*/

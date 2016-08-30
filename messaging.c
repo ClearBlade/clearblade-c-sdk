@@ -29,6 +29,7 @@ void initialize_messaging() {
 }
 
 void setMosquittoCallbacks(MessagingData *md) {
+printf("SETTING CALLBACKS\n");
 	mosquitto_connect_callback_set(md->mosq, connectCallback);
 	mosquitto_message_callback_set(md->mosq, messageReceivedCallback);
 	mosquitto_subscribe_callback_set(md->mosq, subscribeCallback);
@@ -50,7 +51,10 @@ MessagingData *initializeMessagingData(char *clientId, int qos) {
 	}
 	md->qos = qos;
 	md->errno = 0;
+	md->lock = (pthread_mutex_t *) malloc(sizeof(pthread_mutex_t));
+	mosquitto_user_data_set(md->mosq, (void *)md);
 	setMosquittoCallbacks(md);
+	pthread_mutex_init(md->lock, NULL);
 	pthread_mutex_lock(md->lock);
 	return md;
 }
@@ -86,6 +90,7 @@ void messageReceivedCallback(struct mosquitto *mosq, void *userdata, const struc
 }
 
 void publishCallback(struct mosquitto *mosq, void *userdata, int result) {
+printf ("PUBLISH callback\n");
 	MessagingData *md = (MessagingData *)userdata;
 	md->errno = result;
 	pthread_mutex_unlock(md->lock);
@@ -149,12 +154,13 @@ MessagingData *connectToMQTT(char *clientId, int qualityOfService, messageReceiv
 	md->cb = mrcb;
 	
 	mosquitto_username_pw_set(md->mosq, username, password); // Set username and password
-	int connectionResult = mosquitto_connect(md->mosq, host, mqttPort, 60);
+	int connectionResult = mosquitto_connect_async(md->mosq, host, mqttPort, 60);
 	
 	if (connectionResult != 0) {
 		fprintf(stderr, "Mosquitto connect failed: %d\n", connectionResult);
 		return NULL;
 	}
+	// pthread_mutex_lock(md->lock);
 	
 	free(host);
 	return md;

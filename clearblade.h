@@ -28,5 +28,6 @@ extern struct ClearBlade CBGlobal;
   * userPassword as NULL
 */
 void initializeClearBlade(char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *userEmail, char *userPassword, void (*initCallback)(bool error, char *result));
+void initializeClearBladeSync (char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *userEmail, char *userPassword);
 
 #endif
