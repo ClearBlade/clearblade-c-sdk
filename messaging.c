@@ -6,6 +6,8 @@
 #include <unistd.h>
 #include <mosquitto.h>
 #include <pthread.h>
+#include <signal.h>
+#include <sys/time.h>
 #include "util.h"
 #include "messaging.h"
 
@@ -29,7 +31,6 @@ void initialize_messaging() {
 }
 
 void setMosquittoCallbacks(MessagingData *md) {
-printf("SETTING CALLBACKS\n");
 	mosquitto_connect_callback_set(md->mosq, connectCallback);
 	mosquitto_message_callback_set(md->mosq, messageReceivedCallback);
 	mosquitto_subscribe_callback_set(md->mosq, subscribeCallback);
@@ -72,10 +73,8 @@ void finalizeMessagingData(MessagingData *md) {
 void connectCallback(struct mosquitto *mosq, void *userdata, int result) {
 	// TODO -- this assumes the connect worked every time. Duh.
 
-	printf("CONNECT CALLBACK: %d\n", result);
 	MessagingData *md = (MessagingData *)userdata;
 	md->errno = result;
-	mosquitto_loop_start(mosq);
 	pthread_mutex_unlock(md->lock);
 }
 
@@ -90,9 +89,8 @@ void messageReceivedCallback(struct mosquitto *mosq, void *userdata, const struc
 }
 
 void publishCallback(struct mosquitto *mosq, void *userdata, int result) {
-printf ("PUBLISH callback\n");
 	MessagingData *md = (MessagingData *)userdata;
-	md->errno = result;
+	md->errno = 0;
 	pthread_mutex_unlock(md->lock);
 }
 
@@ -153,14 +151,15 @@ MessagingData *connectToMQTT(char *clientId, int qualityOfService, messageReceiv
 	MessagingData *md = initializeMessagingData(clientId, qualityOfService);
 	md->cb = mrcb;
 	
+	mosquitto_loop_start(md->mosq);
 	mosquitto_username_pw_set(md->mosq, username, password); // Set username and password
-	int connectionResult = mosquitto_connect_async(md->mosq, host, mqttPort, 60);
+	int connectionResult = mosquitto_connect_async(md->mosq, host, mqttPort, 5);
 	
 	if (connectionResult != 0) {
 		fprintf(stderr, "Mosquitto connect failed: %d\n", connectionResult);
 		return NULL;
 	}
-	// pthread_mutex_lock(md->lock);
+	pthread_mutex_lock(md->lock);
 	
 	free(host);
 	return md;
@@ -172,7 +171,10 @@ int subscribeToTopic(MessagingData *md, char *topic) {
 }
 
 int publishMessage(MessagingData *md, char *topic, char *message) {
-	mosquitto_publish(md->mosq, NULL, topic, strlen(message), message, md->qos, true);
+	int pubRes = mosquitto_publish(md->mosq, NULL, topic, strlen(message), message, md->qos, true);
+if (pubRes != 0) {
+fprintf(stderr, "mosq_publish failed: %s\n", mosquitto_strerror(pubRes));
+}
 	pthread_mutex_lock(md->lock);
 	return md->errno;
 }
