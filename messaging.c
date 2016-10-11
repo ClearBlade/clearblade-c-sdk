@@ -75,6 +75,7 @@ void connectCallback(struct mosquitto *mosq, void *userdata, int result) {
 
 	MessagingData *md = (MessagingData *)userdata;
 	md->errno = result;
+	connectionCount++;
 	pthread_mutex_unlock(md->lock);
 }
 
@@ -88,7 +89,7 @@ void messageReceivedCallback(struct mosquitto *mosq, void *userdata, const struc
 	MessagingData *md = (MessagingData *)userdata;
 }
 
-void publishCallback(struct mosquitto *mosq, void *userdata, int result) {
+void publishCallback(struct mosquitto *mosq, void *userdata, int messageId) {
 	MessagingData *md = (MessagingData *)userdata;
 	md->errno = 0;
 	pthread_mutex_unlock(md->lock);
