@@ -3,6 +3,10 @@
 
 #include <pthread.h>
 #include <stdbool.h>
+#include "messaging.h"
+#include "code.h"
+#include "query.h"
+#include "user.h"
 
 
 /**
