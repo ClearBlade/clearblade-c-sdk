@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <stdbool.h>
-#include <mosquitto.h>
 #include "die.h"
 #include "request_engine.h"
 #include "util.h"
@@ -60,13 +59,13 @@ void initialize(struct ClearBlade *CB, void callback(bool error, char *result)) 
 	} else {
 		authenticateAuthUser(callback); // If email and password are present, initialize as authenticated user
 	}
-	
+
 	//free(CB); // cleanup the ClearBlade struct after use
 }
 
 /** This is the first function to be called before using any of the other functions in this SDK.
   * This function initializes with the ClearBlade Platform and sets the auth token in util.c after successful initialization.
-  * Except userEmail and userPassword, all other parameters are required. For Anonymous authentication pass userEmail and 
+  * Except userEmail and userPassword, all other parameters are required. For Anonymous authentication pass userEmail and
   * userPassword as NULL
 */
 void initializeClearBlade(char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *userEmail, char *userPassword, void (*initCallback)(bool error, char *result)) {
