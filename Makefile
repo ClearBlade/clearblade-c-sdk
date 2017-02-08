@@ -4,7 +4,7 @@ CFLAGS = -g -Wall -fPIC
 
 LDFLAGS = -shared
 
-LIBS = -lpthread  -ljansson -lmosquitto -lcurl -lpaho-mqtt3as
+LIBS = -lpthread  -ljansson -lcurl -lpaho-mqtt3as
 
 SRC = src
 
