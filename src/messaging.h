@@ -3,7 +3,9 @@
 
 #include "MQTTAsync.h"
 
-void connectToMQTT(char *clientID, int qos, void (*mqttOnConnect)(void* context, MQTTAsync_successData* response), int (*messageArrivedCallback)(void *context, char *topicName, int topicLen, MQTTAsync_message *message));
+void connectToMQTT(char *clientID, int qos, void (*mqttOnConnect)(void* context, MQTTAsync_successData* response),
+                  int (*messageArrivedCallback)(void *context, char *topicName, int topicLen, MQTTAsync_message *message),
+                  void (*onConnLostCallback)(void *context, char *cause));
 
 void subscribeToTopic(char *topic, int qos);
 

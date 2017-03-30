@@ -15,7 +15,7 @@ int qos = 0;
 
 void onConnectFailure(void* context, MQTTAsync_failureData* response) {
 	printf("Connect failed, rc %d\n", response ? response->code : 0);
-	exit(-1);
+	return;
 }
 
 
@@ -27,7 +27,9 @@ void connLost(void *context, char *cause) {
 }
 
 
-void connectToMQTT(char *clientId, int qualityOfService, void (*mqttOnConnect)(void* context, MQTTAsync_successData* response), int (*messageArrivedCallback)(void *context, char *topicName, int topicLen, MQTTAsync_message *message)) {
+void connectToMQTT(char *clientId, int qualityOfService, void (*mqttOnConnect)(void* context, MQTTAsync_successData* response),
+ 									int (*messageArrivedCallback)(void *context, char *topicName, int topicLen, MQTTAsync_message *message),
+									void (*onConnLostCallback)(void *context, char *cause)) {
 	if (getUserToken() == NULL) {
 		fprintf(stderr, "connectToMQTT called with unset user token\n");
 		return;
@@ -49,7 +51,11 @@ void connectToMQTT(char *clientId, int qualityOfService, void (*mqttOnConnect)(v
 	int rc;
 
 	MQTTAsync_create(&client, messagingurl, clientId, MQTTCLIENT_PERSISTENCE_NONE, NULL);
-	MQTTAsync_setCallbacks(client, NULL, connLost, messageArrivedCallback, NULL);
+	if(onConnLostCallback == NULL) {
+		MQTTAsync_setCallbacks(client, NULL, connLost, messageArrivedCallback, NULL);
+	} else {
+		MQTTAsync_setCallbacks(client, NULL, onConnLostCallback, messageArrivedCallback, NULL);
+	}
 
   conn_opts.keepAliveInterval = 20;
   conn_opts.cleansession = 1;
@@ -61,7 +67,7 @@ void connectToMQTT(char *clientId, int qualityOfService, void (*mqttOnConnect)(v
 
   if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS) {
   	printf("Failed to start connect, return code %d\n", rc);
-    exit(-1);
+    return;
   }
 
 	while(finished == 0) {
@@ -88,7 +94,7 @@ void onSubscribeFailure(void* context, MQTTAsync_failureData* response) {
 void subscribeToTopic(char *topic, int qos) {
 	if(mqttClient == NULL) {
 		printf("You are not connected to the MQTT Broker. Please call connectToMQTT() first and then try to subscribe\n");
-		exit(-1);
+		return;
 	}
 
 	int rc;
@@ -97,8 +103,8 @@ void subscribeToTopic(char *topic, int qos) {
 	opts.onFailure = onSubscribeFailure;
 
 	if((rc = MQTTAsync_subscribe(mqttClient, topic, qos, &opts)) != MQTTASYNC_SUCCESS) {
-	printf("Failed to start subscribeToTopic, return code %d\n", rc);
-	exit(-1);
+		printf("Failed to start subscribeToTopic, return code %d\n", rc);
+		return;
 	}
 
 	while(finished == 0) {
@@ -111,8 +117,8 @@ void subscribeToTopic(char *topic, int qos) {
 
 void publishMessage(char *message, char *topic, int qos, int retained) {
 	if(mqttClient == NULL) {
-		printf("You are not connected to the MQTT Broker. Please call connectToMQTT() first and then try to subscribe\n");
-		exit(-1);
+		printf("You are not connected to the MQTT Broker. Please call connectToMQTT() first and then try to publish\n");
+		return;
 	}
 
 	int rc;
@@ -124,21 +130,21 @@ void publishMessage(char *message, char *topic, int qos, int retained) {
 
 	if ((rc = MQTTAsync_sendMessage(mqttClient, topic, &pubmsg, NULL)) != MQTTASYNC_SUCCESS) {
 		printf("Failed to start publishMessage, return code %d\n", rc);
-		exit(-1);
+		return;
 	}
 }
 
 
 void unsubscribeFromTopic(char *topic) {
 	if(mqttClient == NULL) {
-		printf("You are not connected to the MQTT Broker. Please call connectToMQTT() first and then try to subscribe\n");
-		exit(-1);
+		printf("You are not connected to the MQTT Broker. Please call connectToMQTT() first and then try to unsubscribe\n");
+		return;
 	}
 
 	int rc;
 	if((rc = MQTTAsync_unsubscribe(mqttClient, topic, NULL)) != MQTTASYNC_SUCCESS) {
-	        printf("Failed to start disconnect, return code %d\n", rc);
-	        exit(-1);
+	        printf("Failed to start unsubscribe, return code %d\n", rc);
+	        return;
 	}
 }
 
@@ -151,7 +157,7 @@ void onDisconnect(void* context, MQTTAsync_successData* response) {
 
 void disconnectMQTTClient() {
 	if(mqttClient == NULL) {
-		printf("You are not connected to the MQTT Broker. Please call connectToMQTT() first and then try to subscribe\n");
+		printf("You are not connected to the MQTT Broker. Please call connectToMQTT() first and then try to disconnect\n");
 		exit(-1);
 	}
 
@@ -161,7 +167,7 @@ void disconnectMQTTClient() {
 
 	if((rc = MQTTAsync_disconnect(mqttClient, &disc_opts)) != MQTTASYNC_SUCCESS) {
 	        printf("Failed to start disconnect, return code %d\n", rc);
-	        exit(-1);
+	        return;
 	}
 
 	while (finished == 0) {
