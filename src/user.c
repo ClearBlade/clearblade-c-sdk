@@ -33,12 +33,12 @@ void authenticateAnonUser(void callback(bool error, char *result)) {
 	struct Header headers;
 	memset(&headers, 0, sizeof(headers)); // Make all elements of the Header struct to NULL
 
-	headers.url = restURL;						
-	headers.systemKey = getSystemKey();			 // Set Headers	
+	headers.url = restURL;
+	headers.systemKey = getSystemKey();			 // Set Headers
 	headers.systemSecret = getSystemSecret();
 	headers.collectionID = NULL;
 	headers.requestType = "POST";
-	
+
 	char *response = executeRequest(&headers); // Make the REST Call
 	parseAuthToken(response, callback);
 
@@ -69,7 +69,7 @@ void authenticateAuthUser(void callback(bool error, char *result)) {
 
 	headers.url = restURL;
 	headers.systemKey = getSystemKey();
-	headers.systemSecret = getSystemSecret();	// Set Headers	
+	headers.systemSecret = getSystemSecret();	// Set Headers
 	headers.collectionID = NULL;
 	headers.body = body;
 	headers.requestType = "POST";
@@ -77,7 +77,7 @@ void authenticateAuthUser(void callback(bool error, char *result)) {
 	char *response = executeRequest(&headers); // Make the REST Call
 	parseAuthToken(response, callback);
 
-	setUserPassword(NULL); // Do not store password on the client. Make it NULL as soon as user is authenticated.
+	//setUserPassword(NULL); // Do not store password on the client. Make it NULL as soon as user is authenticated.
 
 	free(response);
 	free(restURL);
@@ -142,4 +142,3 @@ void checkAuth(void (*checkAuthCallback)(bool error, char *result)) {
 
 	free(restURL);
 }
-
