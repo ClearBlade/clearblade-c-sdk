@@ -15,7 +15,7 @@ int qos = 0;
 
 void onConnectFailure(void* context, MQTTAsync_failureData* response) {
 	printf("Connect failed, rc %d\n", response ? response->code : 0);
-	return;
+	exit(-1);
 }
 
 
