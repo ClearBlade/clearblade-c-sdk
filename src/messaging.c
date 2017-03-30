@@ -27,7 +27,7 @@ void connLost(void *context, char *cause) {
 }
 
 
-void connectToMQTT(char *clientId, int qualityOfService, void (*mqttOnConnect)(void* context, MQTTAsync_successData* response),
+void connectToMQTTAdvanced(char *clientId, int qualityOfService, void (*mqttOnConnect)(void* context, MQTTAsync_successData* response),
  									int (*messageArrivedCallback)(void *context, char *topicName, int topicLen, MQTTAsync_message *message),
 									void (*onConnLostCallback)(void *context, char *cause)) {
 	if (getUserToken() == NULL) {
@@ -76,6 +76,11 @@ void connectToMQTT(char *clientId, int qualityOfService, void (*mqttOnConnect)(v
 
 	mqttClient = client;
 	finished = 0;
+}
+
+void connectToMQTT(char *clientId, int qualityOfService, void (*mqttOnConnect)(void* context, MQTTAsync_successData* response),
+ 									int (*messageArrivedCallback)(void *context, char *topicName, int topicLen, MQTTAsync_message *message)) {
+	connectToMQTTAdvanced(clientId, qualityOfService, mqttOnConnect, messageArrivedCallback, NULL);
 }
 
 
