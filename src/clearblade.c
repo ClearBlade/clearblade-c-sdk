@@ -59,8 +59,6 @@ void initialize(struct ClearBlade *CB, void callback(bool error, char *result)) 
 	} else {
 		authenticateAuthUser(callback); // If email and password are present, initialize as authenticated user
 	}
-
-	//free(CB); // cleanup the ClearBlade struct after use
 }
 
 /** This is the first function to be called before using any of the other functions in this SDK.
@@ -69,11 +67,6 @@ void initialize(struct ClearBlade *CB, void callback(bool error, char *result)) 
   * userPassword as NULL
 */
 void initializeClearBlade(char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *userEmail, char *userPassword, void (*initCallback)(bool error, char *result)) {
-/*
-	struct ClearBlade *CB = malloc(sizeof(struct ClearBlade));
-	assert(CB != NULL);
-*/
-
 	CBGlobal.systemKey = systemkey;
 	CBGlobal.systemSecret = systemsecret;
 	CBGlobal.platformURL = platformurl;
@@ -83,17 +76,3 @@ void initializeClearBlade(char *systemkey, char *systemsecret, char *platformurl
 
 	initialize(&CBGlobal, initCallback);
 }
-
-/*
-void syncConnectCallback(bool error, char *result) {
-}
-
-void syncInitCallback(bool error, char *result) {
-	initialize_messaging();
-}
-
-void initializeClearBladeSync(char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *userEmail, char *userPassword) {
-
-	initializeClearBlade(systemkey, systemsecret, platformurl, messagingurl, userEmail, userPassword, syncInitCallback);
-}
-*/

@@ -8,7 +8,7 @@
 #include "json_parser.h"
 #include "code.h"
 
-/** 
+/**
   * This function makes a REST call to execute the code service specified by the user and returns the response to the codeCallback
 */
 void execute(char *name, char *params, void codeCallback(bool error, char *result)) {
@@ -16,7 +16,7 @@ void execute(char *name, char *params, void codeCallback(bool error, char *resul
 	restURL = getConcatString(restURL, "/");
 	restURL = getConcatString(restURL, name);
 	restURL = getConcatString(getPlatformURL(), restURL); // Complete URL to make the REST call
-	
+
 	struct Header headers;
 	memset(&headers, 0, sizeof(headers)); // Initialize headers
 
@@ -30,14 +30,13 @@ void execute(char *name, char *params, void codeCallback(bool error, char *resul
 	char *response = executeRequest(&headers); // Make the REST call
 
 	char *result = (char *) getPropertyValueFromJson(response, "results");
-    	if (result == NULL)
-    		codeCallback(true, response); // Code Service execution unsuccessful
-    	else {
-    		codeCallback(false, result); // Code Service execution successful
-    	}
+	if (result == NULL)
+		codeCallback(true, response); // Code Service execution unsuccessful
+	else {
+		codeCallback(false, result); // Code Service execution successful
+	}
 
-    /* Clean shit up */	
-    free(response);
+  free(response);
 	free(restURL);
 }
 
@@ -52,7 +51,7 @@ void executeCodeServiceWithoutParams(char *serviceName, void (*codeCallback)(boo
 	} else {
 		execute(serviceName, "{}", codeCallback);
 	}
-} 
+}
 
 /**
   * Function to execute code service with parameters. Service name, params and codeCallback are required parameters

@@ -39,9 +39,9 @@ size_t writefunc(void *ptr, size_t size, size_t nmemb, struct string *s) {
 }
 
 
-/** 
+/**
   * This executes the HTTP request and returns the response.
-  * It checks for the custom headers and sets them accordingly. 
+  * It checks for the custom headers and sets them accordingly.
   * It uses the libCURL library to make the HTTP requests.
 */
 char *executeRequest(struct Header *header) {
@@ -84,7 +84,7 @@ char *executeRequest(struct Header *header) {
 		headers = curl_slist_append(headers, systemKeyHeader);
 		if (systemSecretHeader != NULL) {
 			headers = curl_slist_append(headers, systemSecretHeader);
-		} 
+		}
 		if (userTokenHeader != NULL) {
 			headers = curl_slist_append(headers, userTokenHeader);
 		}
@@ -105,34 +105,33 @@ char *executeRequest(struct Header *header) {
 			}
 		}
 		//curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-	curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writefunc);
-     	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s);
-     	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-     	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
-		
+	  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writefunc);
+   	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s);
+   	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
+   	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
 		res = curl_easy_perform(curl); // Execute the request
-	
+
 		if(res != CURLE_OK)
       		fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
 
-      	/* Clean shit up */
-    	free(systemKeyHeader);
-    	if (systemSecretHeader != NULL) {
-    		free(systemSecretHeader);
-    	}
-    	if (userTokenHeader != NULL) {
-    		free(userTokenHeader);
-    	}
-    	if (serviceNameHeader != NULL) {
-    		free(serviceNameHeader);
-    	}
-    	if (collectionIDHeader != NULL) {
-    		free(collectionIDHeader);
-    	}
+  	free(systemKeyHeader);
+  	if (systemSecretHeader != NULL) {
+  		free(systemSecretHeader);
+  	}
+  	if (userTokenHeader != NULL) {
+  		free(userTokenHeader);
+  	}
+  	if (serviceNameHeader != NULL) {
+  		free(serviceNameHeader);
+  	}
+  	if (collectionIDHeader != NULL) {
+  		free(collectionIDHeader);
+  	}
 		curl_easy_cleanup(curl);
 		curl_slist_free_all(headers);
 	}
 	curl_global_cleanup();
-	
+
 	return s.ptr;
 }

@@ -70,7 +70,7 @@ char *checkForFilters() {
 }
 
 /**
-  * This constructs the query body with filters, page number and page size 
+  * This constructs the query body with filters, page number and page size
 */
 char *getFetchURLParameter() {
 	char *query = "?query={";
@@ -82,7 +82,7 @@ char *getFetchURLParameter() {
 	if (filters != NULL)
 		param = getConcatString(query, filters);
 
-	if (pagesize == NULL) 
+	if (pagesize == NULL)
 		param = getConcatString(query, pagenum);
 	else {
 		param = getConcatString(query, pagesize);
@@ -125,11 +125,11 @@ void fetch(void (*queryResponse)(bool error, char *result)) {
 		struct Header headers;
 		memset(&headers, 0, sizeof(headers)); // Make all elements of the Header struct to NULL
 
-		headers.url = restEndpoint;						
-		headers.systemKey = getSystemKey();			 // Set Headers	
+		headers.url = restEndpoint;
+		headers.systemKey = getSystemKey();			 // Set Headers
 		headers.userToken = getUserToken();
 		headers.collectionID = queryObj.collectionID;
-		headers.requestType = "GET"; 
+		headers.requestType = "GET";
 
 		char *response = executeRequest(&headers);
 
@@ -140,7 +140,6 @@ void fetch(void (*queryResponse)(bool error, char *result)) {
     		queryResponse(false, result); // Query execution successful
     	}
 
-		/* Clean shit up */
 		free(param);
 		free(restEndpoint);
 	}
@@ -169,12 +168,12 @@ void createItem(char *jsonBody, void (*queryResponse)(bool error, char *result))
 		struct Header headers;
 		memset(&headers, 0, sizeof(headers)); // Make all elements of the Header struct to NULL
 
-		headers.url = restEndpoint;						
-		headers.systemKey = getSystemKey();			 // Set Headers	
+		headers.url = restEndpoint;
+		headers.systemKey = getSystemKey();			 // Set Headers
 		headers.userToken = getUserToken();
 		headers.collectionID = queryObj.collectionID;
 		headers.body = jsonBody;
-		headers.requestType = "POST"; 
+		headers.requestType = "POST";
 
 		char *response = executeRequest(&headers);
 
@@ -185,14 +184,13 @@ void createItem(char *jsonBody, void (*queryResponse)(bool error, char *result))
 		else
 			queryResponse(true, response);
 
-		/* Clean shit up */
 		free(restEndpoint);
 	}
 }
 
 /**
   * This function must be called first before any query operations. This sets the collection ID and sets all the query functions
-  * Returns the query object which is then used to call all the other functions 
+  * Returns the query object which is then used to call all the other functions
   * Without this, the user will not be able to call any of the query functions
 */
 struct Query initializeQueryObject(char *collectionID) {
