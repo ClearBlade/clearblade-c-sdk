@@ -6,9 +6,9 @@
 void connectToMQTT(char *clientId, int qualityOfService, void (*mqttOnConnect)(void* context, MQTTAsync_successData* response),
  									int (*messageArrivedCallback)(void *context, char *topicName, int topicLen, MQTTAsync_message *message));
 
-void connectToMQTTAdvanced(char *clientID, int qos, void (*mqttOnConnect)(void* context, MQTTAsync_successData* response),
-                  int (*messageArrivedCallback)(void *context, char *topicName, int topicLen, MQTTAsync_message *message),
-                  void (*onConnLostCallback)(void *context, char *cause));
+void connectToMQTTAdvanced(char *clientId, int qualityOfService, void (*mqttOnConnect)(void* context, MQTTAsync_successData* response),
+ 									int (*messageArrivedCallback)(void *context, char *topicName, int topicLen, MQTTAsync_message *message),
+									void (*onConnLostCallback)(void *context, char *cause), bool autoReconnect);
 
 void subscribeToTopic(char *topic, int qos);
 

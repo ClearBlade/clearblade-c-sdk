@@ -15,7 +15,6 @@ int qos = 0;
 
 void onConnectFailure(void* context, MQTTAsync_failureData* response) {
 	printf("Connect failed, rc %d\n", response ? response->code : 0);
-	exit(-1);
 }
 
 
@@ -29,7 +28,7 @@ void connLost(void *context, char *cause) {
 
 void connectToMQTTAdvanced(char *clientId, int qualityOfService, void (*mqttOnConnect)(void* context, MQTTAsync_successData* response),
  									int (*messageArrivedCallback)(void *context, char *topicName, int topicLen, MQTTAsync_message *message),
-									void (*onConnLostCallback)(void *context, char *cause)) {
+									void (*onConnLostCallback)(void *context, char *cause), bool autoReconnect) {
 	if (getUserToken() == NULL) {
 		fprintf(stderr, "connectToMQTT called with unset user token\n");
 		return;
@@ -57,6 +56,9 @@ void connectToMQTTAdvanced(char *clientId, int qualityOfService, void (*mqttOnCo
 		MQTTAsync_setCallbacks(client, NULL, onConnLostCallback, messageArrivedCallback, NULL);
 	}
 
+	if(autoReconnect) {
+		conn_opts.automaticReconnect = 1;
+	}
   conn_opts.keepAliveInterval = 20;
   conn_opts.cleansession = 1;
   conn_opts.onSuccess = mqttOnConnect;
@@ -80,7 +82,7 @@ void connectToMQTTAdvanced(char *clientId, int qualityOfService, void (*mqttOnCo
 
 void connectToMQTT(char *clientId, int qualityOfService, void (*mqttOnConnect)(void* context, MQTTAsync_successData* response),
  									int (*messageArrivedCallback)(void *context, char *topicName, int topicLen, MQTTAsync_message *message)) {
-	connectToMQTTAdvanced(clientId, qualityOfService, mqttOnConnect, messageArrivedCallback, NULL);
+	connectToMQTTAdvanced(clientId, qualityOfService, mqttOnConnect, messageArrivedCallback, NULL, false);
 }
 
 
