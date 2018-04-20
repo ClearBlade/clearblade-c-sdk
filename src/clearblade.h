@@ -5,9 +5,9 @@
 #include <stdbool.h>
 #include "messaging.h"
 #include "code.h"
+#include "device.h"
 #include "query.h"
 #include "user.h"
-
 
 /**
   * The ClearBlade struct containing the initialize parameters.
@@ -33,5 +33,11 @@ extern struct ClearBlade CBGlobal;
   * userPassword as NULL
 */
 void initializeClearBlade(char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *userEmail, char *userPassword, void (*initCallback)(bool error, char *result));
+
+/** This is the second option of the first function to be called before using any of the other function in this SDK.
+  * This funcion initializes with the ClearBlade Platform as a device within a system, and sets the auth token in util.c after successful initialization.
+  * All parameters are required.
+*/
+void initializeClearBladeAsDevice(char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *devicename, char *activekey, void (*initCallback)(bool error, char *result));
 
 #endif

@@ -7,6 +7,7 @@
 #define _util_h
 
 char *USER_TOKEN;
+char *DEVICE_TOKEN;
 char *SYSTEM_KEY;
 char *SYSTEM_SECRET;
 char *PLATFORM_URL;
@@ -21,6 +22,7 @@ void setMessagingURL(char *messagingURL);
 void setUserEmail(char *email);
 void setUserPassword(char *password);
 void setUserToken(char *token);
+void setDeviceToken(char *token);
 char *getSystemKey();
 char *getSystemSecret();
 char *getPlatformURL();
@@ -28,5 +30,6 @@ char *getMessagingURL();
 char *getUserEmail();
 char *getUserPassword();
 char *getUserToken();
+char *getDeviceToken();
 
 #endif

@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <stdbool.h>
+#include "device.h"
 #include "die.h"
 #include "request_engine.h"
 #include "util.h"
@@ -48,7 +49,7 @@ void validateInitOptions(struct ClearBlade *CB) {
 }
 
 /**
-  * This function validates the initialize parameters and then calls the authentication function in user.c
+  * This function validates the user initialize parameters and then calls the authentication function in user.c
 */
 void initialize(struct ClearBlade *CB, void callback(bool error, char *result)) {
 
@@ -61,8 +62,17 @@ void initialize(struct ClearBlade *CB, void callback(bool error, char *result)) 
 	}
 }
 
-/** This is the first function to be called before using any of the other functions in this SDK.
-  * This function initializes with the ClearBlade Platform and sets the auth token in util.c after successful initialization.
+/**
+  * This function validates the device intiailize parameters and then calls the authentication function in device.c
+*/
+void initializeDevice(struct ClearBlade *CB, void callback(bool error, char *result)) {
+	validateInitOptions(CB);
+
+	authenticateDevice(callback);
+}
+
+/** This is one of the two first function to be called before using any of the other functions in this SDK.
+  * This function initializes with the ClearBlade Platform as a system user and sets the auth token in util.c after successful initialization.
   * Except userEmail and userPassword, all other parameters are required. For Anonymous authentication pass userEmail and
   * userPassword as NULL
 */
@@ -75,4 +85,19 @@ void initializeClearBlade(char *systemkey, char *systemsecret, char *platformurl
 	CBGlobal.password = userPassword;
 
 	initialize(&CBGlobal, initCallback);
+}
+
+/** This is the second option of the first function to be called before using any of the other function in this SDK.
+  * This funcion initializes with the ClearBlade Platform as a device within a system, and sets the auth token in util.c after successful initialization.
+  * All parameters are required.
+*/
+void initializeClearBladeAsDevice(char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *devicename, char *activekey, void (*initCallback)(bool error, char *result)) {
+	CBGlobal.systemKey = systemkey;
+	CBGlobal.systemSecret = systemsecret;
+	CBGlobal.platformURL = platformurl;
+	CBGlobal.messagingURL = messagingurl;
+	CBGlobal.email = devicename;
+	CBGlobal.password = activekey;
+
+	initializeDevice(&CBGlobal, initCallback);
 }

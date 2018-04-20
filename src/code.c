@@ -22,8 +22,13 @@ void execute(char *name, char *params, void codeCallback(bool error, char *resul
 
 	headers.url = restURL;
 	headers.systemKey = getSystemKey();
-	headers.userToken = getUserToken();	// Set headers for the REST call
-	headers.serviceName = name;
+
+	if (getUserToken() != NULL) {
+		headers.userToken = getUserToken();
+	} else {
+		headers.deviceToken = getDeviceToken();
+	}
+	headers.serviceName = name;	// Set headers for the REST call
 	headers.body = params;
 	headers.requestType = "POST";
 
@@ -44,9 +49,10 @@ void execute(char *name, char *params, void codeCallback(bool error, char *resul
   * Function to execute code service without parameters. Service name and codeCallback are required parameters
 */
 void executeCodeServiceWithoutParams(char *serviceName, void (*codeCallback)(bool error, char *result)) {
-	char *authToken = getUserToken();
+	char *userAuthToken = getUserToken();
+	char *deviceAuthToken = getDeviceToken();
 
-	if (authToken == NULL) {
+	if (userAuthToken == NULL && deviceAuthToken == NULL) {
 		codeCallback(true, "Cannot execute Code Service. Auth token is NULL. Please initialize with ClearBlade first.\n");
 	} else {
 		execute(serviceName, "{}", codeCallback);
@@ -58,9 +64,10 @@ void executeCodeServiceWithoutParams(char *serviceName, void (*codeCallback)(boo
   * Params need to be passes as a json string
 */
 void executeCodeServiceWithParams(char *serviceName, char *params, void (*codeCallback)(bool error, char *result)) {
-	char *authToken = getUserToken();
+	char *userAuthToken = getUserToken();
+	char *deviceAuthToken = getDeviceToken();
 
-	if (authToken == NULL) {
+	if (userAuthToken == NULL && deviceAuthToken == NULL) {
 		codeCallback(true, "Cannot execute Code Service. Auth token is NULL. Please initialize with ClearBlade first.\n");
 	} else {
 		execute(serviceName, params, codeCallback);

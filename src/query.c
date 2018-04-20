@@ -111,7 +111,7 @@ void addFilters(char *filters) {
   * This makes a GET request to the fetch REST API and gives the response back to the user via the queryResponse callback
 */
 void fetch(void (*queryResponse)(bool error, char *result)) {
-	if (getUserToken() == NULL) {
+	if (getUserToken() == NULL && getDeviceToken() == NULL) {
 		queryResponse(true, "Cannot execute query. Auth token is NULL. Please initialize with the ClearBlade Platform first\n");
 	} else if (queryObj.collectionID == NULL) {
 		queryResponse(true, "Cannot execute query. Collection ID is NULL. Please initialize the query object first\n");
@@ -127,7 +127,13 @@ void fetch(void (*queryResponse)(bool error, char *result)) {
 
 		headers.url = restEndpoint;
 		headers.systemKey = getSystemKey();			 // Set Headers
-		headers.userToken = getUserToken();
+
+		if (getUserToken() != NULL) {
+			headers.userToken = getUserToken();
+		} else {
+			headers.deviceToken = getDeviceToken();
+		}
+
 		headers.collectionID = queryObj.collectionID;
 		headers.requestType = "GET";
 
@@ -170,7 +176,13 @@ void createItem(char *jsonBody, void (*queryResponse)(bool error, char *result))
 
 		headers.url = restEndpoint;
 		headers.systemKey = getSystemKey();			 // Set Headers
-		headers.userToken = getUserToken();
+
+		if (getUserToken() != NULL) {
+			headers.userToken = getUserToken();
+		} else {
+			headers.deviceToken = getDeviceToken();
+		}
+
 		headers.collectionID = queryObj.collectionID;
 		headers.body = jsonBody;
 		headers.requestType = "POST";

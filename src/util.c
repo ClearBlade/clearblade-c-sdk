@@ -13,7 +13,7 @@ char *PLATFORM_URL = NULL;
 char *MESSAGING_URL = NULL;
 char *EMAIL = NULL;
 char *PASSWORD = NULL;
-
+char *DEVICE_TOKEN = NULL;
 
 void setSystemKey(char *systemKey) {
 	SYSTEM_KEY = systemKey;
@@ -43,6 +43,10 @@ void setUserToken(char *token) {
 	USER_TOKEN = token;
 }
 
+void setDeviceToken(char *token) {
+	DEVICE_TOKEN = token;
+}
+
 char *getSystemKey() {
 	return SYSTEM_KEY;
 }
@@ -69,4 +73,8 @@ char *getUserPassword() {
 
 char *getUserToken() {
 	return USER_TOKEN;
+}
+
+char *getDeviceToken() {
+	return DEVICE_TOKEN;
 }
