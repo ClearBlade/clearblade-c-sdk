@@ -47,4 +47,7 @@ void authenticateDevice(void callback(bool error, char *result)) {
 
 	free(response);
 	free(restURL);
+	free(deviceNameParam);
+	free(activeKeyParam);
+	free(body);
 }

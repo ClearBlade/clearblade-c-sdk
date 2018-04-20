@@ -51,7 +51,7 @@ void validateInitOptions(struct ClearBlade *CB) {
 /**
   * This function validates the user initialize parameters and then calls the authentication function in user.c
 */
-void initializeUser(struct ClearBlade *CB, void callback(bool error, char *result)) {
+void initialize(struct ClearBlade *CB, void callback(bool error, char *result)) {
 
 	validateInitOptions(CB); // First validate all the parameters passed to the initializeClearBlade() function
 
@@ -76,7 +76,7 @@ void initializeDevice(struct ClearBlade *CB, void callback(bool error, char *res
   * Except userEmail and userPassword, all other parameters are required. For Anonymous authentication pass userEmail and
   * userPassword as NULL
 */
-void initializeClearBladeAsUser(char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *userEmail, char *userPassword, void (*initCallback)(bool error, char *result)) {
+void initializeClearBlade(char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *userEmail, char *userPassword, void (*initCallback)(bool error, char *result)) {
 	CBGlobal.systemKey = systemkey;
 	CBGlobal.systemSecret = systemsecret;
 	CBGlobal.platformURL = platformurl;
@@ -84,7 +84,7 @@ void initializeClearBladeAsUser(char *systemkey, char *systemsecret, char *platf
 	CBGlobal.email = userEmail;
 	CBGlobal.password = userPassword;
 
-	initializeUser(&CBGlobal, initCallback);
+	initialize(&CBGlobal, initCallback);
 }
 
 /** This is the second option of the first function to be called before using any of the other function in this SDK.
