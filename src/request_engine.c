@@ -50,6 +50,7 @@ char *executeRequest(struct Header *header) {
 	char *userTokenHeader = NULL;
 	char *serviceNameHeader = NULL;
 	char *collectionIDHeader = NULL;
+	char *deviceTokenHeader = NULL;
 
 	if (header->systemSecret != NULL || header->systemSecret != 0) {
 		systemSecretHeader = getConcatString("ClearBlade-SystemSecret: ", header->systemSecret);
@@ -57,6 +58,8 @@ char *executeRequest(struct Header *header) {
 
 	if (header->userToken != NULL || header->userToken != 0) {
 		userTokenHeader = getConcatString("ClearBlade-UserToken: ", header->userToken);
+	} else if (header->deviceToken != NULL || header->deviceToken != 0) {
+		deviceTokenHeader = getConcatString("ClearBlade-DeviceToken: ", header->deviceToken);
 	}
 
 	if (header->serviceName != NULL || header->serviceName != 0) {
@@ -87,6 +90,8 @@ char *executeRequest(struct Header *header) {
 		}
 		if (userTokenHeader != NULL) {
 			headers = curl_slist_append(headers, userTokenHeader);
+		} else if (deviceTokenHeader != NULL) {
+			headers = curl_slist_append(headers, deviceTokenHeader);
 		}
 		if (serviceNameHeader != NULL) {
 			headers = curl_slist_append(headers, serviceNameHeader);

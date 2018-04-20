@@ -9,11 +9,12 @@ struct Header {
 	char *systemKey;
 	char *systemSecret;
 	char *userToken;
+	char *deviceToken;
 	char *url;
 	char *serviceName;
-  char *collectionID;
+	char *collectionID;
 	char *body;
-  char *requestType;
+	char *requestType;
 };
 
 

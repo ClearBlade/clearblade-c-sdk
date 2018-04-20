@@ -29,8 +29,8 @@ void connLost(void *context, char *cause) {
 void connectToMQTTAdvanced(char *clientId, int qualityOfService, void (*mqttOnConnect)(void* context, MQTTAsync_successData* response),
  									int (*messageArrivedCallback)(void *context, char *topicName, int topicLen, MQTTAsync_message *message),
 									void (*onConnLostCallback)(void *context, char *cause), bool autoReconnect) {
-	if (getUserToken() == NULL) {
-		fprintf(stderr, "connectToMQTT called with unset user token\n");
+	if (getUserToken() == NULL && getDeviceToken() == NULL) {
+		fprintf(stderr, "connectToMQTT called with unset auth token\n");
 		return;
 	}
 	if (qualityOfService < 0 || qualityOfService > 2) {
@@ -39,6 +39,9 @@ void connectToMQTTAdvanced(char *clientId, int qualityOfService, void (*mqttOnCo
 	}
 
 	const char *username = getUserToken();
+	if (username == NULL) {
+		username = getDeviceToken();
+	}
 	const char *password = getSystemKey();
 	char *messagingurl = getMessagingURL();
 
