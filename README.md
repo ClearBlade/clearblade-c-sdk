@@ -1,3 +1,222 @@
 # ClearBlade C SDK
+# API Reference
+## Initialize and Authenticate  
 
-Install instructions and API reference can be found @ https://docs.clearblade.com/v/3/4-developer_reference/c/Quickstart/
+{{< warning title="Heads Up!" >}}
+You must initialize and authenticate with the ClearBlade Platform first before you perform any other functions
+{{< /warning >}}
+
+If you have not installed the prerequisites, please follow the tutorial @ [Prerequisites](../Quickstart#prerequisites). After you have installed all the prerequisites and the C SDK, include the ___clearblade.h___ header in your code: ```#include <clearblade.h>```   
+Call either the ```initializeClearBladeUser()``` or ```initializeClearBladeDevice()``` function to initialize and authenticate your user with ClearBlade:
+```C
+void cbInitCallback(bool error, char *result) {
+  if(error) {
+    printf("ClearBlade init failed %s\n", result);
+    exit(-1);
+  } else {
+    printf("ClearBlade Init Succeeded\nAuth token: %s\n", result);
+  }
+}
+
+initializeClearBladeUser(SYSTEM_KEY, SYSTEM_SECRET, PLATFORM_URL, MESSAGING_URL, USER_EMAIL, USER_PASSWORD, &cbInitCallback);
+```  
+You will need to pass the function your __SYSTEM_KEY__, __SYSTEM_SECRET__, __PLATFORM_URL__ (https://platform.clearblade.com or similar), __MESSAGING_URL__ (tcp://platform.clearblade.com:1883 or similar), __USER_EMAIL__,
+__USER_PASSWORD__ (or __DEVICE_NAME__ and __ACTIVE_KEY__ if authenticating as a device) and a function as a callback. After successful authentication, you will receive an authentication token in the callback. You can choose to store it in a variable, but the SDK stores a copy of it for itself.
+
+# MQTT Functions
+
+## Connect to the MQTT Broker  
+
+__Before you connect to the MQTT Broker, make sure you include the ```#include "MQTTAsync.h"``` header in your code and link the ```-lpaho-mqtt3as``` library when you compile your code__. There are two functions to choose from when connecting to the MQTT Broker with the following signatures:  
+```C
+connectToMQTT(char *clientId, int qualityOfService, void (*mqttOnConnect)(void* context, MQTTAsync_successData* response),
+ 									int (*messageArrivedCallback)(void *context, char *topicName, int topicLen, MQTTAsync_message *message))  
+```
+__OR__
+```C
+connectToMQTTAdvanced(char *clientId, int qualityOfService, void (*mqttOnConnect)(void* context, MQTTAsync_successData* response),
+ 									int (*messageArrivedCallback)(void *context, char *topicName, int topicLen, MQTTAsync_message *message),
+									void (*onConnLostCallback)(void *context, char *cause))
+```
+The difference between the two is that the first one does not take an __onConnectionLost__ callback whereas the second one does. What this means is that, if for some reason, the connection to the MQTT Broker was lost and you choose the first function, the code will notify you and try to reconnect once and then leave everything to the __Gods of MQTT__. But if you used the second function, you will be able to handle the connection lost event and take a decision accordingly. __We recommend you use the second function.__   
+Here's an example of how you would connect to the MQTT Broker using the ```connectToMQTT()``` function:  
+```C
+char *clientID = "test-client";
+int qos = 0;
+
+int messageArrived(void *context, char *topicName, int topicLen, MQTTAsync_message *message) {
+  printf("Message arrived\n");
+  printf("Topic: %s\n", topicName);
+  char *messagePayload = malloc(message->payloadlen + 1);
+  strncpy(messagePayload, message->payload, message->payloadlen);
+  messagePayload[message->payloadlen] = '\0';
+  printf("Message: %s\n", messagePayload);
+
+  MQTTAsync_freeMessage(&message);
+  MQTTAsync_free(topicName);
+  free(messagePayload);
+
+  return 1;
+}
+
+
+void onConnect(void* context, MQTTAsync_successData* response) {
+  printf("Successful connection to MQTT Broker\n");
+  extern int finished; // Get the 'finished' variable from the CB SDK and set it to 1 to stop the connect loop
+  finished = 1;
+}
+
+connectToMQTT(clientID, qos, &onConnect, &messageArrived);
+```
+
+To the ```connectToMQTT()``` function, you need to pass the client-ID (string), quality of service (int), a callback to notify you of a successful connection and a callback to notify you when a message arrives on a subscription.  
+{{< note title="Note" >}}
+In the __onConnect__ callback, be sure to grab the finished variable from the C SDK using the __extern__ keyword and set it to 1. This tells the SDK that the connect call was completed successfully and the C SDK can stop its internal loop that was waiting for the connection to complete
+{{< /note >}}  
+
+Now, to use the ```connectToMQTTAdvanced()``` function, use the following code as a template:  
+```C
+char *clientID = "test-client";
+int qos = 0;
+
+int messageArrived(void *context, char *topicName, int topicLen, MQTTAsync_message *message) {
+  printf("Message arrived\n");
+  printf("Topic: %s\n", topicName);
+  char *messagePayload = malloc(message->payloadlen + 1);
+  strncpy(messagePayload, message->payload, message->payloadlen);
+  messagePayload[message->payloadlen] = '\0';
+  printf("Message: %s\n", messagePayload);
+
+  MQTTAsync_freeMessage(&message);
+  MQTTAsync_free(topicName);
+  free(messagePayload);
+
+  return 1;
+}
+
+
+void onConnect(void* context, MQTTAsync_successData* response) {
+  printf("Successful connection to MQTT Broker\n");
+  extern int finished; // Get the 'finished' variable from the CB SDK and set it to 1 to stop the connect loop
+  finished = 1;
+}
+
+void onConnectionLost(void *context, char *cause) {
+    printf("\nConnection lost\n");
+  	printf("Cause: %s\n", cause);
+  	printf("Reconnecting\n");
+    // If you believe that your authentication token is expired, you can reauthenticate here as follows
+    initializeClearBlade(SYSTEM_KEY, SYSTEM_SECRET, PLATFORM_URL, MESSAGING_URL, USER_EMAIL, USER_PASSWORD, &cbInitCallback);
+    // Here cbInitCallback is the callback you defined when you first called the initializeClearBlade() function. You can change this to another callback of your choice
+    connectToMQTTAdvanced(clientID, qos, &onConnect, &messageArrived, &onConnLostCallback); // This reconnects to MQTT
+}
+
+connectToMQTTAdvanced(clientID, qos, &onConnect, &messageArrived, &onConnLostCallback);
+```  
+In this case the extra argument is the __OnConnectionLost__ callback.
+{{< note title="Note" >}}
+In the __onConnect__ callback, be sure to grab the finished variable from the C SDK using the __extern__ keyword and set it to 1. This tells the SDK that the connect call was completed successfully and the C SDK can stop its internal loop that was waiting for the connection to complete
+{{< /note >}}  
+
+## Publish a message  
+To publish a message once a successful connection has been established to the MQTT Broker, use the ```publishMessage()``` function:  
+```C
+char *message = "Hello, World!!";
+chat *topic = "AwesomeTopic";
+int qos = 0;
+int retained = 0;
+publishMessage(message, topic, qos , retained);
+```
+
+## Subscribe to a topic  
+To subscribe to a topic, use the ```subscribeToTopic()``` function:  
+```C
+char *topic = "AwesomeTopic";
+int qos = 0;
+subscribeToTopic(topic, qos);
+```  
+
+## Unsubscribe from a topic  
+To unsubscribe from a topic, use the ```unsubscribeFromTopic()``` function:  
+```C
+char *topic = "AwesomeTopic";
+unsubscribeFromTopic(topic);
+```  
+
+## Disconnect from MQTT Broker  
+To disconnect your client from the MQTT Broker, call the ```disconnectMQTTClient()``` function.  
+
+# Code Service Functions  
+You can execute a Code Service using the C SDK. There are two ways to do it, one with parameters that you want to pass to a Code Service and one without.
+
+## Execute a Code Service without parameters  
+To execute a Code Service without passing any parameters, use the ```executeCodeServiceWithoutParams()``` function:  
+```C
+char *serviceName = "TestService";
+
+void codeServiceCallback(bool error, char *result) {
+  if(error) {
+    printf("Cannot execute Code Service: %s\n", result);
+  } else {
+    printf("Execution successful: %s\n", result);
+  }
+}
+
+executeCodeServiceWithoutParams(serviceName, &codeServiceCallback);
+```  
+
+## Execute a Code Service with parameters  
+To execute a Code Service by passing parameters, use the ```executeCodeServiceWithParams()``` function:  
+```C
+char *serviceName = "TestService";
+char *params = "{\"name\": \"Bubba\"}";
+
+void codeServiceCallback(bool error, char *result) {
+  if(error) {
+    printf("Cannot execute Code Service: %s\n", result);
+  } else {
+    printf("Execution successful: %s\n", result);
+  }
+}
+
+executeCodeServiceWithParams(serviceName, params, &codeServiceCallback);
+```
+# QuickStart
+
+## Prerequisites  
+
+To install the C SDK, you will need the following dependencies:  
+- libcurl  
+- openssl  
+- Paho MQTT library  
+- Jansson JSON library  
+
+{{< warning title="Heads Up!" >}}
+The Paho MQTT Library contains a Makefile that only supports Linux systems. You can try to install it on other operating systems but there is a chance that it might not work. So, you may need to edit the Makefile for your operating system or install the C SDK on a Linux system
+{{< /warning >}}
+
+### Installing ___libcurl___ and ___openssl___  
+- You can download and install ___libcurl___ library from https://curl.haxx.se/libcurl/. Depending on your operating system, you may download the compiled libraries or build from source  
+- You can also download and install the ___openssl___ library from https://www.openssl.org  
+
+### Installing the Paho MQTT Library  
+To install the Paho MQTT Library, execute the following commands:  
+```bash
+git clone https://github.com/eclipse/paho.mqtt.c.git  
+cd paho.mqtt.c/  
+make  
+sudo make install  
+```  
+
+### Install the Jansson JSON Library  
+You can follow the instructions given @ http://jansson.readthedocs.io/en/2.10/gettingstarted.html#compiling-and-installing-jansson to install the Jansson JSON Library  
+
+### Install the C SDK  
+Execute the following commands to install the C SDK on your system:  
+```bash
+git clone https://github.com/ClearBlade/ClearBlade-C-SDK.git
+cd ClearBlade-C-SDK/
+make
+sudo make install
+```
+
