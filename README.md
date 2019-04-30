@@ -7,7 +7,7 @@ You must initialize and authenticate with the ClearBlade Platform first before y
 {{< /warning >}}
 
 If you have not installed the prerequisites, please follow the tutorial @ [Prerequisites](../Quickstart#prerequisites). After you have installed all the prerequisites and the C SDK, include the ___clearblade.h___ header in your code: ```#include <clearblade.h>```   
-Call either the ```initializeClearBladeUser()``` or ```initializeClearBladeDevice()``` function to initialize and authenticate your user with ClearBlade:
+Call either the ```initializeClearBlade()``` or ```initializeClearBladeDevice()``` function to initialize and authenticate your user with ClearBlade:
 ```C
 void cbInitCallback(bool error, char *result) {
   if(error) {
@@ -18,7 +18,7 @@ void cbInitCallback(bool error, char *result) {
   }
 }
 
-initializeClearBladeUser(SYSTEM_KEY, SYSTEM_SECRET, PLATFORM_URL, MESSAGING_URL, USER_EMAIL, USER_PASSWORD, &cbInitCallback);
+initializeClearBlade(SYSTEM_KEY, SYSTEM_SECRET, PLATFORM_URL, MESSAGING_URL, USER_EMAIL, USER_PASSWORD, &cbInitCallback);
 ```  
 You will need to pass the function your __SYSTEM_KEY__, __SYSTEM_SECRET__, __PLATFORM_URL__ (https://platform.clearblade.com or similar), __MESSAGING_URL__ (tcp://platform.clearblade.com:1883 or similar), __USER_EMAIL__,
 __USER_PASSWORD__ (or __DEVICE_NAME__ and __ACTIVE_KEY__ if authenticating as a device) and a function as a callback. After successful authentication, you will receive an authentication token in the callback. You can choose to store it in a variable, but the SDK stores a copy of it for itself.
