@@ -1,10 +1,10 @@
-CC = gcc
+CC ?= gcc
 
-CFLAGS = -g -Wall -fPIC
+CFLAGS ?= -g -Wall -fPIC
 
-LDFLAGS = -shared
+LDFLAGS ?= -shared
 
-LIBS = -lpthread  -ljansson -lcurl -lpaho-mqtt3as
+LIBS ?= -lpthread  -ljansson -lcurl -lpaho-mqtt3as
 
 SRC = src
 
