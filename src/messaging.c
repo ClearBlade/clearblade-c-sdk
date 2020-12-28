@@ -62,13 +62,41 @@ void connectToMQTTAdvanced(char *clientId, int qualityOfService, void (*mqttOnCo
 	if(autoReconnect) {
 		conn_opts.automaticReconnect = 1;
 	}
-  conn_opts.keepAliveInterval = 20;
-  conn_opts.cleansession = 1;
-  conn_opts.onSuccess = mqttOnConnect;
-  conn_opts.onFailure = onConnectFailure;
-  conn_opts.context = client;
+	conn_opts.keepAliveInterval = 20;
+	conn_opts.cleansession = 1;
+	conn_opts.onSuccess = mqttOnConnect;
+	conn_opts.onFailure = onConnectFailure;
+	conn_opts.context = client;
 	conn_opts.username = username;
 	conn_opts.password = password;
+	
+	// See if URL contains Port, and if so retrieve it.
+	// Note URL contains TWO colons (e.g. tcp://platform.clearblade.com:1884).
+	// Have to search after SECOND colon for Port
+	char *addrOfFirstColon;
+	addrOfFirstColon = strchr(messagingurl,':');
+	int relLocOfFirstColon = (addrOfFirstColon - messagingurl) * sizeof(char);
+    char *urlWithoutProtocol = messagingurl + relLocOfFirstColon + 1;
+	
+	// Search for second Colon and Port
+	char *addrOfSecondColon;
+	addrOfSecondColon = strchr(urlWithoutProtocol,':');
+	if (addrOfSecondColon != NULL) {
+		int relLocOfSecondColon = (addrOfSecondColon - urlWithoutProtocol) * sizeof(char);
+		char *port = urlWithoutProtocol + relLocOfSecondColon + 1;
+
+		// If Port is '8883' TLS is desired
+		if (strcmp(port, "8883") == 0) {
+			MQTTAsync_SSLOptions ssl_opts = MQTTAsync_SSLOptions_initializer;
+			conn_opts.ssl = &ssl_opts;
+			conn_opts.ssl->struct_version = 2;
+			conn_opts.ssl->sslVersion = 0;
+			conn_opts.ssl->trustStore="/etc/ssl/certs/ca-certificates.crt";
+			conn_opts.ssl->CApath="/etc/ssl/certs";
+			conn_opts.ssl->enableServerCertAuth = 1;
+			conn_opts.ssl->verify = 1;
+		};
+	};
 
   if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS) {
   	printf("Failed to start connect, return code %d\n", rc);
