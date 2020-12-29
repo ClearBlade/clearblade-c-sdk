@@ -85,16 +85,10 @@ void connectToMQTTAdvanced(char *clientId, int qualityOfService, void (*mqttOnCo
 		int relLocOfSecondColon = (addrOfSecondColon - urlWithoutProtocol) * sizeof(char);
 		char *port = urlWithoutProtocol + relLocOfSecondColon + 1;
 
-		// If Port is '8883' TLS is desired
-		if (strcmp(port, "8883") == 0) {
+		// If Port is '1884' TLS is desired
+		if (strcmp(port, "1884") == 0) {
 			MQTTAsync_SSLOptions ssl_opts = MQTTAsync_SSLOptions_initializer;
 			conn_opts.ssl = &ssl_opts;
-			conn_opts.ssl->struct_version = 2;
-			conn_opts.ssl->sslVersion = 0;
-			conn_opts.ssl->trustStore="/etc/ssl/certs/ca-certificates.crt";
-			conn_opts.ssl->CApath="/etc/ssl/certs";
-			conn_opts.ssl->enableServerCertAuth = 1;
-			conn_opts.ssl->verify = 1;
 		};
 	};
 
