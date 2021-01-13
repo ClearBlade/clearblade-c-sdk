@@ -28,6 +28,7 @@ You will need to pass the function your **SYSTEM_KEY**, **SYSTEM_SECRET**, **PLA
 **USER_PASSWORD** (or **DEVICE_NAME** and **ACTIVE_KEY** if authenticating as a device) and a function as a callback. After successful authentication, you will receive an authentication token in the callback. You can choose to store it in a variable, but the SDK stores a copy of it for itself.
 
 **MESSAGING_URL** can be:
+
 tcp://platform.clearblade.com:1883, or similar, for unsecured messaging.
 ssl://platform.clearblade.com:1884, or similar, for secured messaging. i.e. over TLS
 
