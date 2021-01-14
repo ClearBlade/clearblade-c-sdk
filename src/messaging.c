@@ -62,13 +62,29 @@ void connectToMQTTAdvanced(char *clientId, int qualityOfService, void (*mqttOnCo
 	if(autoReconnect) {
 		conn_opts.automaticReconnect = 1;
 	}
-  conn_opts.keepAliveInterval = 20;
-  conn_opts.cleansession = 1;
-  conn_opts.onSuccess = mqttOnConnect;
-  conn_opts.onFailure = onConnectFailure;
-  conn_opts.context = client;
+	conn_opts.keepAliveInterval = 20;
+	conn_opts.cleansession = 1;
+	conn_opts.onSuccess = mqttOnConnect;
+	conn_opts.onFailure = onConnectFailure;
+	conn_opts.context = client;
 	conn_opts.username = username;
 	conn_opts.password = password;
+	
+	// Note URL contains protocol before first colon (e.g. tcp://platform.clearblade.com:1883)
+	char *addrOfFirstColon;
+	addrOfFirstColon = strchr(messagingurl,':');
+	int relLocOfFirstColon = (addrOfFirstColon - messagingurl) * sizeof(char);
+    
+	// Allocate array for protocol and retrieve it from messagingurl; add null at end
+	char protocol[relLocOfFirstColon + 1];
+	strncpy(protocol, messagingurl, relLocOfFirstColon);
+	protocol[relLocOfFirstColon] = '\0';
+
+	// If protocol is 'ssl' TLS is desired
+	if (strcmp(protocol, "ssl") == 0) {
+		MQTTAsync_SSLOptions ssl_opts = MQTTAsync_SSLOptions_initializer;
+		conn_opts.ssl = &ssl_opts;
+	};
 
   if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS) {
   	printf("Failed to start connect, return code %d\n", rc);
