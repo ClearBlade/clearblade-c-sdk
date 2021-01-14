@@ -70,26 +70,20 @@ void connectToMQTTAdvanced(char *clientId, int qualityOfService, void (*mqttOnCo
 	conn_opts.username = username;
 	conn_opts.password = password;
 	
-	// See if URL contains Port, and if so retrieve it.
-	// Note URL contains TWO colons (e.g. tcp://platform.clearblade.com:1884).
-	// Have to search after SECOND colon for Port
+	// Note URL contains protocol before first colon (e.g. tcp://platform.clearblade.com:1883)
 	char *addrOfFirstColon;
 	addrOfFirstColon = strchr(messagingurl,':');
 	int relLocOfFirstColon = (addrOfFirstColon - messagingurl) * sizeof(char);
-    char *urlWithoutProtocol = messagingurl + relLocOfFirstColon + 1;
-	
-	// Search for second Colon and Port
-	char *addrOfSecondColon;
-	addrOfSecondColon = strchr(urlWithoutProtocol,':');
-	if (addrOfSecondColon != NULL) {
-		int relLocOfSecondColon = (addrOfSecondColon - urlWithoutProtocol) * sizeof(char);
-		char *port = urlWithoutProtocol + relLocOfSecondColon + 1;
+    
+	// Allocate array for protocol and retrieve it from messagingurl; add null at end
+	char protocol[relLocOfFirstColon + 1];
+	strncpy(protocol, messagingurl, relLocOfFirstColon);
+	protocol[relLocOfFirstColon] = '\0';
 
-		// If Port is '1884' TLS is desired
-		if (strcmp(port, "1884") == 0) {
-			MQTTAsync_SSLOptions ssl_opts = MQTTAsync_SSLOptions_initializer;
-			conn_opts.ssl = &ssl_opts;
-		};
+	// If protocol is 'ssl' TLS is desired
+	if (strcmp(protocol, "ssl") == 0) {
+		MQTTAsync_SSLOptions ssl_opts = MQTTAsync_SSLOptions_initializer;
+		conn_opts.ssl = &ssl_opts;
 	};
 
   if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS) {
