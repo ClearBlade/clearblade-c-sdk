@@ -8,6 +8,9 @@
 #include "util.h"
 #include "query.h"
 
+//TODO - Add delete and update methods
+
+
 struct Query queryObj; // This stores the collection ID and all sets the functions for querying
 char *filter = NULL;
 //char *EQ = "{\"EQ\":[{\"";
@@ -27,7 +30,7 @@ void setPageSize(int pagesize) {
 /**
   * Checks whether the page size is explicitly set by the user. If not then it defaults to NULL
 */
-char *checkForPageSize() {
+static char *checkForPageSize() {
 	char *pagesize = NULL;
 	if (PAGESIZE != 0) {
 		char buff[sizeof(int)];
@@ -45,7 +48,7 @@ char *checkForPageSize() {
 /**
   * Checks whether the page number is explicitly set by the user. If not then it defaults to 0
 */
-char *checkForPageNum() {
+static char *checkForPageNum() {
 	char *pagenum = NULL;
 	if (PAGENUM != 0) {
 		char buff[sizeof(int)];
@@ -63,12 +66,55 @@ char *checkForPageNum() {
 /**
   * This checks whether the user has set any filters
 */
-char *checkForFilters() {
+static char *checkForFilters() {
 	if (filter == NULL)
 		return NULL;
 	else {
 		return filter;
 	}
+}
+
+/**
+  * Private function to build the rest endpoint based on whether
+	* collection ID or collection name is being used
+*/
+static char *getRestEndpoint() {
+	char *restEndpoint = getPlatformURL();
+
+	if (queryObj.collectionID != NULL) {
+		restEndpoint = getConcatString(restEndpoint, "/api/v/1/data/");
+		restEndpoint = getConcatString(restEndpoint, queryObj.collectionID);;
+	} else if (queryObj.collectionName != NULL) {
+		restEndpoint = getConcatString(restEndpoint, "/api/v/1/collection/");
+		restEndpoint = getConcatString(restEndpoint, getSystemKey());
+		restEndpoint = getConcatString(restEndpoint, "/");
+		restEndpoint = getConcatString(restEndpoint, queryObj.collectionName);
+	}
+
+	return restEndpoint;
+}
+
+/**
+  * Private function to initialize the header struct
+*/
+static struct Header createHeaders() {
+	struct Header headers;
+	memset(&headers, 0, sizeof(headers)); // Make all elements of the Header struct to NULL
+
+	headers.systemKey = getSystemKey();
+
+	if (getUserToken() != NULL) {
+		headers.userToken = getUserToken();
+	} else {
+		headers.deviceToken = getDeviceToken();
+	}
+
+	//TODO - I don't think this needs to be done. Need to verify.
+	if (queryObj.collectionID != NULL) {
+		headers.collectionID = queryObj.collectionID;
+	}
+
+	return headers;
 }
 
 /**
@@ -127,19 +173,8 @@ void fetch(void (*queryResponse)(bool error, char *result)) {
 		char *restEndpoint = getConcatString(restEndpointTmp2, param);
 		free(restEndpointTmp2);
 
-		struct Header headers;
-		memset(&headers, 0, sizeof(headers)); // Make all elements of the Header struct to NULL
-
+		struct Header headers = createHeaders();
 		headers.url = restEndpoint;
-		headers.systemKey = getSystemKey();			 // Set Headers
-
-		if (getUserToken() != NULL) {
-			headers.userToken = getUserToken();
-		} else {
-			headers.deviceToken = getDeviceToken();
-		}
-
-		headers.collectionID = queryObj.collectionID;
 		headers.requestType = "GET";
 
 		char *response = executeRequest(&headers);
@@ -169,8 +204,8 @@ void fetchAll(void (*queryResponse)(bool error, char *result)) {
 void createItem(char *jsonBody, void (*queryResponse)(bool error, char *result)) {
 	if (getUserToken() == NULL) {
 		queryResponse(true, "Cannot execute query. Auth token is NULL. Please initialize with the ClearBlade Platform first\n");
-	} else if (queryObj.collectionID == NULL) {
-		queryResponse(true, "Cannot execute query. Collection ID is NULL. Please initialize the query object first\n");
+	} else if (queryObj.collectionID == NULL && queryObj.collectionName == NULL) {
+		queryResponse(true, "Cannot execute query. Collection ID and Collection Name are NULL. Please initialize the query object first\n");
 	} else {
 		char *restEndpointMiddle = "/api/v/1/data/";
 		char *restEndpointTmp = getConcatString(getPlatformURL(), restEndpointMiddle);
@@ -180,16 +215,8 @@ void createItem(char *jsonBody, void (*queryResponse)(bool error, char *result))
 		struct Header headers;
 		memset(&headers, 0, sizeof(headers)); // Make all elements of the Header struct to NULL
 
+		struct Header headers = createHeaders();
 		headers.url = restEndpoint;
-		headers.systemKey = getSystemKey();			 // Set Headers
-
-		if (getUserToken() != NULL) {
-			headers.userToken = getUserToken();
-		} else {
-			headers.deviceToken = getDeviceToken();
-		}
-
-		headers.collectionID = queryObj.collectionID;
 		headers.body = jsonBody;
 		headers.requestType = "POST";
 
@@ -214,6 +241,19 @@ void createItem(char *jsonBody, void (*queryResponse)(bool error, char *result))
 struct Query initializeQueryObject(char *collectionID) {
 	struct Query query;
 	query.collectionID = collectionID;
+	query.addFilters = addFilters;
+	query.fetch = fetch;
+	query.fetchAll = fetchAll;
+	query.createItem = createItem;
+
+	queryObj = query;
+
+	return query;
+}
+
+struct Query initializeQueryObjectWithCollectionName(char *collectionName) {
+	struct Query query;
+	query.collectionName = collectionName;
 	query.addFilters = addFilters;
 	query.fetch = fetch;
 	query.fetchAll = fetchAll;
