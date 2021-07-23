@@ -1,2 +1,6 @@
+# VSCode settings
+.vscode/**
+
 # Object files
 *.o
+*.so

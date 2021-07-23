@@ -1,11 +1,13 @@
-CC ?= gcc
+ifndef CC
+    CC = gcc
+endif
 
-CFLAGS ?= -g -Wall -fPIC
+ifndef CFLAGS
+    CFLAGS = -g -Wall -fPIC -Wno-error=implicit-function-declaration
+endif
 
 LDFLAGS ?= -shared
-
 LIBS ?= -lpthread  -ljansson -lcurl -lpaho-mqtt3as
-
 SRC = src
 
 SRCS = $(wildcard $(SRC)/*.c)

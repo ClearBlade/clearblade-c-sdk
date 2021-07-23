@@ -9,7 +9,7 @@ You must initialize and authenticate with the ClearBlade Platform first before y
 {{< /warning >}}
 
 If you have not installed the prerequisites, please follow the tutorial @ [Prerequisites](../Quickstart#prerequisites). After you have installed all the prerequisites and the C SDK, include the **_clearblade.h_** header in your code: `#include <clearblade.h>`  
-Call either the `initializeClearBlade()` or `initializeClearBladeDevice()` function to initialize and authenticate your user with ClearBlade:
+Call either the `initializeClearBlade()` or `initializeClearBladeDevice()` function to initialize and authenticate your user or device with ClearBlade:
 
 ```C
 void cbInitCallback(bool error, char *result) {
