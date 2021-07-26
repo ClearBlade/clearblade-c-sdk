@@ -1,5 +1,5 @@
-#ifndef _user_h
-#define _user_h
+#ifndef _device_h
+#define _device_h
 
 #include <stdbool.h>
 
