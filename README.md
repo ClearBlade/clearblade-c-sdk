@@ -221,21 +221,41 @@ To install the C SDK, you will need the following dependencies:
 - Jansson JSON library
 
 {{< warning title="Heads Up!" >}}
-The Paho MQTT Library contains a Makefile that only supports Linux systems. You can try to install it on other operating systems but there is a chance that it might not work. So, you may need to edit the Makefile for your operating system or install the C SDK on a Linux system
+The Paho MQTT Library contains a Makefile that only supports Linux systems. You may try to install it on other operating systems, but there is a chance that it may not work. If this is the case, you will need to edit the Makefile for your operating system or install the C SDK on a Linux based system. There are additional instructions below, regarding Mac OS.
 {{< /warning >}}
 
 ### Installing **_libcurl_** and **_openssl_**
 
 - You can download and install **_libcurl_** library from https://curl.haxx.se/libcurl/. Depending on your operating system, you may download the compiled libraries or build from source
 - You can also download and install the **_openssl_** library from https://www.openssl.org
+- On Mac OS, OpenSSL can be installed with brew `brew install openssl`.
+
+{{< warning title="Heads Up!" >}}
+If attempting to build and utilize the ClearBlade C SDK on Mac OS, you must install OpenSSL. Mac OS does not allow linking with libssl (ld: cannot link directly with dylib/framework, your binary is not an allowed client of /usr/lib/libssl.dylib for architecture x86_64)
+{{< /warning >}}
 
 ### Installing the Paho MQTT Library
 
 To install the Paho MQTT Library, execute the following commands:
 
+#### Linux
 ```bash
 git clone https://github.com/eclipse/paho.mqtt.c.git
 cd paho.mqtt.c/
+make
+sudo make install
+```
+
+#### Mac OS
+- You will need to know where brew installed OpenSSL. The path to OpenSSL will be in `/usr/local/Cellar/` and will resemble `/usr/local/Cellar/openssl@1.1/1.1.1k`
+
+```bash
+git clone https://github.com/eclipse/paho.mqtt.c.git
+cd paho.mqtt.c/
+rm -r build/*
+
+# Replace {YOUR_OPEN_SSL_PATH} below with the path to your OpenSSL installation (for example: /usr/local/Cellar/openssl@1.1/1.1.1k)
+cmake -DPAHO_WITH_SSL=TRUE -DPAHO_HIGH_PERFORMANCE=TRUE -DOPENSSL_ROOT_DIR="{YOUR_OPEN_SSL_PATH}" ../
 make
 sudo make install
 ```
