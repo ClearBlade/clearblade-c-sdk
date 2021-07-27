@@ -238,6 +238,7 @@ So, you may need to edit the Makefile for your operating system or install the C
 
 To install the Paho MQTT library, execute the following commands:
 
+#### Linux
 ```bash
 git clone https://github.com/eclipse/paho.mqtt.c.git
 cd paho.mqtt.c/
@@ -245,7 +246,21 @@ make
 sudo make install
 ```
 
-### Install the Jansson JSON library
+#### Mac OS
+- You will need to know where brew installed OpenSSL. The path to OpenSSL will be in `/usr/local/Cellar/` and will resemble `/usr/local/Cellar/openssl@1.1/1.1.1k`
+
+```bash
+git clone https://github.com/eclipse/paho.mqtt.c.git
+cd paho.mqtt.c/
+rm -r build/*
+
+# Replace {YOUR_OPEN_SSL_PATH} below with the path to your OpenSSL installation (for example: /usr/local/Cellar/openssl@1.1/1.1.1k)
+cmake -DPAHO_WITH_SSL=TRUE -DPAHO_HIGH_PERFORMANCE=TRUE -DOPENSSL_ROOT_DIR="{YOUR_OPEN_SSL_PATH}" ../
+make
+sudo make install
+```
+
+### Install the Jansson JSON Library
 
 You can follow the instructions given @ http://jansson.readthedocs.io/en/2.10/gettingstarted.html#compiling-and-installing-jansson to install the Jansson JSON library.
 
