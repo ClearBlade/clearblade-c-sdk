@@ -11,9 +11,11 @@
 
 void authenticateDevice(void callback(bool error, char *result)) {
 
-	char *restURL = getConcatString("/api/v/2/devices/", getSystemKey());
-	restURL = getConcatString(restURL, "/auth");
-	restURL = getConcatString(getPlatformURL(), restURL);
+	char *restURLTmp1 = getConcatString("/api/v/2/devices/", getSystemKey());
+	char *restURLTmp2 = getConcatString(restURLTmp1, "/auth");
+	free(restURLTmp1);
+	char *restURL = getConcatString(getPlatformURL(), restURLTmp2);
+	free(restURLTmp2);
 
 	char *deviceNameParam = getConcatString("{\"deviceName\":\"", getUserEmail());
 	char *activeKeyParam = getConcatString("\",\"activeKey\":\"", getUserPassword());
