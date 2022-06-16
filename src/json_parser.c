@@ -23,8 +23,11 @@ char const *getPropertyValueFromJson(char *jsonString, char *property) {
 		} else if (json_is_object(jsonValue) || json_is_array(jsonValue)) {
 			value = jsonString;
 		}
+		free(root);
+		free(jsonValue);
 		return value;
 	} else {
+		free(root);
 		return NULL;
 	}
 }

@@ -12,10 +12,13 @@
   * This function makes a REST call to execute the code service specified by the user and returns the response to the codeCallback
 */
 void execute(char *name, char *params, void codeCallback(bool error, char *result)) {
-	char *restURL = getConcatString("/api/v/1/code/", getSystemKey()); // REST endpoint to execute code service
-	restURL = getConcatString(restURL, "/");
-	restURL = getConcatString(restURL, name);
-	restURL = getConcatString(getPlatformURL(), restURL); // Complete URL to make the REST call
+	char *restURLTmp1 = getConcatString("/api/v/1/code/", getSystemKey()); // REST endpoint to execute code service
+	char *restURLTmp2 = getConcatString(restURLTmp1, "/");
+	free(restURLTmp1);
+	char *restURLTmp3 = getConcatString(restURLTmp2, name);
+	free(restURLTmp2);
+	char *restURL = getConcatString(getPlatformURL(), restURLTmp3); // Complete URL to make the REST call
+	free(restURLTmp3);
 
 	struct Header headers;
 	memset(&headers, 0, sizeof(headers)); // Initialize headers
@@ -41,7 +44,7 @@ void execute(char *name, char *params, void codeCallback(bool error, char *resul
 		codeCallback(false, result); // Code Service execution successful
 	}
 
-  free(response);
+  	free(response);
 	free(restURL);
 }
 
