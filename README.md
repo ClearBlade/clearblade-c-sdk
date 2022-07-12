@@ -184,6 +184,7 @@ void codeServiceCallback(bool error, char *result) {
     printf("Cannot execute Code Service: %s\n", result);
   } else {
     printf("Execution successful: %s\n", result);
+    free(result);
   }
 }
 
@@ -203,6 +204,7 @@ void codeServiceCallback(bool error, char *result) {
     printf("Cannot execute Code Service: %s\n", result);
   } else {
     printf("Execution successful: %s\n", result);
+    free(result);
   }
 }
 
