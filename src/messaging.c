@@ -88,6 +88,7 @@ void connectToMQTTAdvanced(char *clientId, int qualityOfService, void (*mqttOnCo
 
   if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS) {
   	printf("Failed to start connect, return code %d\n", rc);
+	MQTTAsync_destroy(&client);
     return;
   }
 
@@ -195,7 +196,7 @@ void disconnectMQTTClient() {
 	        printf("Failed to start disconnect, return code %d\n", rc);
 	        return;
 	}
-
+	MQTTAsync_destroy(&mqttClient);
 	while (finished == 0) {
 
 	}
