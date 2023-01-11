@@ -139,7 +139,7 @@ To publish a message once a successful connection has been established to the MQ
 
 ```C
 char *message = "Hello, World!!";
-chat *topic = "AwesomeTopic";
+char *topic = "AwesomeTopic";
 int qos = 0;
 int retained = 0;
 publishMessage(message, topic, qos , retained);
