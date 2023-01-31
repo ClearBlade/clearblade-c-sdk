@@ -54,12 +54,12 @@ void connectToMQTTAdvanced(char *clientId, int qualityOfService, void (*mqttOnCo
 
 	rc = MQTTAsync_create(&client, messagingurl, clientId, MQTTCLIENT_PERSISTENCE_NONE, NULL);
 	if(rc != MQTTASYNC_SUCCESS) {
-		printf("Failed to create MQTT client. Error code is %d\n", rc)
-		return
+		printf("Failed to create MQTT client. Error code is %d\n", rc);
+		return;
 	}
 	if(client == NULL) {
-		printf("MQTT client creation failure. client is NULL\n")
-		return
+		printf("MQTT client creation failure. client is NULL\n");
+		return;
 	}
 	if(onConnLostCallback == NULL) {
 		MQTTAsync_setCallbacks(client, NULL, connLost, messageArrivedCallback, NULL);
