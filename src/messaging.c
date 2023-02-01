@@ -29,6 +29,23 @@ void connLost(void *context, char *cause) {
 void connectToMQTTAdvanced(char *clientId, int qualityOfService, void (*mqttOnConnect)(void* context, MQTTAsync_successData* response),
  									int (*messageArrivedCallback)(void *context, char *topicName, int topicLen, MQTTAsync_message *message),
 									void (*onConnLostCallback)(void *context, char *cause), bool autoReconnect) {
+	connectToMQTTInternal(clientId, qualityOfService, mqttOnConnect, messageArrivedCallback, onConnLostCallback, autoReconnect, NULL);
+}
+
+void connectToMQTT(char *clientId, int qualityOfService, void (*mqttOnConnect)(void* context, MQTTAsync_successData* response),
+ 									int (*messageArrivedCallback)(void *context, char *topicName, int topicLen, MQTTAsync_message *message)) {
+	connectToMQTTAdvanced(clientId, qualityOfService, mqttOnConnect, messageArrivedCallback, NULL, false);
+}
+
+void connectToMQTTWithSSLOptions(char *clientId, int qualityOfService, void (*mqttOnConnect)(void* context, MQTTAsync_successData* response),
+ 									int (*messageArrivedCallback)(void *context, char *topicName, int topicLen, MQTTAsync_message *message),
+									void (*onConnLostCallback)(void *context, char *cause), bool autoReconnect, struct MQTTSSLOptions *sslOptions) {
+	connectToMQTTInternal(clientId, qualityOfService, mqttOnConnect, messageArrivedCallback, onConnLostCallback, autoReconnect, sslOptions);
+}
+
+void connectToMQTTInternal(char *clientId, int qualityOfService, void (*mqttOnConnect)(void* context, MQTTAsync_successData* response),
+ 									int (*messageArrivedCallback)(void *context, char *topicName, int topicLen, MQTTAsync_message *message),
+									void (*onConnLostCallback)(void *context, char *cause), bool autoReconnect, struct MQTTSSLOptions *sslOptions) {
 	if (getUserToken() == NULL && getDeviceToken() == NULL) {
 		fprintf(stderr, "connectToMQTT called with unset auth token\n");
 		return;
@@ -92,6 +109,7 @@ void connectToMQTTAdvanced(char *clientId, int qualityOfService, void (*mqttOnCo
 	if (strcmp(protocol, "ssl") == 0) {
 		MQTTAsync_SSLOptions ssl_opts = MQTTAsync_SSLOptions_initializer;
 		conn_opts.ssl = &ssl_opts;
+		setSSLOptions(&conn_opts, sslOptions);
 	};
 
   if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS) {
@@ -108,9 +126,16 @@ void connectToMQTTAdvanced(char *clientId, int qualityOfService, void (*mqttOnCo
 	finished = 0;
 }
 
-void connectToMQTT(char *clientId, int qualityOfService, void (*mqttOnConnect)(void* context, MQTTAsync_successData* response),
- 									int (*messageArrivedCallback)(void *context, char *topicName, int topicLen, MQTTAsync_message *message)) {
-	connectToMQTTAdvanced(clientId, qualityOfService, mqttOnConnect, messageArrivedCallback, NULL, false);
+void setSSLOptions(MQTTAsync_connectOptions* connOpts, struct MQTTSSLOptions* sslOptions) {
+	if (sslOptions == NULL) {
+		return;
+	}
+	if (sslOptions->keyStore != NULL) {
+		connOpts->ssl->keyStore = sslOptions->keyStore;
+	}
+	if (sslOptions->trustStore != NULL) {
+		connOpts->ssl->trustStore = sslOptions->trustStore;
+	}
 }
 
 
