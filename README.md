@@ -4,9 +4,10 @@
 
 ## Initialize and authenticate
 
-{{< warning title="Heads Up!" >}}
+```markdown
+> **Heads Up!**
 You must initialize and authenticate with the ClearBlade Platform before you perform any other functions.
-{{< /warning >}}
+```
 
 If you still need to install the prerequisites, please follow the tutorial @ [Prerequisites](../Quickstart#prerequisites). After you have installed all the prerequisites and the C SDK, include the **_clearblade.h_** header in your code: `#include <clearblade.h>`  
 Call the `initializeClearBlade()` or `initializeClearBladeDevice()` function to initialize and authenticate your user with ClearBlade:
@@ -222,9 +223,11 @@ To install the C SDK, you will need the following dependencies:
 - Paho MQTT library
 - Jansson JSON library
 
-{{< warning title="Heads Up!" >}}
-The Paho MQTT library contains a Makefile that only supports Linux systems. You can try to install it on other operating systems, but it might not work. So, you may need to edit the Makefile for your operating system or install the C SDK on a Linux system.
-{{< /warning >}}
+```markdown
+> **Heads Up!**
+The Paho MQTT library contains a Makefile that only supports Linux systems. You can try to install it on other operating systems, but it might not work. 
+So, you may need to edit the Makefile for your operating system or install the C SDK on a Linux system.
+```
 
 ### Installing **_libcurl_** and **_openssl_**
 
