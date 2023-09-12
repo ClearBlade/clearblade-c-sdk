@@ -9,7 +9,8 @@ You must initialize and authenticate with the ClearBlade Platform first before y
 {{< /warning >}}
 
 If you have not installed the prerequisites, please follow the tutorial @ [Prerequisites](../Quickstart#prerequisites). After you have installed all the prerequisites and the C SDK, include the **_clearblade.h_** header in your code: `#include <clearblade.h>`  
-Call either the `initializeClearBlade()` or `initializeClearBladeDevice()` function to initialize and authenticate your user or device with ClearBlade:
+
+### User Authentication
 
 ```C
 void cbInitCallback(bool error, char *result) {
@@ -24,8 +25,55 @@ void cbInitCallback(bool error, char *result) {
 initializeClearBlade(SYSTEM_KEY, SYSTEM_SECRET, PLATFORM_URL, MESSAGING_URL, USER_EMAIL, USER_PASSWORD, &cbInitCallback);
 ```
 
-You will need to pass the function your **SYSTEM_KEY**, **SYSTEM_SECRET**, **PLATFORM_URL** (https://platform.clearblade.com or similar), **MESSAGING_URL**, **USER_EMAIL**,
-**USER_PASSWORD** (or **DEVICE_NAME** and **ACTIVE_KEY** if authenticating as a device) and a function as a callback. After successful authentication, you will receive an authentication token in the callback. You can choose to store it in a variable, but the SDK stores a copy of it for itself.
+You will need to pass the function your **SYSTEM_KEY**, **SYSTEM_SECRET**, **PLATFORM_URL** (https://platform.clearblade.com or similar), **MESSAGING_URL**, **USER_EMAIL**, **USER_PASSWORD**, and a function as a callback. After successful authentication, you will receive an authentication token in the callback. You can choose to store it in a variable, but the SDK stores a copy of it for itself.
+
+**MESSAGING_URL** can be:  
+tcp://platform.clearblade.com:1883, or similar, for unsecured messaging.  
+ssl://platform.clearblade.com:1884, or similar, for secured messaging. i.e. over TLS
+
+### Device Authentication
+```C
+void cbInitCallback(bool error, char *result) {
+  if(error) {
+    printf("ClearBlade init failed %s\n", result);
+    exit(-1);
+  } else {
+    printf("ClearBlade Init Succeeded\nAuth token: %s\n", result);
+  }
+}
+
+initializeClearBladeAsDevice(SYSTEM_KEY, SYSTEM_SECRET, PLATFORM_URL, MESSAGING_URL, DEVICE_NAME, ACTIVE_KEY, &cbInitCallback);
+```
+
+You will need to pass the function your **SYSTEM_KEY**, **SYSTEM_SECRET**, **PLATFORM_URL** (https://platform.clearblade.com or similar), **MESSAGING_URL**, **DEVICE_NAME**, **ACTIVE_KEY**, and a function as a callback. After successful authentication, you will receive an authentication token in the callback. You can choose to store it in a variable, but the SDK stores a copy of it for itself.
+
+**MESSAGING_URL** can be:  
+tcp://platform.clearblade.com:1883, or similar, for unsecured messaging.  
+ssl://platform.clearblade.com:1884, or similar, for secured messaging. i.e. over TLS
+
+### Device Authentication With mTLS
+Rather than authenticating a device with the device name and active key, a device can be authenticated using mTLS. This requires the device to pass the location of the x509 SSL certificate and the location of the private key. The ClearBlade Platform will then ensure the certificate and private key passed by the device is valid and matches what the ClearBlade Platform expects.
+
+If the device does not exist in the system it will be automatically created, providing the ability to do Just-In_Time provisioning.
+
+{{< warning title="Heads Up!" >}}
+Using mTLS authentication requires additional configuration by ClearBlade that is not implemented by default. If you require mTLS authentication, you will need to contact ClearBlade.
+{{< /warning >}}
+
+```C
+void cbInitCallback(bool error, char *result) {
+  if(error) {
+    printf("ClearBlade init failed %s\n", result);
+    exit(-1);
+  } else {
+    printf("ClearBlade Init Succeeded\nAuth token: %s\n", result);
+  }
+}
+
+initializeClearBladeAsDevice(SYSTEM_KEY, SYSTEM_SECRET, PLATFORM_URL, MESSAGING_URL, DEVICE_NAME, CERT_FILE_PATH, KEY_FILE_PATH, &cbInitCallback);
+```
+
+You will need to pass the function your **SYSTEM_KEY**, **SYSTEM_SECRET**, **PLATFORM_URL** (https://platform.clearblade.com or similar), **MESSAGING_URL**, **DEVICE_NAME**, **CERT_FILE_PATH**, **KEY_FILE_PATH**, and a function as a callback. After successful authentication, you will receive an authentication token in the callback. You can choose to store it in a variable, but the SDK stores a copy of it for itself.
 
 **MESSAGING_URL** can be:  
 tcp://platform.clearblade.com:1883, or similar, for unsecured messaging.  
@@ -247,15 +295,15 @@ sudo make install
 ```
 
 #### Mac OS
-- You will need to know where brew installed OpenSSL. The path to OpenSSL will be in `/usr/local/Cellar/` and will resemble `/usr/local/Cellar/openssl@1.1/1.1.1k`
+- You will need to know where brew installed OpenSSL. The path to OpenSSL will be in `/opt/homebrew/Cellar/` and will resemble `/opt/homebrew/Cellar/openssl@3/3.1.2`
 
 ```bash
 git clone https://github.com/eclipse/paho.mqtt.c.git
 cd paho.mqtt.c/
 rm -r build/*
 
-# Replace {YOUR_OPEN_SSL_PATH} below with the path to your OpenSSL installation (for example: /usr/local/Cellar/openssl@1.1/1.1.1k)
-cmake -DPAHO_WITH_SSL=TRUE -DPAHO_HIGH_PERFORMANCE=TRUE -DOPENSSL_ROOT_DIR="{YOUR_OPEN_SSL_PATH}" ../
+# Replace {YOUR_OPEN_SSL_PATH} below with the path to your OpenSSL installation (for example: /opt/homebrew/Cellar/openssl@3/3.1.2)
+cmake -DPAHO_WITH_SSL=TRUE -DPAHO_HIGH_PERFORMANCE=TRUE -DOPENSSL_ROOT_DIR="{YOUR_OPEN_SSL_PATH}" .
 make
 sudo make install
 ```

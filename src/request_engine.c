@@ -45,6 +45,14 @@ size_t writefunc(void *ptr, size_t size, size_t nmemb, struct string *s) {
   * It uses the libCURL library to make the HTTP requests.
 */
 char *executeRequest(struct Header *header) {
+	return makeRequest(header, "", "");
+}
+
+char *executex509MtlsRequest(struct Header *header, char *certFilePath, char *keyFilePath) {
+	return makeRequest(header, certFilePath, keyFilePath);
+}
+
+char*makeRequest(struct Header *header, char *certFilePath, char *keyFilePath) {
 	char *systemKeyHeader = getConcatString("ClearBlade-SystemKey: ", header->systemKey); // This is a required header for all calls
 	char *systemSecretHeader = NULL;
 	char *userTokenHeader = NULL;
@@ -109,11 +117,22 @@ char *executeRequest(struct Header *header) {
 				curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0L); // Send POST without body
 			}
 		}
+
 		//curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 	  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writefunc);
    	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s);
    	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
    	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+
+		if (certFilePath && certFilePath[0] != '\0') {
+			curl_easy_setopt(curl, CURLOPT_SSLCERT, certFilePath);
+			curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
+		}
+
+		if (keyFilePath && keyFilePath[0] != '\0') {
+			curl_easy_setopt(curl, CURLOPT_SSLKEY, keyFilePath);
+			curl_easy_setopt(curl, CURLOPT_SSLKEYTYPE, "PEM");
+		}
 
 		res = curl_easy_perform(curl); // Execute the request
 

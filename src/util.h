@@ -21,6 +21,8 @@ void setPlatformURL(char *platformURL);
 void setMessagingURL(char *messagingURL);
 void setUserEmail(char *email);
 void setUserPassword(char *password);
+void setCertFilePath(char *certFilePath);
+void setKeyFilePath(char *keyFilePath);
 void setUserToken(char *token);
 void setDeviceToken(char *token);
 char *getSystemKey();
@@ -29,6 +31,8 @@ char *getPlatformURL();
 char *getMessagingURL();
 char *getUserEmail();
 char *getUserPassword();
+char *getCertFilePath();
+char *getKeyFilePath();
 char *getUserToken();
 char *getDeviceToken();
 
