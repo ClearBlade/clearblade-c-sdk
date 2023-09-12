@@ -38,16 +38,6 @@ void validateInitOptions(struct ClearBlade *CB) {
 		setMessagingURL(CB->messagingURL);
 	}
 
-	// if (CB->email != NULL && CB->password == NULL) {
-	// 	die("Password cannot be empty when email is present");
-	// } else if (CB->password != NULL && CB->email == NULL) {
-	// 	die("Email cannot be empty when password is present");
-	// } else {
-	// 	setUserEmail(CB->email);
-	// 	setUserPassword(CB->password);
-	// }
-
-
 	if (CB->email != NULL) {
 		if (CB->password == NULL && CB->certFilePath == NULL && CB->keyFilePath == NULL) {
 			die("Either password or certFilePath and keyFilePath must be specified when email is present");
