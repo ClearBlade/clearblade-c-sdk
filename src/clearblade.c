@@ -43,9 +43,9 @@ void validateInitOptions(struct ClearBlade *CB) {
 			die("Either password or certFile and keyFile must be specified when email is present");
 		} else if (CB->password == NULL) {
 			if (CB->certFile == NULL) {
-				die("certFile must be specified when email and keyFilePath are present");
+				die("certFile must be specified when email and keyFile are present");
 			} else if (CB->keyFile == NULL) {
-				die("keyFilePath must be specified when email and certFile are present");
+				die("keyFile must be specified when email and certFile are present");
 			}
 		}
 	} else if (CB->password != NULL) {
