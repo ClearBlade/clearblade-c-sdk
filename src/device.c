@@ -76,7 +76,7 @@ void authenticateDeviceX509(void callback(bool error, char *result)) {
 	headers.body = body;
 	headers.requestType = "POST";
 
-	char *response = executex509MtlsRequest(&headers, getCertFilePath(), getKeyFilePath());
+	char *response = executex509MtlsRequest(&headers, getCertFile(), getKeyFile());
 
 	char *authToken = (char *) getPropertyValueFromJson(response, "deviceToken");
 	if (authToken == NULL) {

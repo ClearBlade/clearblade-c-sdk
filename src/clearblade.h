@@ -20,8 +20,8 @@ struct ClearBlade {
 	char *messagingURL;
 	char *email;
 	char *password;
-  char *certFilePath;
-  char *keyFilePath;
+  char *certFile;
+  char *keyFile;
 	pthread_mutex_t connectLock;
 };
 
@@ -42,6 +42,6 @@ void initializeClearBlade(char *systemkey, char *systemsecret, char *platformurl
 */
 void initializeClearBladeAsDevice(char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *devicename, char *activekey, void (*initCallback)(bool error, char *result));
 
-void initializeClearBladeAsMtlsDevice(char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *devicename, char *certFilePath, char *keyFilePath, void (*initCallback)(bool error, char *result));
+void initializeClearBladeAsMtlsDevice(char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *devicename, char *certFile, char *keyFile, void (*initCallback)(bool error, char *result));
 
 #endif

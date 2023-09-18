@@ -13,8 +13,8 @@ char *PLATFORM_URL = NULL;
 char *MESSAGING_URL = NULL;
 char *EMAIL = NULL;
 char *PASSWORD = NULL;
-char *CERT_FILE_PATH = NULL;
-char *KEY_FILE_PATH = NULL;
+char *CERT_FILE = NULL;
+char *KEY_FILE = NULL;
 char *DEVICE_TOKEN = NULL;
 
 void setSystemKey(char *systemKey) {
@@ -41,12 +41,12 @@ void setUserPassword(char *password) {
 	PASSWORD = password;
 }
 
-void setCertFilePath(char *certFilePath) {
-	CERT_FILE_PATH = certFilePath;
+void setCertFile(char *certFile) {
+	CERT_FILE = certFile;
 }
 
-void setKeyFilePath(char *keyFilePath) {
-	KEY_FILE_PATH = keyFilePath;
+void setKeyFile(char *keyFile) {
+	KEY_FILE = keyFile;
 }
 
 void setUserToken(char *token) {
@@ -81,12 +81,12 @@ char *getUserPassword() {
 	return PASSWORD;
 }
 
-char *getCertFilePath() {
-	return CERT_FILE_PATH;
+char *getCertFile() {
+	return CERT_FILE;
 }
 
-char *getKeyFilePath() {
-	return KEY_FILE_PATH;
+char *getKeyFile() {
+	return KEY_FILE;
 }
 
 char *getUserToken() {

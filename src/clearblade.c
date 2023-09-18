@@ -39,26 +39,26 @@ void validateInitOptions(struct ClearBlade *CB) {
 	}
 
 	if (CB->email != NULL) {
-		if (CB->password == NULL && CB->certFilePath == NULL && CB->keyFilePath == NULL) {
-			die("Either password or certFilePath and keyFilePath must be specified when email is present");
+		if (CB->password == NULL && CB->certFile == NULL && CB->keyFile == NULL) {
+			die("Either password or certFile and keyFile must be specified when email is present");
 		} else if (CB->password == NULL) {
-			if (CB->certFilePath == NULL) {
-				die("certFilePath must be specified when email and keyFilePath are present");
-			} else if (CB->keyFilePath == NULL) {
-				die("keyFilePath must be specified when email and certFilePath are present");
+			if (CB->certFile == NULL) {
+				die("certFile must be specified when email and keyFilePath are present");
+			} else if (CB->keyFile == NULL) {
+				die("keyFilePath must be specified when email and certFile are present");
 			}
 		}
 	} else if (CB->password != NULL) {
 		die("Email cannot be empty when password is present");
-	} else if (CB->certFilePath == NULL || CB->keyFilePath == NULL) {
-		die("Email cannot be empty when certFilePath and keyFilePath are present");
+	} else if (CB->certFile == NULL || CB->keyFile == NULL) {
+		die("Email cannot be empty when certFile and keyFile are present");
 	}
 
 	setUserEmail(CB->email);
 
 	if (CB->password != NULL) setUserPassword(CB->password);
-	if (CB->certFilePath != NULL) setCertFilePath(CB->certFilePath);
-	if (CB->keyFilePath != NULL) setKeyFilePath(CB->keyFilePath);
+	if (CB->certFile != NULL) setCertFile(CB->certFile);
+	if (CB->keyFile != NULL) setKeyFile(CB->keyFile);
 }
 
 /**
@@ -81,7 +81,7 @@ void initialize(struct ClearBlade *CB, void callback(bool error, char *result)) 
 void initializeDevice(struct ClearBlade *CB, void callback(bool error, char *result)) {
 	validateInitOptions(CB);
 
-	if (CB->certFilePath == NULL && CB->keyFilePath == NULL) {
+	if (CB->certFile == NULL && CB->keyFile == NULL) {
 		authenticateDevice(callback);
 	} else {
 		authenticateDeviceX509(callback);
@@ -119,14 +119,14 @@ void initializeClearBladeAsDevice(char *systemkey, char *systemsecret, char *pla
 	initializeDevice(&CBGlobal, initCallback);
 }
 
-void initializeClearBladeAsMtlsDevice(char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *devicename, char *certFilePath, char *keyFilePath, void (*initCallback)(bool error, char *result)) {
+void initializeClearBladeAsMtlsDevice(char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *devicename, char *certFile, char *keyFile, void (*initCallback)(bool error, char *result)) {
 	CBGlobal.systemKey = systemkey;
 	CBGlobal.systemSecret = systemsecret;
 	CBGlobal.platformURL = platformurl;
 	CBGlobal.messagingURL = messagingurl;
 	CBGlobal.email = devicename;
-	CBGlobal.certFilePath = certFilePath;
-	CBGlobal.keyFilePath = keyFilePath;
+	CBGlobal.certFile = certFile;
+	CBGlobal.keyFile = keyFile;
 
 	initializeDevice(&CBGlobal, initCallback);
 }

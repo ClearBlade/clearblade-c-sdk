@@ -70,10 +70,13 @@ void cbInitCallback(bool error, char *result) {
   }
 }
 
-initializeClearBladeAsDevice(SYSTEM_KEY, SYSTEM_SECRET, PLATFORM_URL, MESSAGING_URL, DEVICE_NAME, CERT_FILE_PATH, KEY_FILE_PATH, &cbInitCallback);
+initializeClearBladeAsDevice(SYSTEM_KEY, SYSTEM_SECRET, PLATFORM_URL, MESSAGING_URL, DEVICE_NAME, CERT_FILE, KEY_FILE, &cbInitCallback);
 ```
 
-You will need to pass the function your **SYSTEM_KEY**, **SYSTEM_SECRET**, **PLATFORM_URL** (https://platform.clearblade.com or similar), **MESSAGING_URL**, **DEVICE_NAME**, **CERT_FILE_PATH**, **KEY_FILE_PATH**, and a function as a callback. After successful authentication, you will receive an authentication token in the callback. You can choose to store it in a variable, but the SDK stores a copy of it for itself.
+You will need to pass the function your **SYSTEM_KEY**, **SYSTEM_SECRET**, **PLATFORM_URL** (https://platform.clearblade.com or similar), **MESSAGING_URL**, **DEVICE_NAME**, **CERT_FILE**, **KEY_FILE**, and a function as a callback. After successful authentication, you will receive an authentication token in the callback. You can choose to store it in a variable, but the SDK stores a copy of it for itself.
+
+CERT_FILE can be either the path to the SSL certificate or the contents of the certificate file
+KEY_FILE can be either the path to the private key or the contents of the private key file
 
 **MESSAGING_URL** can be:  
 tcp://platform.clearblade.com:1883, or similar, for unsecured messaging.  
