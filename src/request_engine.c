@@ -168,8 +168,8 @@ char*makeRequest(struct Header *header, char *certFile, char *keyFile) {
     		} else {
     			die("keyFile parameter must contain either the contents of a private key file or the path to the private key file");
     		}
-				curl_easy_setopt(curl, CURLOPT_SSLKEYTYPE, "PEM");
 			}
+			curl_easy_setopt(curl, CURLOPT_SSLKEYTYPE, "PEM");
 		}
 
 		res = curl_easy_perform(curl); // Execute the request
