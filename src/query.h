@@ -33,5 +33,5 @@ void filters(char *filter);
 */
 struct Query initializeQueryObject(char *collectionID);
 
-struct Query initializeQueryObjectWithCollectionName(char *collectionName)
+struct Query initializeQueryObjectWithCollectionName(char *collectionName);
 #endif
