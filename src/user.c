@@ -26,7 +26,7 @@ void parseAuthToken(char *response, void callback(bool error, char *message)) {
 /**
   * This function gathers all the information required to make a REST call to authenticate the user anonymously
 */
-void authenticateAnonUser(void callback(bool error, char *result)) {
+void authenticateAnonUser(void (*callback)(bool error, char *result)) {
 	char *restURL = "/api/v/1/user/anon"; // Anonymous auth REST endpoint
 	restURL = getConcatString(getPlatformURL(), restURL); // Construct complete URL for making the REST call
 
@@ -49,7 +49,7 @@ void authenticateAnonUser(void callback(bool error, char *result)) {
 /**
   * This function gathers all the information required to make a REST call to authenticate the user as a auth user
 */
-void authenticateAuthUser(void callback(bool error, char *result)) {
+void authenticateAuthUser(void (*callback)(bool error, char *result)) {
 	char *restEndpoint = "/api/v/1/user/auth"; // Authenticated auth REST endpoint
 	char *platformurl = getPlatformURL();
 	char *restURL = getConcatString(platformurl, restEndpoint); // Construct complete URL for making the REST call
