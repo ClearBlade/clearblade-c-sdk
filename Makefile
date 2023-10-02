@@ -3,7 +3,7 @@ ifndef CC
 endif
 
 ifndef CFLAGS
-    CFLAGS = -g -Wall -fPIC -Wno-error=implicit-function-declaration
+    CFLAGS = -g -Wall -fPIC
 endif
 
 LDFLAGS ?= -shared
