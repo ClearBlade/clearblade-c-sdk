@@ -212,9 +212,6 @@ void createItem(char *jsonBody, void (*queryResponse)(bool error, char *result))
 		char *restEndpoint = getConcatString(restEndpointTmp, queryObj.collectionID);
 		free(restEndpointTmp);
 
-		struct Header headers;
-		memset(&headers, 0, sizeof(headers)); // Make all elements of the Header struct to NULL
-
 		struct Header headers = createHeaders();
 		headers.url = restEndpoint;
 		headers.body = jsonBody;
