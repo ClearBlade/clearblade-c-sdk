@@ -6,14 +6,14 @@
 #ifndef _util_h
 #define _util_h
 
-char *USER_TOKEN;
-char *DEVICE_TOKEN;
-char *SYSTEM_KEY;
-char *SYSTEM_SECRET;
-char *PLATFORM_URL;
-char *MESSAGING_URL;
-char *EMAIL;
-char *PASSWORD;
+extern char *USER_TOKEN;
+extern char *DEVICE_TOKEN;
+extern char *SYSTEM_KEY;
+extern char *SYSTEM_SECRET;
+extern char *PLATFORM_URL;
+extern char *MESSAGING_URL;
+extern char *EMAIL;
+extern char *PASSWORD;
 
 void setSystemKey(char *systemKey);
 void setSystemSecret(char *systemSecret);
