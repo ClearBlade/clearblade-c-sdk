@@ -35,8 +35,9 @@ static char *checkForPageSize() {
 	if (PAGESIZE != 0) {
 		char buff[sizeof(int)];
 		sprintf(buff, "%d", PAGESIZE);
-		pagesize = getConcatString("\"PAGESIZE\":", buff); // Page size key for the query body
-		pagesize = getConcatString(pagesize, ", ");
+		char *pagesizeTmp = getConcatString("\"PAGESIZE\":", buff); // Page size key for the query body
+		pagesize = getConcatString(pagesizeTmp, ", ");
+		free(pagesizeTmp);
 
 		return pagesize;
 	} else {
@@ -52,8 +53,9 @@ static char *checkForPageNum() {
 	if (PAGENUM != 0) {
 		char buff[sizeof(int)];
 		sprintf(buff, "%d", PAGENUM);
-		pagenum = getConcatString("\"PAGENUM\":", buff); // Page number key for the query body
-		pagenum = getConcatString(pagenum, "}");
+		char *pagenumTmp = getConcatString("\"PAGENUM\":", buff); // Page number key for the query body
+		pagenum = getConcatString(pagenumTmp, "}");
+		free(pagenumTmp);
 	} else {
 		pagenum = "\"PAGENUM\":0}";
 	}
@@ -131,8 +133,9 @@ char *getFetchURLParameter() {
 	if (pagesize == NULL)
 		param = getConcatString(query, pagenum);
 	else {
-		param = getConcatString(query, pagesize);
-		param = getConcatString(param, pagenum);
+		char *paramTmp = getConcatString(query, pagesize);
+		param = getConcatString(paramTmp, pagenum);
+		free(paramTmp);
 	}
 
 	if (PAGENUM != 0)
@@ -163,8 +166,12 @@ void fetch(void (*queryResponse)(bool error, char *result)) {
 		queryResponse(true, "Cannot execute query. Collection ID is NULL. Please initialize the query object first\n");
 	} else {
 		char *param = getFetchURLParameter();
-		char *restEndpoint = getRestEndpoint();
-		restEndpoint = getConcatString(restEndpoint, param);
+		char *restEndpointMiddle = "/api/v/1/data/";
+		char *restEndpointTmp1 = getConcatString(getPlatformURL(), restEndpointMiddle);
+		char *restEndpointTmp2 = getConcatString(restEndpointTmp1, queryObj.collectionID);
+		free(restEndpointTmp1);
+		char *restEndpoint = getConcatString(restEndpointTmp2, param);
+		free(restEndpointTmp2);
 
 		struct Header headers = createHeaders();
 		headers.url = restEndpoint;
@@ -200,7 +207,13 @@ void createItem(char *jsonBody, void (*queryResponse)(bool error, char *result))
 	} else if (queryObj.collectionID == NULL && queryObj.collectionName == NULL) {
 		queryResponse(true, "Cannot execute query. Collection ID and Collection Name are NULL. Please initialize the query object first\n");
 	} else {
-		char *restEndpoint = getRestEndpoint();
+		char *restEndpointMiddle = "/api/v/1/data/";
+		char *restEndpointTmp = getConcatString(getPlatformURL(), restEndpointMiddle);
+		char *restEndpoint = getConcatString(restEndpointTmp, queryObj.collectionID);
+		free(restEndpointTmp);
+
+		struct Header headers;
+		memset(&headers, 0, sizeof(headers)); // Make all elements of the Header struct to NULL
 
 		struct Header headers = createHeaders();
 		headers.url = restEndpoint;

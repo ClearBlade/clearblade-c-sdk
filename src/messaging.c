@@ -62,7 +62,7 @@ void connectToMQTTAdvanced(char *clientId, int qualityOfService, void (*mqttOnCo
 	if(autoReconnect) {
 		conn_opts.automaticReconnect = 1;
 	}
-	conn_opts.keepAliveInterval = 20;
+	conn_opts.keepAliveInterval = 60;
 	conn_opts.cleansession = 1;
 	conn_opts.onSuccess = mqttOnConnect;
 	conn_opts.onFailure = onConnectFailure;
@@ -88,6 +88,7 @@ void connectToMQTTAdvanced(char *clientId, int qualityOfService, void (*mqttOnCo
 
   if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS) {
   	printf("Failed to start connect, return code %d\n", rc);
+	MQTTAsync_destroy(&client);
     return;
   }
 
@@ -195,7 +196,7 @@ void disconnectMQTTClient() {
 	        printf("Failed to start disconnect, return code %d\n", rc);
 	        return;
 	}
-
+	MQTTAsync_destroy(&mqttClient);
 	while (finished == 0) {
 
 	}

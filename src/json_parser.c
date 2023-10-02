@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 #include <jansson.h>
 #include "json_parser.h"
 
@@ -23,8 +24,12 @@ char const *getPropertyValueFromJson(char *jsonString, char *property) {
 		} else if (json_is_object(jsonValue) || json_is_array(jsonValue)) {
 			value = jsonString;
 		}
-		return value;
+		char *rval = NULL;
+		rval = strdup(value);
+		json_decref(root);
+		return rval;
 	} else {
+		json_decref(root);
 		return NULL;
 	}
 }
@@ -39,8 +44,10 @@ bool checkIfJsonArray(char *jsonString) {
 	root = json_loads(jsonString, 0, &error);
 
 	if (json_is_array(root)) {
+		json_decref(root);
 		return true;
 	} else {
+		json_decref(root);
 		return false;
 	}
 }
