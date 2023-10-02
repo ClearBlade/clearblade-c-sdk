@@ -6,7 +6,7 @@
 /**
   * This function gathers all the information required to make a REST call to authenticate the user anonymously
 */
-void authenticateAuthUser(void (*callback)(bool error, char *result));
+void authenticateAnonUser(void (*callback)(bool error, char *result));
 
 
 /**
