@@ -64,7 +64,7 @@ void validateInitOptions(struct ClearBlade *CB) {
 /**
   * This function validates the user initialize parameters and then calls the authentication function in user.c
 */
-void initialize(struct ClearBlade *CB, void callback(bool error, char *result)) {
+void initialize(struct ClearBlade *CB, void (*callback)(bool error, char *result)) {
 
 	validateInitOptions(CB); // First validate all the parameters passed to the initializeClearBlade() function
 
@@ -78,7 +78,7 @@ void initialize(struct ClearBlade *CB, void callback(bool error, char *result)) 
 /**
   * This function validates the device intiailize parameters and then calls the authentication function in device.c
 */
-void initializeDevice(struct ClearBlade *CB, void callback(bool error, char *result)) {
+void initializeDevice(struct ClearBlade *CB, void (*callback)(bool error, char *result)) {
 	validateInitOptions(CB);
 
 	if (CB->certFile == NULL && CB->keyFile == NULL) {
