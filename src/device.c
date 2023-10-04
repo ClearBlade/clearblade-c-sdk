@@ -55,8 +55,7 @@ void authenticateDevice(void callback(bool error, char *result)) {
 }
 
 void authenticateDeviceX509(void callback(bool error, char *result)) {
-	char *restURL = ":444/api/v/4/devices/mtls/auth";
-	restURL = getConcatString(getPlatformURL(), restURL);
+	char *restURL = getConcatString(getPlatformURL(), ":444/api/v/4/devices/mtls/auth");
 
 	char *deviceNameParam = getConcatString("{\"name\":\"", getUserEmail());
 	char *systemKeyParam = getConcatString("\",\"system_key\":\"", getSystemKey());
@@ -66,7 +65,10 @@ void authenticateDeviceX509(void callback(bool error, char *result)) {
 	assert(body != NULL);
 	strcpy(body, deviceNameParam);
 	strcat(body, systemKeyParam);
-	strcat(body, endBrace);
+	strcat(body, "\"}");
+
+	free(deviceNameParam);
+	free(systemKeyParam);
 
 	struct Header headers;
 	memset(&headers, 0, sizeof(headers));
@@ -79,7 +81,6 @@ void authenticateDeviceX509(void callback(bool error, char *result)) {
 	headers.requestType = "POST";
 
 	char *response = executex509MtlsRequest(&headers, getCertFile(), getKeyFile());
-
 	char *authToken = (char *) getPropertyValueFromJson(response, "deviceToken");
 	if (authToken == NULL) {
 		callback(true, response);
@@ -90,7 +91,5 @@ void authenticateDeviceX509(void callback(bool error, char *result)) {
 
 	free(response);
 	free(restURL);
-	free(deviceNameParam);
-	free(systemKeyParam);
 	free(body);
 }

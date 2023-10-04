@@ -134,6 +134,7 @@ char*makeRequest(struct Header *header, char *certFile, char *keyFile) {
   			blob.len = strlen(certFile);
   			blob.flags = CURL_BLOB_COPY;
 
+				//This requires curl version 7.71.0
 				curl_easy_setopt(curl, CURLOPT_SSLCERT_BLOB, &blob);
 			} else {
 				//See if we have a file path
@@ -174,8 +175,7 @@ char*makeRequest(struct Header *header, char *certFile, char *keyFile) {
 
 		res = curl_easy_perform(curl); // Execute the request
 
-		if(res != CURLE_OK)
-      		fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+		if(res != CURLE_OK) fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
 
   	free(systemKeyHeader);
   	if (systemSecretHeader != NULL) {
