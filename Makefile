@@ -33,4 +33,5 @@ install: $(TARGET_LIB)
 	cp $(TARGET_LIB) $(PREFIX)/lib/$(TARGET_LIB)
 	cp $(SRC)/*.h $(PREFIX)/include
 	ldconfig $(PREFIX)/lib
-	rm $(TARGET_LIB)
+	$(RM) $(TARGET_LIB)
+	$(RM) $(OBJS)
