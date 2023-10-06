@@ -26,10 +26,10 @@ char const *getPropertyValueFromJson(char *jsonString, char *property) {
 		}
 		char *rval = NULL;
 		rval = strdup(value);
-		json_decref(root);
+		if (root->refcount > 0) json_decref(root);
 		return rval;
 	} else {
-		json_decref(root);
+		if (root->refcount > 0) json_decref(root);
 		return NULL;
 	}
 }

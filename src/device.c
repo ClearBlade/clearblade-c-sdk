@@ -65,7 +65,7 @@ void authenticateDeviceX509(void callback(bool error, char *result)) {
 	assert(body != NULL);
 	strcpy(body, deviceNameParam);
 	strcat(body, systemKeyParam);
-	strcat(body, "\"}");
+	strcat(body, endBrace);
 
 	free(deviceNameParam);
 	free(systemKeyParam);

@@ -108,7 +108,7 @@ char*makeRequest(struct Header *header, char *certFile, char *keyFile) {
 		if (collectionIDHeader != NULL) {
 			headers = curl_slist_append(headers, collectionIDHeader);
 		}
-		res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 		curl_easy_setopt(curl, CURLOPT_URL, header->url);
 		if (strcmp("POST", header->requestType) == 0) {
 			curl_easy_setopt(curl, CURLOPT_POST, 1L);
@@ -119,25 +119,27 @@ char*makeRequest(struct Header *header, char *certFile, char *keyFile) {
 			}
 		}
 
-		//curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+		curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 	  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writefunc);
    	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s);
    	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
    	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
 		if (certFile && certFile[0] != '\0') {
-    	char *substrPtr = strstr(certFile, "BEGIN CERTIFICATE");
-    	if (substrPtr) {
-				struct curl_blob blob;
+			// TODO - LEAVE COMMENTED, This requires curl version 7.71.0
+    	// char *substrPtr = strstr(certFile, "BEGIN CERTIFICATE");
+    	// if (substrPtr) {
+			// 	struct curl_blob blob;
 
-				blob.data = certFile;
-  			blob.len = strlen(certFile);
-  			blob.flags = CURL_BLOB_COPY;
+			// 	blob.data = certFile;
+  		// 	blob.len = strlen(certFile);
+  		// 	blob.flags = CURL_BLOB_COPY;
 
-				//This requires curl version 7.71.0
-				curl_easy_setopt(curl, CURLOPT_SSLCERT_BLOB, &blob);
-			} else {
+			// 	curl_easy_setopt(curl, CURLOPT_SSLCERT_BLOB, &blob);
+			// } else {
+			//END TODO
 				//See if we have a file path
+
 				FILE* filePtr = fopen(certFile, "r");
     		if (filePtr) {
 					curl_easy_setopt(curl, CURLOPT_SSLCERT, certFile);
@@ -145,23 +147,29 @@ char*makeRequest(struct Header *header, char *certFile, char *keyFile) {
     		} else {
     			die("certFile parameter must contain either the contents of an SSL certificate file or the path to the certificate file");
     		}
-			}
+			// TODO - LEAVE COMMENTED
+		 	//}
+			//END TODO
 			curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
 		}
 
 		if (keyFile && keyFile[0] != '\0') {
 			//See if keyFile contains the private key or the path to the private key
-    	char *substrPtr = strstr(keyFile, "PRIVATE KEY");
-    	if (substrPtr) {
-				struct curl_blob blob;
 
-				blob.data = keyFile;
-  			blob.len = strlen(keyFile);
-  			blob.flags = CURL_BLOB_COPY;
+			// TODO - LEAVE COMMENTED, This requires curl version 7.71.0
+    	// char *substrPtr = strstr(keyFile, "PRIVATE KEY");
+    	// if (substrPtr) {
+			// 	struct curl_blob blob;
 
-				curl_easy_setopt(curl, CURLOPT_SSLKEY_BLOB, &blob);
-			} else {
+			// 	blob.data = keyFile;
+  		// 	blob.len = strlen(keyFile);
+  		// 	blob.flags = CURL_BLOB_COPY;
+
+			// 	curl_easy_setopt(curl, CURLOPT_SSLKEY_BLOB, &blob);
+			// } else {
+			//END TODO
 				//See if we have a file path
+
 				FILE* filePtr = fopen(keyFile, "r");
     		if (filePtr) {
 					curl_easy_setopt(curl, CURLOPT_SSLKEY, keyFile);
@@ -169,13 +177,16 @@ char*makeRequest(struct Header *header, char *certFile, char *keyFile) {
     		} else {
     			die("keyFile parameter must contain either the contents of a private key file or the path to the private key file");
     		}
-			}
+		// TODO - LEAVE COMMENTED
+		// 	}
+		//END TODO
 			curl_easy_setopt(curl, CURLOPT_SSLKEYTYPE, "PEM");
 		}
 
 		res = curl_easy_perform(curl); // Execute the request
-
-		if(res != CURLE_OK) fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+		
+		if(res != CURLE_OK)
+       	fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
 
   	free(systemKeyHeader);
   	if (systemSecretHeader != NULL) {
