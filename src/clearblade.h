@@ -27,8 +27,6 @@ struct ClearBlade {
 
 extern struct ClearBlade CBGlobal;
 
-
-
 /** This is the first function to be called before using any of the other functions in this SDK.
   * This function initializes with the ClearBlade Platform and sets the auth token in util.c after successful initialization.
   * Except userEmail and userPassword, all other parameters are required. For Anonymous authentication pass userEmail and
@@ -37,11 +35,15 @@ extern struct ClearBlade CBGlobal;
 void initializeClearBlade(char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *userEmail, char *userPassword, void (*initCallback)(bool error, char *result));
 
 /** This is the second option of the first function to be called before using any of the other function in this SDK.
-  * This funcion initializes with the ClearBlade Platform as a device within a system, and sets the auth token in util.c after successful initialization.
+  * This function initializes with the ClearBlade Platform as a device within a system, and sets the auth token in util.c after successful initialization.
   * All parameters are required.
 */
 void initializeClearBladeAsDevice(char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *devicename, char *activekey, void (*initCallback)(bool error, char *result));
 
-void initializeClearBladeAsMtlsDevice(char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *devicename, char *certFile, char *keyFile, void (*initCallback)(bool error, char *result));
+/** This is the third option of the first function to be called before using any of the other function in this SDK.
+  * This function initializes with the ClearBlade Platform as a device within a system, and sets the auth token in util.c after successful initialization.
+  * All parameters are required.
+*/
+void initializeClearBladeAsMtlsDevice(void *context, char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *devicename, char *certFile, char *keyFile, void (*initCallback)(void *context, bool error, char *result));
 
 #endif

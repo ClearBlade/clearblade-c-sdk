@@ -88,6 +88,19 @@ void initializeDevice(struct ClearBlade *CB, void (*callback)(bool error, char *
 	}
 }
 
+/**
+  * This function validates the device intiailize parameters and then calls the authentication function in device.c
+*/
+void initializeDeviceWithContext(void *context, struct ClearBlade *CB, void (*callback)(void *context, bool error, char *result)) {
+	validateInitOptions(CB);
+
+	if (CB->certFile == NULL && CB->keyFile == NULL) {
+		authenticateDevice(callback);
+	} else {
+		authenticateDeviceX509(context, callback);
+	}
+}
+
 /** This is one of the two first function to be called before using any of the other functions in this SDK.
   * This function initializes with the ClearBlade Platform as a system user and sets the auth token in util.c after successful initialization.
   * Except userEmail and userPassword, all other parameters are required. For Anonymous authentication pass userEmail and
@@ -119,7 +132,8 @@ void initializeClearBladeAsDevice(char *systemkey, char *systemsecret, char *pla
 	initializeDevice(&CBGlobal, initCallback);
 }
 
-void initializeClearBladeAsMtlsDevice(char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *devicename, char *certFile, char *keyFile, void (*initCallback)(bool error, char *result)) {
+
+void initializeClearBladeAsMtlsDevice(void *context, char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *devicename, char *certFile, char *keyFile, void (*initCallback)(void *context, bool error, char *result)) {
 	CBGlobal.systemKey = systemkey;
 	CBGlobal.systemSecret = systemsecret;
 	CBGlobal.platformURL = platformurl;
@@ -128,5 +142,5 @@ void initializeClearBladeAsMtlsDevice(char *systemkey, char *systemsecret, char 
 	CBGlobal.certFile = certFile;
 	CBGlobal.keyFile = keyFile;
 
-	initializeDevice(&CBGlobal, initCallback);
+	initializeDeviceWithContext(context, &CBGlobal, initCallback);
 }
