@@ -12,31 +12,31 @@ MQTTAsync mqttClient = NULL;
 char *clientID = "";
 int qos = 0;
 
-CbMqttConnectOptions* getDefaultConnectOptions() {
-	CbMqttConnectOptions* options;
+CbMqttConnectOptions getDefaultConnectOptions() {
+	CbMqttConnectOptions options;
 
 	//These defaults are inline with what paho uses in the MQTTAsync_connectOptions_initializer
-	options->keepAliveInterval = 60;
-	options->cleanSession = true;
-	options->maxInFlight = 65535;
-	options->connectTimeout = 30;
-	options->retryInterval = 0;
-	options->automaticReconnect = false;
-	options->minRetryInterval = 1;
-	options->maxRetryInterval = 60;
+	options.keepAliveInterval = 60;
+	options.cleanSession = true;
+	options.maxInFlight = 65535;
+	options.connectTimeout = 30;
+	options.retryInterval = 0;
+	options.automaticReconnect = false;
+	options.minRetryInterval = 1;
+	options.maxRetryInterval = 60;
 
-	return &options;
+	return options;
 }
 
-CbMqttDisconnectOptions* getDefaultDisconnectOptions() {
-	CbMqttDisconnectOptions* options;
+CbMqttDisconnectOptions getDefaultDisconnectOptions() {
+	CbMqttDisconnectOptions options;
 
 	//These defaults are inline with what paho uses in the MQTTAsync_disconnectOptions_initializer
-	options->timeout = 0;
-	options->onSuccess = NULL;
-	options->onFailure = NULL;
+	options.timeout = 0;
+	options.onSuccess = NULL;
+	options.onFailure = NULL;
 
-	return &options;
+	return options;
 }
 
 void onConnectSuccess(void *context, MQTTAsync_successData *response) {
@@ -165,7 +165,7 @@ void connectCbMQTT(void* context, char *clientId, CbMqttConnectOptions *options,
 	conn_opts.maxRetryInterval = options->maxRetryInterval;
 
 	if (mqttOnConnect == NULL) {
-		conn_opts.onSuccess = onConnectFailure;
+		conn_opts.onSuccess = onConnectSuccess;
 	} else {
 		conn_opts.onSuccess = mqttOnConnect;
 	}
@@ -173,7 +173,7 @@ void connectCbMQTT(void* context, char *clientId, CbMqttConnectOptions *options,
 	if (options->onFailure == NULL) {
 		conn_opts.onFailure = onConnectFailure;
 	} else {
-		conn_opts.onSuccess = options->onFailure;
+		conn_opts.onFailure = options->onFailure;
 	}
 
 	conn_opts.context = context;
@@ -320,7 +320,7 @@ void disconnectCbMQTT(void* context, CbMqttDisconnectOptions *options) {
 	if (options->onFailure == NULL) {
 		disc_opts.onFailure = onDisconnectFailure;
 	} else {
-		disc_opts.onSuccess = options->onFailure;
+		disc_opts.onFailure = options->onFailure;
 	}
 
 	if((rc = MQTTAsync_disconnect(mqttClient, &disc_opts)) != MQTTASYNC_SUCCESS) {
