@@ -62,7 +62,7 @@ Using mTLS authentication requires additional configuration by ClearBlade that i
 {{< /warning >}}
 
 ```C
-void cbInitCallback(bool error, char *result) {
+void cbInitCallback(void *context, bool error, char *result) {
   if(error) {
     printf("ClearBlade init failed %s\n", result);
     exit(-1);
@@ -71,10 +71,10 @@ void cbInitCallback(bool error, char *result) {
   }
 }
 
-initializeClearBladeAsDevice(SYSTEM_KEY, SYSTEM_SECRET, PLATFORM_URL, MESSAGING_URL, DEVICE_NAME, CERT_FILE, KEY_FILE, &cbInitCallback);
+initializeClearBladeAsMtlsDevice(this, SYSTEM_KEY, SYSTEM_SECRET, PLATFORM_URL, MESSAGING_URL, DEVICE_NAME, CERT_FILE, KEY_FILE, &cbInitCallback);
 ```
 
-You will need to pass the function your **SYSTEM_KEY**, **SYSTEM_SECRET**, **PLATFORM_URL** (https://platform.clearblade.com or similar), **MESSAGING_URL**, **DEVICE_NAME**, **CERT_FILE**, **KEY_FILE**, and a function as a callback. After successful authentication, you will receive an authentication token in the callback. You can choose to store it in a variable, but the SDK stores a copy of it for itself.
+You will need to pass the function an optional **context**, your **SYSTEM_KEY**, **SYSTEM_SECRET**, **PLATFORM_URL** (https://platform.clearblade.com or similar), **MESSAGING_URL**, **DEVICE_NAME**, **CERT_FILE**, **KEY_FILE**, and a function as a callback. After successful authentication, you will receive an authentication token in the callback. You can choose to store it in a variable, but the SDK stores a copy of it for itself.
 
 CERT_FILE can be either the path to the SSL certificate or the contents of the certificate file
 KEY_FILE can be either the path to the private key or the contents of the private key file
