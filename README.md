@@ -304,9 +304,11 @@ sudo make install
 git clone https://github.com/eclipse/paho.mqtt.c.git
 cd paho.mqtt.c/
 rm -r build/*
+mkdir build
+cd build
 
 # Replace {YOUR_OPEN_SSL_PATH} below with the path to your OpenSSL installation (for example: /opt/homebrew/Cellar/openssl@3/3.1.2)
-cmake -DPAHO_WITH_SSL=TRUE -DPAHO_HIGH_PERFORMANCE=TRUE -DOPENSSL_ROOT_DIR="{YOUR_OPEN_SSL_PATH}" .
+cmake -DPAHO_WITH_SSL=TRUE -DPAHO_HIGH_PERFORMANCE=TRUE -DOPENSSL_ROOT_DIR="{YOUR_OPEN_SSL_PATH}" ../paho.mqtt.c
 make
 sudo make install
 ```
