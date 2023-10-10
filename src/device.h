@@ -9,6 +9,11 @@
 void authenticateDevice(void callback(bool error, char *result));
 
 /**
+  * This function gathers all the information required to make a REST call to authenticate a device within a system
+*/
+void authenticateDeviceWithContext(void *context, void callback(void *context, bool error, char *result));
+
+/**
   * This function gathers all the information required to make a REST call to authenticate a device, using a x509 key pair, within a system
 */
 void authenticateDeviceX509(void *context, void callback(void *context, bool error, char *result));
