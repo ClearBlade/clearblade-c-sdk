@@ -44,17 +44,17 @@ void authenticateDevice(void callback(bool error, char *result)) {
 		callback(true, response);
 	} else {
 		setDeviceToken(authToken);
+		free(response);
 		callback(false, authToken);
 	}
 
-	free(response);
 	free(restURL);
 	free(deviceNameParam);
 	free(activeKeyParam);
 	free(body);
 }
 
-void authenticateDeviceX509(void callback(bool error, char *result)) {
+void authenticateDeviceX509(void *context, void callback(void *context, bool error, char *result)) {
 	char *restURL = getConcatString(getPlatformURL(), ":444/api/v/4/devices/mtls/auth");
 
 	char *deviceNameParam = getConcatString("{\"name\":\"", getUserEmail());
@@ -83,13 +83,13 @@ void authenticateDeviceX509(void callback(bool error, char *result)) {
 	char *response = executex509MtlsRequest(&headers, getCertFile(), getKeyFile());
 	char *authToken = (char *) getPropertyValueFromJson(response, "deviceToken");
 	if (authToken == NULL) {
-		callback(true, response);
+		callback(context, true, response);
 	} else {
 		setDeviceToken(authToken);
-		callback(false, authToken);
+		free(response);
+		callback(context, false, authToken);
 	}
 
-	free(response);
 	free(restURL);
 	free(body);
 }
