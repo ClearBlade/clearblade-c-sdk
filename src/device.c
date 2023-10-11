@@ -10,6 +10,7 @@
 #include "concat_strings.h"
 
 void authenticateDevice(void callback(bool error, char *result)) {
+	printf("C SDK - authenticateDevice\n");
 
 	char *restURLTmp1 = getConcatString("/api/v/2/devices/", getSystemKey());
 	char *restURLTmp2 = getConcatString(restURLTmp1, "/auth");
@@ -38,7 +39,6 @@ void authenticateDevice(void callback(bool error, char *result)) {
 	headers.requestType = "POST";
 
 	char *response = executeRequest(&headers);
-
 	char *authToken = (char *) getPropertyValueFromJson(response, "deviceToken");
 	if (authToken == NULL) {
 		callback(true, response);
@@ -55,6 +55,7 @@ void authenticateDevice(void callback(bool error, char *result)) {
 }
 
 void authenticateDeviceWithContext(void *context, void callback(void *context, bool error, char *result)) {
+	printf("C SDK - authenticateDeviceWithContext\n");
 
 	char *restURLTmp1 = getConcatString("/api/v/2/devices/", getSystemKey());
 	char *restURLTmp2 = getConcatString(restURLTmp1, "/auth");
@@ -100,6 +101,7 @@ void authenticateDeviceWithContext(void *context, void callback(void *context, b
 }
 
 void authenticateDeviceX509(void *context, void callback(void *context, bool error, char *result)) {
+	printf("C SDK - authenticateDeviceX509\n");
 	char *restURL = getConcatString(getPlatformURL(), ":444/api/v/4/devices/mtls/auth");
 
 	char *deviceNameParam = getConcatString("{\"name\":\"", getUserEmail());
