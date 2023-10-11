@@ -99,7 +99,6 @@ void initializeClearBladeAsDevice(char *systemkey, char *systemsecret, char *pla
 	authenticateDevice(initCallback);
 }
 
-
 void initializeClearBladeAsMtlsDevice(void *context, char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *devicename, char *certFile, char *keyFile, void (*initCallback)(void *context, bool error, char *result)) {
 	CBGlobal.systemKey = systemkey;
 	CBGlobal.systemSecret = systemsecret;
@@ -109,6 +108,7 @@ void initializeClearBladeAsMtlsDevice(void *context, char *systemkey, char *syst
 	CBGlobal.certFile = certFile;
 	CBGlobal.keyFile = keyFile;
 
+	validateInitOptions(&CBGlobal);
 	if (CBGlobal.certFile == NULL && CBGlobal.keyFile == NULL) {
 		authenticateDeviceWithContext(context, initCallback);
 	} else {
