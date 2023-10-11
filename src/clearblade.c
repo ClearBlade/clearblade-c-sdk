@@ -17,6 +17,8 @@ struct ClearBlade CBGlobal;
   * This function performs checks on the initialize parameters passed to the initializeClearBlade() function and validates them.
 */
 void validateInitOptions(struct ClearBlade *CB) {
+	printf("C SDK - validateInitOptions\n");
+
 	if (CB->systemKey == NULL) {
 		die("SystemKey cannot be empty");
 	} else if (CB->systemSecret == NULL) {
@@ -67,6 +69,8 @@ void validateInitOptions(struct ClearBlade *CB) {
   * userPassword as NULL
 */
 void initializeClearBlade(char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *userEmail, char *userPassword, void (*initCallback)(bool error, char *result)) {
+	printf("C SDK - initializeClearBlade\n");
+	
 	CBGlobal.systemKey = systemkey;
 	CBGlobal.systemSecret = systemsecret;
 	CBGlobal.platformURL = platformurl;
@@ -88,6 +92,8 @@ void initializeClearBlade(char *systemkey, char *systemsecret, char *platformurl
   * All parameters are required.
 */
 void initializeClearBladeAsDevice(char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *devicename, char *activekey, void (*initCallback)(bool error, char *result)) {
+	printf("C SDK - initializeClearBladeAsDevice\n");
+	
 	CBGlobal.systemKey = systemkey;
 	CBGlobal.systemSecret = systemsecret;
 	CBGlobal.platformURL = platformurl;
@@ -100,6 +106,8 @@ void initializeClearBladeAsDevice(char *systemkey, char *systemsecret, char *pla
 }
 
 void initializeClearBladeAsMtlsDevice(void *context, char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *devicename, char *certFile, char *keyFile, void (*initCallback)(void *context, bool error, char *result)) {
+	printf("C SDK - initializeClearBladeAsMtlsDevice\n");
+	
 	CBGlobal.systemKey = systemkey;
 	CBGlobal.systemSecret = systemsecret;
 	CBGlobal.platformURL = platformurl;

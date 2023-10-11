@@ -14,6 +14,8 @@
   * This function parses the response received from the REST call to authenticate the user to get the auth token.
 */
 void parseAuthToken(char *response, void callback(bool error, char *message)) {
+	printf("C SDK - parseAuthToken\n");
+
 	char *authToken = (char *) getPropertyValueFromJson(response, "user_token"); // Gets the auth token string from the response json object
     	if (authToken == NULL)
     		callback(true, response);
@@ -27,6 +29,8 @@ void parseAuthToken(char *response, void callback(bool error, char *message)) {
   * This function gathers all the information required to make a REST call to authenticate the user anonymously
 */
 void authenticateAnonUser(void (*callback)(bool error, char *result)) {
+	printf("C SDK - authenticateAnonUser\n");
+
 	char *restURL = "/api/v/1/user/anon"; // Anonymous auth REST endpoint
 	restURL = getConcatString(getPlatformURL(), restURL); // Construct complete URL for making the REST call
 
@@ -50,6 +54,8 @@ void authenticateAnonUser(void (*callback)(bool error, char *result)) {
   * This function gathers all the information required to make a REST call to authenticate the user as a auth user
 */
 void authenticateAuthUser(void (*callback)(bool error, char *result)) {
+	printf("C SDK - authenticateAuthUser\n");
+
 	char *restEndpoint = "/api/v/1/user/auth"; // Authenticated auth REST endpoint
 	char *platformurl = getPlatformURL();
 	char *restURL = getConcatString(platformurl, restEndpoint); // Construct complete URL for making the REST call
@@ -90,6 +96,8 @@ void authenticateAuthUser(void (*callback)(bool error, char *result)) {
   * This function logs the user out of the ClearBlade platform. The logout callback is a required parameter and the user has to implement it
 */
 void logoutUser(void (*logoutCallback)(bool error, char *result)) {
+	printf("C SDK - logoutUser\n");
+
 	char *restEndpoint = "/api/v/1/user/logout"; // Logout REST endpoint
 	char *platformurl = getPlatformURL();
 	char *restURL = getConcatString(platformurl, restEndpoint); // Construct complete URL for making the REST call
@@ -118,6 +126,8 @@ void logoutUser(void (*logoutCallback)(bool error, char *result)) {
   * This function checks whether the user is authenticated
 */
 void checkAuth(void (*checkAuthCallback)(bool error, char *result)) {
+	printf("C SDK - checkAuth\n");
+
 	char *restEndpoint = "/api/v/1/user/checkauth"; // Checkauth REST endpoint
 	char *platformurl = getPlatformURL();
 	char *restURL = getConcatString(platformurl, restEndpoint); // Construct complete URL for making the REST call

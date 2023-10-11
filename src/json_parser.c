@@ -11,6 +11,8 @@
   * It also checks whether the json string is an object or array
 */
 char const *getPropertyValueFromJson(char *jsonString, char *property) {
+	printf("C SDK - getPropertyValueFromJson\n");
+
 	const char *value = NULL;
 	json_t *root, *jsonValue;
 	json_error_t error;
@@ -42,6 +44,8 @@ char const *getPropertyValueFromJson(char *jsonString, char *property) {
   * Checks if the json string is an array
 */
 bool checkIfJsonArray(char *jsonString) {
+	printf("C SDK - checkIfJsonArray\n");
+
 	json_t *root;
 	json_error_t error;
 
