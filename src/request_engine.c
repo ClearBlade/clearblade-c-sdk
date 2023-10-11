@@ -46,14 +46,17 @@ size_t writefunc(void *ptr, size_t size, size_t nmemb, struct string *s) {
   * It uses the libCURL library to make the HTTP requests.
 */
 char *executeRequest(struct Header *header) {
+	printf("C SDK - executeRequest\n");
 	return makeRequest(header, "", "");
 }
 
 char *executex509MtlsRequest(struct Header *header, char *certFile, char *keyFile) {
+	printf("C SDK - executex509MtlsRequest\n");
 	return makeRequest(header, certFile, keyFile);
 }
 
 char*makeRequest(struct Header *header, char *certFile, char *keyFile) {
+	printf("C SDK - makeRequest\n");
 	char *systemKeyHeader = getConcatString("ClearBlade-SystemKey: ", header->systemKey); // This is a required header for all calls
 	char *systemSecretHeader = NULL;
 	char *userTokenHeader = NULL;
