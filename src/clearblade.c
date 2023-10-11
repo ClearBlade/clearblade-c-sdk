@@ -61,41 +61,6 @@ void validateInitOptions(struct ClearBlade *CB) {
 	if (CB->keyFile != NULL) setKeyFile(CB->keyFile);
 }
 
-/**
-  * This function validates the user initialize parameters and then calls the authentication function in user.c
-*/
-void initialize(struct ClearBlade *CB, void (*callback)(bool error, char *result)) {
-
-	validateInitOptions(CB); // First validate all the parameters passed to the initializeClearBlade() function
-
-	if (CB->email == NULL && CB->password == NULL) {
-		authenticateAnonUser(callback); // If email and password are NULL, initialize as anonymous user
-	} else {
-		authenticateAuthUser(callback); // If email and password are present, initialize as authenticated user
-	}
-}
-
-/**
-  * This function validates the device intiailize parameters and then calls the authentication function in device.c
-*/
-void initializeDevice(struct ClearBlade *CB, void (*callback)(bool error, char *result)) {
-	validateInitOptions(CB);
-	authenticateDevice(callback);
-}
-
-/**
-  * This function validates the device intiailize parameters and then calls the authentication function in device.c
-*/
-void initializeDeviceWithContext(void *context, struct ClearBlade *CB, void (*callback)(void *context, bool error, char *result)) {
-	validateInitOptions(CB);
-
-	if (CB->certFile == NULL && CB->keyFile == NULL) {
-		authenticateDevice(callback);
-	} else {
-		authenticateDeviceX509(context, callback);
-	}
-}
-
 /** This is one of the two first function to be called before using any of the other functions in this SDK.
   * This function initializes with the ClearBlade Platform as a system user and sets the auth token in util.c after successful initialization.
   * Except userEmail and userPassword, all other parameters are required. For Anonymous authentication pass userEmail and
@@ -109,7 +74,13 @@ void initializeClearBlade(char *systemkey, char *systemsecret, char *platformurl
 	CBGlobal.email = userEmail;
 	CBGlobal.password = userPassword;
 
-	initialize(&CBGlobal, initCallback);
+	validateInitOptions(&CBGlobal); // First validate all the parameters passed to the initializeClearBlade() function
+
+	if (CBGlobal.email == NULL && CBGlobal.password == NULL) {
+		authenticateAnonUser(initCallback); // If email and password are NULL, initialize as anonymous user
+	} else {
+		authenticateAuthUser(initCallback); // If email and password are present, initialize as authenticated user
+	}
 }
 
 /** This is the second option of the first function to be called before using any of the other function in this SDK.
@@ -124,7 +95,8 @@ void initializeClearBladeAsDevice(char *systemkey, char *systemsecret, char *pla
 	CBGlobal.email = devicename;
 	CBGlobal.password = activekey;
 
-	initializeDevice(&CBGlobal, initCallback);
+	validateInitOptions(&CBGlobal);
+	authenticateDevice(initCallback);
 }
 
 
@@ -137,5 +109,9 @@ void initializeClearBladeAsMtlsDevice(void *context, char *systemkey, char *syst
 	CBGlobal.certFile = certFile;
 	CBGlobal.keyFile = keyFile;
 
-	initializeDeviceWithContext(context, &CBGlobal, initCallback);
+	if (CBGlobal.certFile == NULL && CBGlobal.keyFile == NULL) {
+		authenticateDeviceWithContext(context, initCallback);
+	} else {
+		authenticateDeviceX509(context, initCallback);
+	}
 }
