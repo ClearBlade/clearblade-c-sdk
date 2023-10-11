@@ -72,7 +72,7 @@ void onConnectFailure(void* context, MQTTAsync_failureData* response) {
 	printf("C SDK - onConnectFailure\n");
 	operationInProgress = false;
 
-	if (callbacks.onDisconnectSuccess != NULL) callbacks.onDisconnectSuccess(context, response);
+	if (callbacks.onDisconnectFailure != NULL) callbacks.onDisconnectFailure(context, response);
 }
 
 void onConnectionLost(void *context, char *cause) {

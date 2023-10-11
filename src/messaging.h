@@ -4,7 +4,6 @@
 #include "MQTTAsync.h"
 
 struct CbMqttCallbacks {
-  int timeout;
 	MQTTAsync_onSuccess* onConnectSuccess;
 	MQTTAsync_onFailure* onConnectFailure;
 	MQTTAsync_connectionLost* onConnectionLost;
