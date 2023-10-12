@@ -63,12 +63,36 @@ void validateInitOptions(struct ClearBlade *CB) {
 	if (CB->keyFile != NULL) setKeyFile(CB->keyFile);
 }
 
-/** This is one of the two first function to be called before using any of the other functions in this SDK.
+/** This is one of the two first functions to be called before using any of the other functions in this SDK.
   * This function initializes with the ClearBlade Platform as a system user and sets the auth token in util.c after successful initialization.
   * Except userEmail and userPassword, all other parameters are required. For Anonymous authentication pass userEmail and
   * userPassword as NULL
 */
 void initializeClearBlade(char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *userEmail, char *userPassword, void (*initCallback)(bool error, char *result)) {
+	printf("C SDK - initializeClearBlade\n");
+	
+	CBGlobal.systemKey = systemkey;
+	CBGlobal.systemSecret = systemsecret;
+	CBGlobal.platformURL = platformurl;
+	CBGlobal.messagingURL = messagingurl;
+	CBGlobal.email = userEmail;
+	CBGlobal.password = userPassword;
+
+	validateInitOptions(&CBGlobal); // First validate all the parameters passed to the initializeClearBlade() function
+
+	if (CBGlobal.email == NULL && CBGlobal.password == NULL) {
+		authenticateAnonUser(initCallback); // If email and password are NULL, initialize as anonymous user
+	} else {
+		authenticateAuthUser(initCallback); // If email and password are present, initialize as authenticated user
+	}
+}
+
+/** This is one of the two first function to be called before using any of the other functions in this SDK.
+  * This function initializes with the ClearBlade Platform as a system user and sets the auth token in util.c after successful initialization.
+  * Except userEmail and userPassword, all other parameters are required. For Anonymous authentication pass userEmail and
+  * userPassword as NULL
+*/
+void cbInitialize(void *context, char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *userEmail, char *userPassword, void (*initCallback)(void *context, bool error, char *result)) {
 	printf("C SDK - initializeClearBlade\n");
 	
 	CBGlobal.systemKey = systemkey;
@@ -105,6 +129,24 @@ void initializeClearBladeAsDevice(char *systemkey, char *systemsecret, char *pla
 	authenticateDevice(initCallback);
 }
 
+/** This is the second option of the first function to be called before using any of the other function in this SDK.
+  * This funcion initializes with the ClearBlade Platform as a device within a system, and sets the auth token in util.c after successful initialization.
+  * All parameters are required.
+*/
+void initializeCBAsDevice(void *context, char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *devicename, char *activekey, void (*initCallback)(void *context, bool error, char *result)) {
+	printf("C SDK - initializeClearBladeAsDevice\n");
+	
+	CBGlobal.systemKey = systemkey;
+	CBGlobal.systemSecret = systemsecret;
+	CBGlobal.platformURL = platformurl;
+	CBGlobal.messagingURL = messagingurl;
+	CBGlobal.email = devicename;
+	CBGlobal.password = activekey;
+
+	validateInitOptions(&CBGlobal);
+	authenticateCbDevice(context, initCallback);
+}
+
 void initializeClearBladeAsMtlsDevice(void *context, char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *devicename, char *certFile, char *keyFile, void (*initCallback)(void *context, bool error, char *result)) {
 	printf("C SDK - initializeClearBladeAsMtlsDevice\n");
 	
@@ -118,7 +160,7 @@ void initializeClearBladeAsMtlsDevice(void *context, char *systemkey, char *syst
 
 	validateInitOptions(&CBGlobal);
 	if (CBGlobal.certFile == NULL && CBGlobal.keyFile == NULL) {
-		authenticateDeviceWithContext(context, initCallback);
+		authenticateCbDevice(context, initCallback);
 	} else {
 		authenticateDeviceX509(context, initCallback);
 	}

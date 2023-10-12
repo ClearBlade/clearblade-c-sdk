@@ -51,24 +51,24 @@ struct CbMqttDisconnectOptions getDefaultCbMQTTDisconnectOptions();
 struct CbMqttResponseOptions getDefaultCbMQTTResponseOptions();
 
 void connectToMQTT(char *clientId, int qualityOfService, MQTTAsync_onSuccess *mqttOnConnect,
- 		MQTTAsync_messageArrived* messageArrivedCallback);
+ 		MQTTAsync_messageArrived* messageArrivedCallback) __attribute__ ((deprecated));
 
 void connectToMQTTAdvanced(char *clientId, int qualityOfService, MQTTAsync_onSuccess* mqttOnConnect,
- 		MQTTAsync_messageArrived* messageArrivedCallback, MQTTAsync_connectionLost* onConnLostCallback, bool autoReconnect);
+ 		MQTTAsync_messageArrived* messageArrivedCallback, MQTTAsync_connectionLost* onConnLostCallback, bool autoReconnect) __attribute__ ((deprecated));
 
 void connectCbMQTT(void* context, char *clientId, struct CbMqttConnectOptions *options,
  		MQTTAsync_messageArrived* messageArrivedCallback, MQTTAsync_connectionLost* onConnLostCallback);
 
-void subscribeToTopic(char *topic, int qos);
+void subscribeToTopic(char *topic, int qos) __attribute__ ((deprecated));
 void subscribeCbMQTT(void* context, char *topic, int qos, struct CbMqttResponseOptions* options);
 
-void publishMessage(char *message, char *topic, int qos, int retained);
+void publishMessage(char *message, char *topic, int qos, int retained) __attribute__ ((deprecated));
 void publishCbMQTT(void* context, char *message, char *topic, int qos, int retained, struct CbMqttResponseOptions* options);
 
-void unsubscribeFromTopic(char *topic);
+void unsubscribeFromTopic(char *topic) __attribute__ ((deprecated));
 void unsubscribeCbMQTT(void* context, char *topic, struct CbMqttResponseOptions* options);
 
-void disconnectMQTTClient();
+void disconnectMQTTClient() __attribute__ ((deprecated));
 void disconnectCbMQTT(void* context, struct CbMqttDisconnectOptions *options);
 
 #endif

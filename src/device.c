@@ -54,8 +54,8 @@ void authenticateDevice(void callback(bool error, char *result)) {
 	free(body);
 }
 
-void authenticateDeviceWithContext(void *context, void callback(void *context, bool error, char *result)) {
-	printf("C SDK - authenticateDeviceWithContext\n");
+void authenticateCbDevice(void *context, void callback(void *context, bool error, char *result)) {
+	printf("C SDK - authenticateCbDevice\n");
 
 	char *restURLTmp1 = getConcatString("/api/v/2/devices/", getSystemKey());
 	char *restURLTmp2 = getConcatString(restURLTmp1, "/auth");
