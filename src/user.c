@@ -13,7 +13,8 @@
 /**
   * This function parses the response received from the REST call to authenticate the user to get the auth token.
 */
-void parseAuthToken(char *response, void callback(bool error, char *message)) __attribute__ ((deprecated)) {
+__attribute__ ((deprecated))
+void parseAuthToken(char *response, void callback(bool error, char *message)) {
 	printf("C SDK - parseAuthToken\n");
 
 	char *authToken = (char *) getPropertyValueFromJson(response, "user_token"); // Gets the auth token string from the response json object
@@ -43,7 +44,8 @@ void parseCbAuthToken(void* context, char *response, void callback(void* context
 /**
   * This function gathers all the information required to make a REST call to authenticate the user anonymously
 */
-void authenticateAnonUser(void (*callback)(bool error, char *result)) __attribute__ ((deprecated)) {
+__attribute__ ((deprecated))
+void authenticateAnonUser(void (*callback)(bool error, char *result)) {
 	printf("C SDK - authenticateAnonUser\n");
 
 	char *restURL = "/api/v/1/user/anon"; // Anonymous auth REST endpoint
@@ -93,7 +95,8 @@ void authenticateAnonCbUser(void* context, void (*callback)(void* context, bool 
 /**
   * This function gathers all the information required to make a REST call to authenticate the user as a auth user
 */
-void authenticateAuthUser(void (*callback)(bool error, char *result)) __attribute__ ((deprecated)) {
+__attribute__ ((deprecated))
+void authenticateAuthUser(void (*callback)(bool error, char *result)) {
 	printf("C SDK - authenticateAuthUser\n");
 
 	char *restEndpoint = "/api/v/1/user/auth"; // Authenticated auth REST endpoint
@@ -163,7 +166,7 @@ void authenticateAuthCbUser(void* context, void (*callback)(void* context, bool 
 	headers.requestType = "POST";
 
 	char *response = executeRequest(&headers); // Make the REST Call
-	parseAuthCbToken(context, response, callback);
+	parseCbAuthToken(context, response, callback);
 
 	//setUserPassword(NULL); // Do not store password on the client. Make it NULL as soon as user is authenticated.
 
@@ -177,7 +180,8 @@ void authenticateAuthCbUser(void* context, void (*callback)(void* context, bool 
 /**
   * This function logs the user out of the ClearBlade platform. The logout callback is a required parameter and the user has to implement it
 */
-void logoutUser(void (*logoutCallback)(bool error, char *result)) __attribute__ ((deprecated)) {
+__attribute__ ((deprecated))
+void logoutUser(void (*logoutCallback)(bool error, char *result)) {
 	printf("C SDK - logoutUser\n");
 
 	char *restEndpoint = "/api/v/1/user/logout"; // Logout REST endpoint
@@ -237,7 +241,8 @@ void logoutCbUser(void* context, void (*logoutCallback)(void* context, bool erro
 /**
   * This function checks whether the user is authenticated
 */
-void checkAuth(void (*checkAuthCallback)(bool error, char *result)) __attribute__ ((deprecated)) {
+__attribute__ ((deprecated))
+void checkAuth(void (*checkAuthCallback)(bool error, char *result)) {
 	printf("C SDK - checkAuth\n");
 
 	char *restEndpoint = "/api/v/1/user/checkauth"; // Checkauth REST endpoint
