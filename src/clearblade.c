@@ -105,9 +105,9 @@ void cbInitialize(void *context, char *systemkey, char *systemsecret, char *plat
 	validateInitOptions(&CBGlobal); // First validate all the parameters passed to the initializeClearBlade() function
 
 	if (CBGlobal.email == NULL && CBGlobal.password == NULL) {
-		authenticateAnonUser(initCallback); // If email and password are NULL, initialize as anonymous user
+		authenticateAnonCbUser(context, initCallback); // If email and password are NULL, initialize as anonymous user
 	} else {
-		authenticateAuthUser(initCallback); // If email and password are present, initialize as authenticated user
+		authenticateAuthCbUser(context, initCallback); // If email and password are present, initialize as authenticated user
 	}
 }
 
