@@ -3,6 +3,10 @@
 
 #include "MQTTAsync.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct {
 	MQTTAsync_onSuccess* onConnectSuccess;
 	MQTTAsync_onFailure* onConnectFailure;
@@ -70,5 +74,9 @@ void unsubscribeCbMQTT(void* context, char *topic, CbMqttResponseOptions* option
 
 void disconnectMQTTClient() __attribute__ ((deprecated));
 void disconnectCbMQTT(void* context, CbMqttDisconnectOptions *options);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

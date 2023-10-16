@@ -1,6 +1,9 @@
 #ifndef _code_h
 #define _code_h
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
   * Function to execute code service without parameters. Service name and codeCallback are required parameters
@@ -13,5 +16,9 @@ void executeCodeServiceWithoutParams(char *serviceName, void (*codeCallback)(boo
   * Params need to be passes as a json string
 */
 void executeCodeServiceWithParams(char *serviceName, char *params, void (*codeCallback)(bool error, char *result));
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

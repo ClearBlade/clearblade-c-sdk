@@ -2,6 +2,10 @@
 #define _json_parser_h
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
   * This functions returns the property value of the passed in property and json string.
   * It uses the Jansson library to parse the JSON.
@@ -15,5 +19,9 @@ char const *getPropertyValueFromJson(char *jsonString, char *property);
   * Checks if the json string is an array
 */
 bool checkIfJsonArray(char *jsonString);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

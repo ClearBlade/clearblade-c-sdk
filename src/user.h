@@ -3,6 +3,10 @@
 
 #include <stdbool.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
   * This function gathers all the information required to make a REST call to authenticate the user anonymously
 */
@@ -42,5 +46,9 @@ void checkAuth(void (*checkAuthCallback)(bool error, char *result)) __attribute_
   * This function checks whether the user is authenticated
 */
 void checkCbAuth(void* context, void (*checkAuthCallback)(void* context, bool error, char *result));
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

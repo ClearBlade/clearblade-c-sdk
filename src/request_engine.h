@@ -1,6 +1,9 @@
 #ifndef _request_engine_h
 #define _request_engine_h
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
   * Struct to store all the custom headers
@@ -43,5 +46,9 @@ char *executeRequest(struct Header *header);
 char *executex509MtlsRequest(struct Header *header, char *certFile, char *keyFile);
 
 char *makeRequest(struct Header *header, char *certFile, char *keyFile);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

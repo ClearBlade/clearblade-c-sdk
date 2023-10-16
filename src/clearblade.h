@@ -9,6 +9,10 @@
 #include "query.h"
 #include "user.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
   * The ClearBlade struct containing the initialize parameters.
   * This is just to make things simple and understand what is going on during initialization
@@ -58,5 +62,9 @@ void initializeCBAsDevice(void *context, char *systemkey, char *systemsecret, ch
   * All parameters are required.
 */
 void initializeClearBladeAsMtlsDevice(void *context, char *systemkey, char *systemsecret, char *platformurl, char *messagingurl, char *devicename, char *certFile, char *keyFile, void (*initCallback)(void *context, bool error, char *result));
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
