@@ -15,7 +15,7 @@ int qos = 0;
 CbMqttCallbacks callbacks = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 
 CbMqttConnectOptions* getDefaultCbMQTTConnectOptions() {
-	CbMqttConnectOptions* options  = malloc(sizeof(CbMqttDisconnectOptions));
+	CbMqttConnectOptions* options = malloc(sizeof(CbMqttConnectOptions));
 
 	//These defaults are inline with what paho uses in the MQTTAsync_connectOptions_initializer
 	options->keepAliveInterval = 60;
