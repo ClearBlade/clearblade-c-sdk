@@ -12,42 +12,42 @@ bool operationInProgress = false;
 char *clientID = "";
 int qos = 0;
 
-struct CbMqttCallbacks callbacks = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+CbMqttCallbacks callbacks = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 
-struct CbMqttConnectOptions getDefaultCbMQTTConnectOptions() {
-	struct CbMqttConnectOptions options;
+CbMqttConnectOptions* getDefaultCbMQTTConnectOptions() {
+	CbMqttConnectOptions* options  = malloc(sizeof(CbMqttDisconnectOptions));
 
 	//These defaults are inline with what paho uses in the MQTTAsync_connectOptions_initializer
-	options.keepAliveInterval = 60;
-	options.cleanSession = true;
-	options.maxInFlight = 65535;
-	options.connectTimeout = 30;
-	options.retryInterval = 0;
-	options.automaticReconnect = false;
-	options.minRetryInterval = 1;
-	options.maxRetryInterval = 60;
-	options.onSuccess = NULL;
-	options.onFailure = NULL;
+	options->keepAliveInterval = 60;
+	options->cleanSession = true;
+	options->maxInFlight = 65535;
+	options->connectTimeout = 30;
+	options->retryInterval = 0;
+	options->automaticReconnect = false;
+	options->minRetryInterval = 1;
+	options->maxRetryInterval = 60;
+	options->onSuccess = NULL;
+	options->onFailure = NULL;
 
 	return options;
 }
 
-struct CbMqttDisconnectOptions getDefaultCbMQTTDisconnectOptions() {
-	struct CbMqttDisconnectOptions options;
+CbMqttDisconnectOptions* getDefaultCbMQTTDisconnectOptions() {
+	CbMqttDisconnectOptions* options = malloc(sizeof(CbMqttDisconnectOptions));
 
 	//These defaults are inline with what paho uses in the MQTTAsync_disconnectOptions_initializer
-	options.timeout = 0;
-	options.onSuccess = NULL;
-	options.onFailure = NULL;
+	options->timeout = 0;
+	options->onSuccess = NULL;
+	options->onFailure = NULL;
 
 	return options;
 }
 
-struct CbMqttResponseOptions getDefaultCbMQTTResponseOptions() {
-	struct CbMqttResponseOptions options;
+CbMqttResponseOptions* getDefaultCbMQTTResponseOptions() {
+	CbMqttResponseOptions* options = malloc(sizeof(CbMqttResponseOptions));
 
-	options.onSuccess = NULL;
-	options.onFailure = NULL;
+	options->onSuccess = NULL;
+	options->onFailure = NULL;
 
 	return options;
 }
@@ -192,7 +192,7 @@ void connectToMQTTAdvanced(char *clientId, int qualityOfService, MQTTAsync_onSuc
 	mqttClient = client;
 }
 
-void connectCbMQTT(void* context, char *clientId, struct CbMqttConnectOptions *options,
+void connectCbMQTT(void* context, char *clientId, CbMqttConnectOptions *options,
  		MQTTAsync_messageArrived* messageArrivedCallback, MQTTAsync_connectionLost* onConnLostCallback) {
 
 	printf("C SDK - connectCbMQTT\n");
@@ -302,7 +302,7 @@ void onSubscribeFailure(void* context, MQTTAsync_failureData* response) {
 	if (callbacks.onSubscribeFailure != NULL) callbacks.onSubscribeFailure(context, response);
 }
 
-void subscribeCbMQTT(void* context, char *topic, int qos, struct CbMqttResponseOptions* options) {
+void subscribeCbMQTT(void* context, char *topic, int qos, CbMqttResponseOptions* options) {
 	printf("C SDK - cbMQTTSubscribe\n");
 
 	if(mqttClient == NULL) {
@@ -362,7 +362,7 @@ void onPublishFailure(void* context, MQTTAsync_failureData* response) {
 	if (callbacks.onPublishFailure != NULL) callbacks.onPublishFailure(context, response);
 }
 
-void publishCbMQTT(void* context, char *message, char *topic, int qos, int retained, struct CbMqttResponseOptions* options) {
+void publishCbMQTT(void* context, char *message, char *topic, int qos, int retained, CbMqttResponseOptions* options) {
 	printf("C SDK - cbMQTTSubscribe\n");
 	if(mqttClient == NULL) {
 		printf("You are not connected to the MQTT Broker. Please call connectToMQTT() first and then try to publish\n");
@@ -424,7 +424,7 @@ void onUnsubscribeFailure(void* context, MQTTAsync_failureData* response) {
 	if (callbacks.onUnsubscribeFailure != NULL) callbacks.onUnsubscribeFailure(context, response);
 }
 
-void unsubscribeCbMQTT(void* context, char *topic, struct CbMqttResponseOptions* options) {
+void unsubscribeCbMQTT(void* context, char *topic, CbMqttResponseOptions* options) {
 	printf("C SDK - unsubscribeCbMQTT\n");
 	if(mqttClient == NULL) {
 		printf("You are not connected to the MQTT Broker. Please call connectToMQTT() first and then try to unsubscribe\n");
@@ -489,7 +489,7 @@ void disconnectMQTTClient() {
 	mqttClient = NULL;
 }
 
-void disconnectCbMQTT(void* context, struct CbMqttDisconnectOptions *options) {
+void disconnectCbMQTT(void* context, CbMqttDisconnectOptions *options) {
 	printf("C SDK - disconnectCbMQTT\n");
 
 	if(mqttClient == NULL) {
