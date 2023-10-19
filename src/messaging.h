@@ -45,9 +45,15 @@ typedef struct {
 } CbMqttDisconnectOptions;
 
 typedef struct  {
-  int timeout;
+  int noLocal;
+	int retainAsPublished;
+	int retainHandling;
+} CbMqttSubscribeOptions;
+
+typedef struct  {
 	MQTTAsync_onSuccess* onSuccess;
 	MQTTAsync_onFailure* onFailure;
+	CbMqttSubscribeOptions* subscribeOptions;
 } CbMqttResponseOptions;
 
 CbMqttConnectOptions* getDefaultCbMQTTConnectOptions();
