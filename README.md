@@ -308,14 +308,20 @@ mkdir build
 cd build
 
 # Replace {YOUR_OPEN_SSL_PATH} below with the path to your OpenSSL installation (for example: /opt/homebrew/Cellar/openssl@3/3.1.2)
-cmake -DPAHO_WITH_SSL=TRUE -DPAHO_HIGH_PERFORMANCE=TRUE -DOPENSSL_ROOT_DIR="{YOUR_OPEN_SSL_PATH}" ../paho.mqtt.c
+cmake -DPAHO_WITH_SSL=TRUE -DPAHO_HIGH_PERFORMANCE=TRUE -DOPENSSL_ROOT_DIR="{YOUR_OPEN_SSL_PATH}" ..
 make
 sudo make install
 ```
 
-### Install the Jansson JSON Library
 
-You can follow the instructions given @ http://jansson.readthedocs.io/en/2.10/gettingstarted.html#compiling-and-installing-jansson to install the Jansson JSON library.
+
+### Install the json-c Library
+You can follow the instructions given @ http://json-c.github.io/json-c/json-c-current-release/doc/html/index.html to install the json-c library. In addition, you may be able to install the json-c library through a package manager.
+
+```
+sudo apt install libjson-c
+sudo apt install libjson-c-dev
+```
 
 ### Install the C SDK
 

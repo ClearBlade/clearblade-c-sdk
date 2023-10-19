@@ -7,7 +7,7 @@ ifndef CFLAGS
 endif
 
 LDFLAGS ?= -shared
-LIBS ?= -lpthread  -ljansson -lcurl -lpaho-mqtt3as
+LIBS ?= -lpthread  -ljson-c -lcurl -lpaho-mqtt3as
 SRC = src
 
 SRCS = $(wildcard $(SRC)/*.c)
