@@ -58,7 +58,7 @@ CbMqttResponseOptions* getDefaultCbMQTTResponseOptions() {
 
 	options->onSuccess = NULL;
 	options->onFailure = NULL;
-	options->subscribeOptions = getDefaultCbMQTTSubscribeOptions();
+	options->subscribeOptions = NULL;
 
 	return options;
 }

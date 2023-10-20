@@ -55,6 +55,7 @@ typedef struct  {
 CbMqttConnectOptions* getDefaultCbMQTTConnectOptions();
 CbMqttDisconnectOptions* getDefaultCbMQTTDisconnectOptions();
 CbMqttResponseOptions* getDefaultCbMQTTResponseOptions();
+CbMqttSubscribeOptions* getDefaultCbMQTTSubscribeOptions();
 
 void connectToMQTT(char *clientId, int qualityOfService, MQTTAsync_onSuccess *mqttOnConnect,
  		MQTTAsync_messageArrived* messageArrivedCallback) __attribute__ ((deprecated));
