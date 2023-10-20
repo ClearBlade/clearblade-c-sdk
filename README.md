@@ -11,11 +11,8 @@ To install the C SDK, you will need the following dependencies:
 - Paho MQTT library
 - Jansson JSON library
 
-```markdown
-> **Heads Up!**
-The Paho MQTT library contains a Makefile that only supports Linux systems. You can try to install it on other operating systems, but it might not work. 
-So, you may need to edit the Makefile for your operating system or install the C SDK on a Linux system.
-```
+> [!IMPORTANT]
+> The Paho MQTT library contains a Makefile that only supports Linux systems. You can try to install it on other operating systems, but it might not work. So, you may need to edit the Makefile for your operating system or install the C SDK on a Linux system.
 
 ### Installing **_libcurl_** and **_openssl_**
 
