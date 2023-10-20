@@ -1,5 +1,73 @@
 # ClearBlade C SDK
 
+# QuickStart
+
+## Prerequisites
+
+To install the C SDK, you will need the following dependencies:
+
+- libcurl
+- OpenSSL
+- Paho MQTT library
+- Jansson JSON library
+
+```markdown
+> **Heads Up!**
+The Paho MQTT library contains a Makefile that only supports Linux systems. You can try to install it on other operating systems, but it might not work. 
+So, you may need to edit the Makefile for your operating system or install the C SDK on a Linux system.
+```
+
+### Installing **_libcurl_** and **_openssl_**
+
+- You can download and install **_libcurl_** library from https://curl.haxx.se/libcurl/. Depending on your operating system, you may download the compiled libraries or build from the source.
+- You can also download and install the **_openssl_** library from https://www.openssl.org.
+
+### Installing the Paho MQTT library
+
+To install the Paho MQTT library, execute the following commands:
+
+#### Linux
+```bash
+git clone https://github.com/eclipse/paho.mqtt.c.git
+cd paho.mqtt.c/
+make
+sudo make install
+```
+
+#### Mac OS
+- You will need to know where brew installed OpenSSL. The path to OpenSSL will be in `/opt/homebrew/Cellar/` and will resemble `/opt/homebrew/Cellar/openssl@3/3.1.2`
+
+```bash
+git clone https://github.com/eclipse/paho.mqtt.c.git
+cd paho.mqtt.c/
+rm -r build/*
+mkdir build
+cd build
+
+# Replace {YOUR_OPEN_SSL_PATH} below with the path to your OpenSSL installation (for example: /opt/homebrew/Cellar/openssl@3/3.1.2)
+cmake -DPAHO_WITH_SSL=TRUE -DPAHO_HIGH_PERFORMANCE=TRUE -DOPENSSL_ROOT_DIR="{YOUR_OPEN_SSL_PATH}" ..
+make
+sudo make install
+```
+
+### Install the json-c Library
+You can follow the instructions given @ http://json-c.github.io/json-c/json-c-current-release/doc/html/index.html to install the json-c library. In addition, you may be able to install the json-c library through a package manager.
+
+```
+sudo apt install libjson-c-dev
+```
+
+### Install the C SDK
+
+Execute the following commands to install the C SDK on your system:
+
+```bash
+git clone https://github.com/ClearBlade/ClearBlade-C-SDK.git
+cd ClearBlade-C-SDK/
+make
+sudo make install
+```
+
 # API reference
 
 ## Initialize and authenticate
@@ -408,72 +476,4 @@ void codeServiceCallback(bool error, char *result) {
 }
 
 executeCodeServiceWithParams(serviceName, params, &codeServiceCallback);
-```
-
-# QuickStart
-
-## Prerequisites
-
-To install the C SDK, you will need the following dependencies:
-
-- libcurl
-- OpenSSL
-- Paho MQTT library
-- Jansson JSON library
-
-```markdown
-> **Heads Up!**
-The Paho MQTT library contains a Makefile that only supports Linux systems. You can try to install it on other operating systems, but it might not work. 
-So, you may need to edit the Makefile for your operating system or install the C SDK on a Linux system.
-```
-
-### Installing **_libcurl_** and **_openssl_**
-
-- You can download and install **_libcurl_** library from https://curl.haxx.se/libcurl/. Depending on your operating system, you may download the compiled libraries or build from the source.
-- You can also download and install the **_openssl_** library from https://www.openssl.org.
-
-### Installing the Paho MQTT library
-
-To install the Paho MQTT library, execute the following commands:
-
-#### Linux
-```bash
-git clone https://github.com/eclipse/paho.mqtt.c.git
-cd paho.mqtt.c/
-make
-sudo make install
-```
-
-#### Mac OS
-- You will need to know where brew installed OpenSSL. The path to OpenSSL will be in `/opt/homebrew/Cellar/` and will resemble `/opt/homebrew/Cellar/openssl@3/3.1.2`
-
-```bash
-git clone https://github.com/eclipse/paho.mqtt.c.git
-cd paho.mqtt.c/
-rm -r build/*
-mkdir build
-cd build
-
-# Replace {YOUR_OPEN_SSL_PATH} below with the path to your OpenSSL installation (for example: /opt/homebrew/Cellar/openssl@3/3.1.2)
-cmake -DPAHO_WITH_SSL=TRUE -DPAHO_HIGH_PERFORMANCE=TRUE -DOPENSSL_ROOT_DIR="{YOUR_OPEN_SSL_PATH}" ..
-make
-sudo make install
-```
-
-### Install the json-c Library
-You can follow the instructions given @ http://json-c.github.io/json-c/json-c-current-release/doc/html/index.html to install the json-c library. In addition, you may be able to install the json-c library through a package manager.
-
-```
-sudo apt install libjson-c-dev
-```
-
-### Install the C SDK
-
-Execute the following commands to install the C SDK on your system:
-
-```bash
-git clone https://github.com/ClearBlade/ClearBlade-C-SDK.git
-cd ClearBlade-C-SDK/
-make
-sudo make install
 ```
