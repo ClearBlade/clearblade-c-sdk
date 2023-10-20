@@ -11,11 +11,8 @@ To install the C SDK, you will need the following dependencies:
 - Paho MQTT library
 - Jansson JSON library
 
-```markdown
-> **Heads Up!**
-The Paho MQTT library contains a Makefile that only supports Linux systems. You can try to install it on other operating systems, but it might not work. 
-So, you may need to edit the Makefile for your operating system or install the C SDK on a Linux system.
-```
+> [!IMPORTANT]
+> The Paho MQTT library contains a Makefile that only supports Linux systems. You can try to install it on other operating systems, but it might not work. So, you may need to edit the Makefile for your operating system or install the C SDK on a Linux system.
 
 ### Installing **_libcurl_** and **_openssl_**
 
@@ -72,10 +69,8 @@ sudo make install
 
 ## Initialize and authenticate
 
-```markdown
-> **Heads Up!**
-You must initialize and authenticate with the ClearBlade Platform before you perform any other functions.
-```
+> [!IMPORTANT]
+> You must initialize and authenticate with the ClearBlade Platform before you perform any other functions.
 
 If you have not installed the prerequisites, please follow the tutorial @ [Prerequisites](../Quickstart#prerequisites). After you have installed all the prerequisites and the C SDK, include the **_clearblade.h_** header in your code: `#include <clearblade.h>`  
 
@@ -102,9 +97,8 @@ You will need to pass the function a context, your **SYSTEM_KEY**, **SYSTEM_SECR
 tcp://platform.clearblade.com:1883, or similar, for unsecured messaging.  
 ssl://platform.clearblade.com:1884, or similar, for secured messaging. i.e. over TLS
 
-{{< note title="Note" >}}
-The first argument passed to the cbInitialize function is a ```(void*) context``` argument that provides the ability to receive application specific contextual information in the init callback function.
-{{< /note >}}
+> [!NOTE]
+> The first argument passed to the cbInitialize function is a ```(void*) context``` argument that provides the ability to receive application specific contextual information in the init callback function.
 
 ### Device Authentication
 ```C
@@ -127,18 +121,17 @@ You will need to pass the function a context, your **SYSTEM_KEY**, **SYSTEM_SECR
 tcp://platform.clearblade.com:1883, or similar, for unsecured messaging.  
 ssl://platform.clearblade.com:1884, or similar, for secured messaging. i.e. over TLS
 
-{{< note title="Note" >}}
-The first argument passed to the initializeCBAsDevice function is a ```(void*) context``` argument that provides the ability to receive application specific contextual information in the init callback function.
-{{< /note >}}
+> [!NOTE]
+> The first argument passed to the initializeCBAsDevice function is a ```(void*) context``` argument that provides the ability to receive application specific contextual information in the init callback function.
 
 ### Device Authentication With mTLS
 Rather than authenticating a device with the device name and active key, a device can be authenticated using mTLS. This requires the device to pass the location of the x509 SSL certificate and the location of the private key. The ClearBlade Platform will then ensure the certificate and private key passed by the device is valid and matches what the ClearBlade Platform expects.
 
 If the device does not exist in the system it will be automatically created, providing the ability to do Just-In_Time provisioning.
 
-{{< warning title="Heads Up!" >}}
-Using mTLS authentication requires additional configuration by ClearBlade that is not implemented by default. If you require mTLS authentication, you will need to contact ClearBlade.
-{{< /warning >}}
+> [!WARNING]
+> Using mTLS authentication requires additional configuration by ClearBlade that is not implemented by default. If you require mTLS authentication, you will need to contact ClearBlade.
+
 
 ```C
 void cbInitCallback(void *context, bool error, char *result) {
@@ -162,8 +155,8 @@ KEY_FILE can be either the path to the private key or the contents of the privat
 tcp://platform.clearblade.com:1883, or similar, for unsecured messaging.  
 ssl://platform.clearblade.com:1884, or similar, for secured messaging. i.e., over TLS
 
-{{< note title="Note" >}}
-The first argument passed to the initializeCBAsDevice function is a ```(void*) context``` argument that provides the ability to receive application specific contextual information in the init callback function.
+> [!NOTE]
+> The first argument passed to the initializeCBAsDevice function is a ```(void*) context``` argument that provides the ability to receive application specific contextual information in the init callback function.
 
 
 # MQTT functions
@@ -180,9 +173,8 @@ void connectCbMQTT(void* context, char *clientId, CbMqttConnectOptions *options,
 ### Connection Options
 The CbMqttConnectOptions struct provides a way to specify advanced connection options when connecting to the MQTT broker. The C SDK will default the connection options to appropriate values if the options object is not provided. In addition, the getDefaultCbMQTTConnectOptions() function provides a convenient way to create the connection options with appropriate default values. 
 
-{{< note title="Note" >}}
-If the getDefaultCbMQTTConnectOptions function is used, it is the responsibility of the calling application to __free__ the memory used by the connection options.
-{{< /note >}}
+> [!NOTE]
+> If the getDefaultCbMQTTConnectOptions function is used, it is the responsibility of the calling application to __free__ the memory used by the connection options.
 
 typedef struct {
   int keepAliveInterval;
@@ -266,9 +258,8 @@ connectCbMQTT(NULL, clientID, connectOptions, messageArrived, onConnectionLost);
 ## Response Options
 The CbMqttResponseOptions struct provides a way to specify advanced options when publishing, subscribing, and unsubscribing. The C SDK will default the response options to appropriate values if the options object is not provided. In addition, the getDefaultCbMQTTResponseOptions() function provides a convenient way to create the response options with appropriate default values. 
 
-{{< note title="Note" >}}
-If the getDefaultCbMQTTResponseOptions function is used, it is the responsibility of the calling application to __free__ the memory used by the response options.
-{{< /note >}}
+> [!NOTE]
+> If the getDefaultCbMQTTResponseOptions function is used, it is the responsibility of the calling application to __free__ the memory used by the response options.
 
 typedef struct  {
 	MQTTAsync_onSuccess* onSuccess;
@@ -285,9 +276,8 @@ subscribeOptions | NULL | This is a pointer to a CbMqttSubscribeOptions structur
 ## Subscribe Options
 The CbMqttSubscribeOptions struct provides a way to specify advanced options when subscribing to topics. The C SDK will default the options to appropriate values if the options object is not provided. In addition, the getDefaultCbMQTTSubscribeOptions() function provides a convenient way to create the subscribe options with appropriate default values. 
 
-{{< note title="Note" >}}
-If the getDefaultCbMQTTSubscribeOptions function is used, it is the responsibility of the calling application to __free__ the memory used by the subscribe options.
-{{< /note >}}
+> [!NOTE]
+> If the getDefaultCbMQTTSubscribeOptions function is used, it is the responsibility of the calling application to __free__ the memory used by the subscribe options.
 
 typedef struct  {
   int noLocal;
@@ -394,9 +384,8 @@ To disconnect your client from the MQTT broker, call the `disconnectMQTTClient()
 ### Disconnect Options
 The CbMqttDisconnectOptions struct provides a way to specify advanced disconnect options when disconnecting from the MQTT broker. The C SDK will default the disconnect options to appropriate values if the options object is not provided. In addition, the getDefaultCbMQTTDisconnectOptions() function provides a convenient way to create the disconnection options with appropriate default values. 
 
-{{< note title="Note" >}}
-If the getDefaultCbMQTTDisconnectOptions function is used, it is the responsibility of the calling application to __free__ the memory used by the disconnect options.
-{{< /note >}}
+> [!NOTE]
+> If the getDefaultCbMQTTDisconnectOptions function is used, it is the responsibility of the calling application to __free__ the memory used by the disconnect options.
 
 typedef struct {
   int timeout;
