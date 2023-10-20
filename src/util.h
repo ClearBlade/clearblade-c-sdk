@@ -6,10 +6,6 @@
 #ifndef _util_h
 #define _util_h
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 extern char *USER_TOKEN;
 extern char *DEVICE_TOKEN;
 extern char *SYSTEM_KEY;
@@ -39,9 +35,5 @@ char *getCertFile();
 char *getKeyFile();
 char *getUserToken();
 char *getDeviceToken();
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif
