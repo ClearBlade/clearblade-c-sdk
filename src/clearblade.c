@@ -10,13 +10,13 @@
 #include "user.h"
 #include "clearblade.h"
 
-struct ClearBlade CBGlobal;
+struct ClearBladeInitParms CBGlobal;
 
 
 /**
   * This function performs checks on the initialize parameters passed to the initializeClearBlade() function and validates them.
 */
-void validateInitOptions(struct ClearBlade *CB) {
+void validateInitOptions(struct ClearBladeInitParms *CB) {
 	printf("C SDK - validateInitOptions\n");
 
 	if (CB->systemKey == NULL) {

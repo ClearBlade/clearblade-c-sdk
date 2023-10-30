@@ -13,7 +13,7 @@
   * The ClearBlade struct containing the initialize parameters.
   * This is just to make things simple and understand what is going on during initialization
 */
-struct ClearBlade {
+struct ClearBladeInitParms {
 	char *systemKey;
 	char *systemSecret;
 	char *platformURL;
@@ -25,7 +25,7 @@ struct ClearBlade {
 	pthread_mutex_t connectLock;
 };
 
-extern struct ClearBlade CBGlobal;
+extern struct ClearBladeInitParms CBGlobal;
 
 /** This is the first function to be called before using any of the other functions in this SDK.
   * This function initializes with the ClearBlade Platform and sets the auth token in util.c after successful initialization.
