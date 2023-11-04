@@ -324,11 +324,14 @@ void subscribeCbMQTT(void* context, char *topic, int qos, CbMqttResponseOptions*
 	responseOpts.onFailure = onSubscribeFailure;
 
 	//subscribe options
-	if (options->subscribeOptions->noLocal) responseOpts.subscribeOptions.noLocal = options->subscribeOptions->noLocal;
-	if (options->subscribeOptions->retainAsPublished) responseOpts.subscribeOptions.retainAsPublished = options->subscribeOptions->retainAsPublished;
-	if (options->subscribeOptions->retainHandling) responseOpts.subscribeOptions.retainHandling = options->subscribeOptions->retainHandling;
+	if (options->subscribeOptions != NULL && options->subscribeOptions->noLocal) responseOpts.subscribeOptions.noLocal = options->subscribeOptions->noLocal;
+	if (options->subscribeOptions != NULL && options->subscribeOptions->retainAsPublished) responseOpts.subscribeOptions.retainAsPublished = options->subscribeOptions->retainAsPublished;
+	if (options->subscribeOptions != NULL && options->subscribeOptions->retainHandling) responseOpts.subscribeOptions.retainHandling = options->subscribeOptions->retainHandling;
 
-	if (context != NULL) responseOpts.context = context;
+
+	if (context != NULL) {
+		responseOpts.context = context;
+	}
 
 	printf("C SDK - Invoking MQTTAsync_subscribe\n");
 
