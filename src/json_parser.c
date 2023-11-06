@@ -55,17 +55,21 @@ char const *getPropertyValueFromJson(char *jsonString, char *property) {
  
 	if (json_object_get_type(root) == json_type_object) {
 		jsonValue = json_object_object_get(root, property);
-		if (json_object_get_type(jsonValue) == json_type_string) {
-			value = json_object_get_string(jsonValue);
-		} else if (json_object_get_type(jsonValue) == json_type_object || json_object_get_type(jsonValue) == json_type_array) {
-			value = jsonString;
-		}
-		char *rval = NULL;
-		rval = strdup(value);
-		if (root) {
-			json_object_put(root);
-		}
-		return rval;
+		if (jsonValue != NULL) {
+			if (jsonValue != NULL && json_object_get_type(jsonValue) == json_type_string) {
+				value = json_object_get_string(jsonValue);
+			} else if (json_object_get_type(jsonValue) == json_type_object || json_object_get_type(jsonValue) == json_type_array) {
+				value = jsonString;
+			}
+			char *rval = NULL;
+			rval = strdup(value);
+			if (root) {
+				json_object_put(root);
+			}
+			return rval;
+			} else {
+				return NULL;
+			}
 	} else {
 		if (root) {
 			json_object_put(root);
