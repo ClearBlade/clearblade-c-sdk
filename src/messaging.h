@@ -4,18 +4,8 @@
 #include "MQTTAsync.h"
 
 typedef struct {
-	MQTTAsync_onSuccess* onConnectSuccess;
-	MQTTAsync_onFailure* onConnectFailure;
 	MQTTAsync_connectionLost* onConnectionLost;
-	MQTTAsync_onSuccess* onDisconnectSuccess;
-	MQTTAsync_onFailure* onDisconnectFailure;
 	MQTTAsync_messageArrived* messageArrived;
-	MQTTAsync_onSuccess* onSubscribeSuccess;
-	MQTTAsync_onFailure* onSubscribeFailure;
-	MQTTAsync_onSuccess* onPublishSuccess;
-	MQTTAsync_onFailure* onPublishFailure;
-	MQTTAsync_onSuccess* onUnsubscribeSuccess;
-	MQTTAsync_onFailure* onUnsubscribeFailure;
 } CbMqttCallbacks;
 
 extern CbMqttCallbacks callbacks;

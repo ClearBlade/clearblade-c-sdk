@@ -7,12 +7,20 @@
 #include "util.h"
 #include "messaging.h"
 
+// TODO - Ideally, we would want separate callbacks for each client. In addition, we would want
+//separate subscribe and publish callbacks for each topic.
+typedef struct {
+    void* context;
+		MQTTAsync_onSuccess* onSuccess;
+    MQTTAsync_onFailure* onFailure;
+} ContextWrapper;
+
 MQTTAsync mqttClient = NULL;
 bool operationInProgress = false;
 char *clientID = "";
 int qos = 0;
 
-CbMqttCallbacks callbacks = {NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+CbMqttCallbacks callbacks = {NULL, NULL};
 
 CbMqttConnectOptions* getDefaultCbMQTTConnectOptions() {
 	CbMqttConnectOptions* options = malloc(sizeof(CbMqttConnectOptions));
@@ -83,8 +91,12 @@ void onConnectSuccess(void *context, MQTTAsync_successData *response) {
 
 	operationInProgress = false;
 
-	if (callbacks.onConnectSuccess != NULL) {
-		callbacks.onConnectSuccess(context, response);
+	if (context != NULL) {
+		ContextWrapper* contextWrapper = (ContextWrapper*)context;
+		if (contextWrapper->onSuccess != NULL) {
+			contextWrapper->onSuccess(contextWrapper->context, response);
+		}
+		free(context);
 	}
 }
 
@@ -92,7 +104,13 @@ void onConnectFailure(void* context, MQTTAsync_failureData* response) {
 	printf("C SDK - onConnectFailure\n");
 	operationInProgress = false;
 
-	if (callbacks.onConnectFailure != NULL) callbacks.onConnectFailure(context, response);
+	if (context != NULL) {
+		ContextWrapper* contextWrapper = (ContextWrapper*)context;
+		if (contextWrapper->onFailure != NULL) {
+			contextWrapper->onFailure(contextWrapper->context, response);
+		}
+		free(context);
+	}
 }
 
 void onConnectionLost(void *context, char *cause) {
@@ -136,11 +154,16 @@ void connectToMQTTAdvanced(char *clientId, int qualityOfService, MQTTAsync_onSuc
 	MQTTAsync_create(&client, messagingurl, clientId, MQTTCLIENT_PERSISTENCE_NONE, NULL);
 	
 	//Set callbacks
+
+	ContextWrapper* contextWrapper = malloc(sizeof(ContextWrapper));
+	contextWrapper->context = NULL;
+	contextWrapper->onFailure = NULL;
+
 	if (mqttOnConnect == NULL) {
 		printf("mqttOnConnect NULL\n");
-		callbacks.onConnectSuccess = NULL;
+		contextWrapper->onSuccess = NULL;
 	} else {
-		callbacks.onConnectSuccess = mqttOnConnect;
+		contextWrapper->onSuccess = mqttOnConnect;
 	}
 	conn_opts.onSuccess = onConnectSuccess;
 
@@ -157,6 +180,7 @@ void connectToMQTTAdvanced(char *clientId, int qualityOfService, MQTTAsync_onSuc
 	}
 	MQTTAsync_setCallbacks(client, NULL, onConnectionLost, onMessageArrived, NULL);
 
+	conn_opts.context = contextWrapper;
 
 	if(autoReconnect) {
 		conn_opts.automaticReconnect = 1;
@@ -206,18 +230,23 @@ void connectCbMQTT(void* context, char *clientId, CbMqttConnectOptions *options,
 	MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
 	MQTTAsync_create(&client, messagingurl, clientId, MQTTCLIENT_PERSISTENCE_NONE, context);
 
+	ContextWrapper* contextWrapper = malloc(sizeof(ContextWrapper));
+	contextWrapper->context = NULL;
+	contextWrapper->onSuccess = NULL;
+	contextWrapper->onFailure = NULL;
+
+	if (context != NULL) {
+		contextWrapper->context = context;
+	}
+
 	//Set callbacks
-	if (options->onSuccess == NULL) {
-		callbacks.onConnectSuccess = NULL;
-	} else {
-		callbacks.onConnectSuccess = options->onSuccess;
+	if (options->onSuccess != NULL) {
+		contextWrapper->onSuccess = options->onSuccess;
 	}
 	conn_opts.onSuccess = onConnectSuccess;
 
-	if (options->onFailure == NULL) {
-		callbacks.onConnectFailure = NULL;
-	} else {
-		callbacks.onConnectFailure = options->onFailure;
+	if (options->onFailure != NULL) {
+		contextWrapper->onFailure = options->onFailure;
 	}
 	conn_opts.onFailure = onConnectFailure;
 
@@ -255,10 +284,7 @@ void connectCbMQTT(void* context, char *clientId, CbMqttConnectOptions *options,
 		conn_opts.ssl = &ssl_opts;
 	};
 	
-	if (context != NULL) {
-		conn_opts.context = context;
-	}
-	
+	conn_opts.context = contextWrapper;
 	conn_opts.automaticReconnect = options->automaticReconnect;
 	conn_opts.minRetryInterval = options->minRetryInterval;
 	conn_opts.maxRetryInterval = options->maxRetryInterval;
@@ -286,13 +312,27 @@ void connectCbMQTT(void* context, char *clientId, CbMqttConnectOptions *options,
 
 void onSubscribeSuccess(void* context, MQTTAsync_successData* response) {
 	printf("C SDK - onSubscribeSuccess\n");
-	if (callbacks.onSubscribeSuccess != NULL) callbacks.onSubscribeSuccess(context, response);
+
+	if (context != NULL) {
+		ContextWrapper* contextWrapper = (ContextWrapper*)context;
+		if (contextWrapper->onSuccess != NULL) {
+			contextWrapper->onSuccess(contextWrapper->context, response);
+		}
+		free(context);
+	}
 }
 
 void onSubscribeFailure(void* context, MQTTAsync_failureData* response) {
 	printf("C SDK - onSubscribeFailure\n");
 	printf("C SDK - Subscribe failed, rc %d\n", response ? response->code : 0);
-	if (callbacks.onSubscribeFailure != NULL) callbacks.onSubscribeFailure(context, response);
+
+	if (context != NULL) {
+		ContextWrapper* contextWrapper = (ContextWrapper*)context;
+		if (contextWrapper->onFailure != NULL) {
+			contextWrapper->onFailure(contextWrapper->context, response);
+		}
+		free(context);
+	}
 }
 
 void subscribeCbMQTT(void* context, char *topic, int qos, CbMqttResponseOptions* options) {
@@ -304,34 +344,34 @@ void subscribeCbMQTT(void* context, char *topic, int qos, CbMqttResponseOptions*
 	}
 
 	MQTTAsync_responseOptions responseOpts = MQTTAsync_responseOptions_initializer;
+	ContextWrapper* contextWrapper = malloc(sizeof(ContextWrapper));
+	contextWrapper->context = NULL;
+	contextWrapper->onSuccess = NULL;
+	contextWrapper->onFailure = NULL;
+
+	if (context != NULL) {
+		contextWrapper->context = context;
+	}
 
 	//Set callbacks
 	if (options != NULL) {
-		if (options->onSuccess == NULL) {
-			callbacks.onSubscribeSuccess = NULL;
-		} else {
-			callbacks.onSubscribeSuccess = options->onSuccess;
+		if (options->onSuccess != NULL) {
+			contextWrapper->onSuccess = options->onSuccess;
 		}
 
-		if (options->onFailure == NULL) {
-			callbacks.onSubscribeFailure = NULL;
-		} else {
-			callbacks.onSubscribeFailure = options->onFailure;
+		if (options->onFailure != NULL) {
+			contextWrapper->onFailure = options->onFailure;
 		}
+		
+		//subscribe options
+		if (options->subscribeOptions != NULL && options->subscribeOptions->noLocal) responseOpts.subscribeOptions.noLocal = options->subscribeOptions->noLocal;
+		if (options->subscribeOptions != NULL && options->subscribeOptions->retainAsPublished) responseOpts.subscribeOptions.retainAsPublished = options->subscribeOptions->retainAsPublished;
+		if (options->subscribeOptions != NULL && options->subscribeOptions->retainHandling) responseOpts.subscribeOptions.retainHandling = options->subscribeOptions->retainHandling;
 	}
 
+	responseOpts.context = contextWrapper;
 	responseOpts.onSuccess = onSubscribeSuccess;
 	responseOpts.onFailure = onSubscribeFailure;
-
-	//subscribe options
-	if (options->subscribeOptions != NULL && options->subscribeOptions->noLocal) responseOpts.subscribeOptions.noLocal = options->subscribeOptions->noLocal;
-	if (options->subscribeOptions != NULL && options->subscribeOptions->retainAsPublished) responseOpts.subscribeOptions.retainAsPublished = options->subscribeOptions->retainAsPublished;
-	if (options->subscribeOptions != NULL && options->subscribeOptions->retainHandling) responseOpts.subscribeOptions.retainHandling = options->subscribeOptions->retainHandling;
-
-
-	if (context != NULL) {
-		responseOpts.context = context;
-	}
 
 	printf("C SDK - Invoking MQTTAsync_subscribe\n");
 
@@ -352,7 +392,13 @@ void onPublishSuccess(void* context, MQTTAsync_successData* response) {
 	printf("C SDK - onPublishSuccess\n");
 	operationInProgress = false;
 
-	if (callbacks.onPublishSuccess != NULL) callbacks.onPublishSuccess(context, response);
+	if (context != NULL) {
+		ContextWrapper* contextWrapper = (ContextWrapper*)context;
+		if (contextWrapper->onSuccess != NULL) {
+			contextWrapper->onSuccess(contextWrapper->context, response);
+		}
+		free(context);
+	}
 }
 
 void onPublishFailure(void* context, MQTTAsync_failureData* response) {
@@ -360,11 +406,17 @@ void onPublishFailure(void* context, MQTTAsync_failureData* response) {
 	printf("C SDK - Publish failed, rc %d\n", response ? response->code : 0);
 	operationInProgress = false;
 
-	if (callbacks.onPublishFailure != NULL) callbacks.onPublishFailure(context, response);
+	if (context != NULL) {
+		ContextWrapper* contextWrapper = (ContextWrapper*)context;
+		if (contextWrapper->onFailure != NULL) {
+			contextWrapper->onFailure(contextWrapper->context, response);
+		}
+		free(context);
+	}
 }
 
 void publishCbMQTT(void* context, char *message, char *topic, int qos, int retained, CbMqttResponseOptions* options) {
-	printf("C SDK - cbMQTTSubscribe\n");
+	printf("C SDK - publishCbMQTT\n");
 	if(mqttClient == NULL) {
 		printf("C SDK - You are not connected to the MQTT Broker. Please invoke connectCbMQTT() first and then try to publish\n");
 		return;
@@ -379,25 +431,29 @@ void publishCbMQTT(void* context, char *message, char *topic, int qos, int retai
 	pubmsg.qos = qos;
 	pubmsg.retained = retained;
 
+	ContextWrapper* contextWrapper = malloc(sizeof(ContextWrapper));
+	contextWrapper->context = NULL;
+	contextWrapper->onSuccess = NULL;
+	contextWrapper->onFailure = NULL;
+
+	if (context != NULL) {
+		contextWrapper->context = context;
+	}
+
 	//Set callbacks
 	if (options != NULL) {
-		if (options->onSuccess == NULL) {
-			callbacks.onPublishSuccess = NULL;
-		} else {
-			callbacks.onPublishSuccess = options->onSuccess;
+		if (options->onSuccess != NULL) {
+			contextWrapper->onSuccess = options->onSuccess;
 		}
 
-		if (options->onFailure == NULL) {
-			callbacks.onPublishFailure = NULL;
-		} else {
-			callbacks.onPublishFailure = options->onFailure;
+		if (options->onFailure != NULL) {
+			contextWrapper->onFailure = options->onFailure;
 		}
 	}
 
+	opts.context = contextWrapper;
 	opts.onSuccess = onPublishSuccess;
 	opts.onFailure = onPublishFailure;
-
-	if (context != NULL) opts.context = context;
 
 	if ((rc = MQTTAsync_sendMessage(mqttClient, topic, &pubmsg, &opts)) != MQTTASYNC_SUCCESS) {
 		printf("Failed to start publishMessage, return code %d\n", rc);
@@ -413,14 +469,26 @@ void publishMessage(char *message, char *topic, int qos, int retained) {
 void onUnsubscribeSuccess(void* context, MQTTAsync_successData* response) {
 	printf("C SDK - onUnsubscribeSuccess\n");
 
-	if (callbacks.onUnsubscribeSuccess != NULL) callbacks.onUnsubscribeSuccess(context, response);
+	if (context != NULL) {
+		ContextWrapper* contextWrapper = (ContextWrapper*)context;
+		if (contextWrapper->onSuccess != NULL) {
+			contextWrapper->onSuccess(contextWrapper->context, response);
+		}
+		free(context);
+	}
 }
 
 void onUnsubscribeFailure(void* context, MQTTAsync_failureData* response) {
 	printf("C SDK - onUnsubscribeFailure\n");
 	printf("C SDK - Unsubscribe failed, rc %d\n", response ? response->code : 0);
 
-	if (callbacks.onUnsubscribeFailure != NULL) callbacks.onUnsubscribeFailure(context, response);
+	if (context != NULL) {
+		ContextWrapper* contextWrapper = (ContextWrapper*)context;
+		if (contextWrapper->onFailure != NULL) {
+			contextWrapper->onFailure(contextWrapper->context, response);
+		}
+		free(context);
+	}
 }
 
 void unsubscribeCbMQTT(void* context, char *topic, CbMqttResponseOptions* options) {
@@ -431,26 +499,29 @@ void unsubscribeCbMQTT(void* context, char *topic, CbMqttResponseOptions* option
 	}
 
 	MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
+	ContextWrapper* contextWrapper = malloc(sizeof(ContextWrapper));
+	contextWrapper->context = NULL;
+	contextWrapper->onSuccess = NULL;
+	contextWrapper->onFailure = NULL;
+
+	if (context != NULL) {
+		contextWrapper->context = context;
+	}
 
 	//Set callbacks
 	if (options != NULL) {
-		if (options->onSuccess == NULL) {
-			callbacks.onUnsubscribeSuccess = NULL;
-		} else {
-			callbacks.onUnsubscribeSuccess = options->onSuccess;
+		if (options->onSuccess != NULL) {
+			contextWrapper->onSuccess = options->onSuccess;
 		}
 
-		if (options->onFailure == NULL) {
-			callbacks.onUnsubscribeFailure = NULL;
-		} else {
-			callbacks.onUnsubscribeFailure = options->onFailure;
+		if (options->onFailure != NULL) {
+			contextWrapper->onFailure = options->onFailure;
 		}
 	}
 
+	opts.context = contextWrapper;
 	opts.onSuccess = onUnsubscribeSuccess;
 	opts.onFailure = onUnsubscribeFailure;
-
-	if (context != NULL) opts.context = context;
 
 	int rc;
 	if((rc = MQTTAsync_unsubscribe(mqttClient, topic, &opts)) != MQTTASYNC_SUCCESS) {
@@ -468,7 +539,13 @@ void onDisconnectSuccess(void* context, MQTTAsync_successData* response) {
 	printf("C SDK - onDisconnectSuccess\n");
 	operationInProgress = false;
 
-	if (callbacks.onDisconnectSuccess != NULL) callbacks.onDisconnectSuccess(context, response);
+	if (context != NULL) {
+		ContextWrapper* contextWrapper = (ContextWrapper*)context;
+		if (contextWrapper->onSuccess != NULL) {
+			contextWrapper->onSuccess(contextWrapper->context, response);
+		}
+		free(context);
+	}
 }
 
 void onDisconnectFailure(void* context, MQTTAsync_failureData* response) {
@@ -476,7 +553,13 @@ void onDisconnectFailure(void* context, MQTTAsync_failureData* response) {
 	printf("MQTT disconnect failed, rc %d\n", response ? response->code : 0);
 	operationInProgress = false;
 
-	if (callbacks.onDisconnectFailure != NULL) callbacks.onDisconnectFailure(context, response);
+	if (context != NULL) {
+		ContextWrapper* contextWrapper = (ContextWrapper*)context;
+		if (contextWrapper->onFailure != NULL) {
+			contextWrapper->onFailure(contextWrapper->context, response);
+		}
+		free(context);
+	}
 }
 
 void disconnectMQTTClient() {
@@ -511,22 +594,27 @@ void disconnectCbMQTT(void* context, CbMqttDisconnectOptions *options) {
 
 	int rc;
 	MQTTAsync_disconnectOptions disc_opts = MQTTAsync_disconnectOptions_initializer;
+	ContextWrapper* contextWrapper = malloc(sizeof(ContextWrapper));
+	contextWrapper->context = NULL;
+	contextWrapper->onSuccess = NULL;
+	contextWrapper->onFailure = NULL;
+
+	if (context != NULL) {
+		contextWrapper->context = context;
+	}
+
 	disc_opts.timeout = options->timeout;
 
-	if (options->onSuccess == NULL) {
-		callbacks.onDisconnectSuccess = NULL;
-	} else {
-		callbacks.onDisconnectSuccess = options->onSuccess;
+	if (options->onSuccess != NULL) {
+		contextWrapper->onSuccess = options->onSuccess;
 	}
 	disc_opts.onSuccess = onDisconnectSuccess;
 
-	if (options->onFailure == NULL) {
-		callbacks.onDisconnectFailure = NULL;
-	} else {
-		callbacks.onDisconnectFailure = options->onFailure;
+	if (options->onFailure != NULL) {
+		contextWrapper->onFailure = options->onFailure;
 	}
 	disc_opts.onFailure = onDisconnectFailure;
-	disc_opts.context = context;
+	disc_opts.context = contextWrapper;
 
 	operationInProgress = true;
 	
@@ -536,6 +624,6 @@ void disconnectCbMQTT(void* context, CbMqttDisconnectOptions *options) {
 	}
 
 	//waitForOperation();
-	//MQTTAsync_destroy(&mqttClient);
+	//MQTTAsync_destroy(&mqttClient); This causes a segmentation fault. Not sure why.
 	mqttClient = NULL;
 }
