@@ -82,7 +82,7 @@ int onMessageArrived(void *context, char *topicName, int topicLen, MQTTAsync_mes
 	if (callbacks.messageArrived != NULL) {
 		return callbacks.messageArrived(context, topicName, topicLen, message);
 	} else {
-		return 0;
+		return 1; //Returning one indicate the message has been successfully handled: https://eclipse.github.io/paho.mqtt.c/MQTTAsync/html/_m_q_t_t_async_8h.html#a3918ead59b56816a8d7544def184e48e
 	}
 }
 
