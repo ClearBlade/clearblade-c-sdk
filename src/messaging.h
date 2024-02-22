@@ -6,6 +6,7 @@
 typedef struct {
 	MQTTAsync_connectionLost* onConnectionLost;
 	MQTTAsync_messageArrived* messageArrived;
+	MQTTAsync_connected* onConnectResumedCallback;
 } CbMqttCallbacks;
 
 extern CbMqttCallbacks callbacks;
@@ -54,7 +55,7 @@ void connectToMQTTAdvanced(char *clientId, int qualityOfService, MQTTAsync_onSuc
  		MQTTAsync_messageArrived* messageArrivedCallback, MQTTAsync_connectionLost* onConnLostCallback, bool autoReconnect) __attribute__ ((deprecated));
 
 void connectCbMQTT(void* context, char *clientId, CbMqttConnectOptions *options,
- 		MQTTAsync_messageArrived* messageArrivedCallback, MQTTAsync_connectionLost* onConnLostCallback);
+ 		MQTTAsync_messageArrived* messageArrivedCallback, MQTTAsync_connectionLost* onConnLostCallback, MQTTAsync_connected* onConnectResumedCallback);
 
 void subscribeToTopic(char *topic, int qos) __attribute__ ((deprecated));
 void subscribeCbMQTT(void* context, char *topic, int qos, CbMqttResponseOptions* options);

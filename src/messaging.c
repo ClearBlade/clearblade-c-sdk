@@ -118,6 +118,13 @@ void onConnectionLost(void *context, char *cause) {
 	if (callbacks.onConnectionLost != NULL) callbacks.onConnectionLost(context, cause);
 }
 
+void onConnectionResumed(void *context, char *cause) {
+	printf("C SDK - onConnectionResumed\n");
+
+	if (callbacks.onConnectResumedCallback != NULL) callbacks.onConnectResumedCallback(context, cause);
+}
+
+
 void connectToMQTT(char *clientId, int qualityOfService, MQTTAsync_onSuccess* mqttOnConnect, MQTTAsync_messageArrived* messageArrivedCallback) {
 	printf("C SDK - connectToMQTT\n");
 	connectToMQTTAdvanced(clientId, qualityOfService, mqttOnConnect, messageArrivedCallback, NULL, false);
@@ -209,7 +216,7 @@ void connectToMQTTAdvanced(char *clientId, int qualityOfService, MQTTAsync_onSuc
 }
 
 void connectCbMQTT(void* context, char *clientId, CbMqttConnectOptions *options,
- 		MQTTAsync_messageArrived* messageArrivedCallback, MQTTAsync_connectionLost* onConnLostCallback) {
+ 		MQTTAsync_messageArrived* messageArrivedCallback, MQTTAsync_connectionLost* onConnLostCallback, MQTTAsync_connected* onConnectResumedCallback) {
 
 	printf("C SDK - connectCbMQTT\n");
 
@@ -262,7 +269,12 @@ void connectCbMQTT(void* context, char *clientId, CbMqttConnectOptions *options,
 		callbacks.messageArrived = messageArrivedCallback;
 	}
 
-	MQTTAsync_setCallbacks(client, context, onConnectionLost, onMessageArrived, NULL);
+	if(onConnectResumedCallback == NULL) {
+		callbacks.onConnectResumedCallback = NULL;
+	} else {
+		callbacks.onConnectResumedCallback = onConnectResumedCallback;
+		MQTTAsync_setConnected(client, context, onConnectResumedCallback);
+	}
 
 	conn_opts.keepAliveInterval = options->keepAliveInterval;
 	conn_opts.cleansession = options->cleanSession;
