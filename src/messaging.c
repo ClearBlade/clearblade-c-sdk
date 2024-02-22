@@ -20,7 +20,7 @@ bool operationInProgress = false;
 char *clientID = "";
 int qos = 0;
 
-CbMqttCallbacks callbacks = {NULL, NULL};
+CbMqttCallbacks callbacks = {NULL, NULL, NULL};
 
 CbMqttConnectOptions* getDefaultCbMQTTConnectOptions() {
 	CbMqttConnectOptions* options = malloc(sizeof(CbMqttConnectOptions));
@@ -273,10 +273,10 @@ void connectCbMQTT(void* context, char *clientId, CbMqttConnectOptions *options,
 		callbacks.onConnectResumedCallback = NULL;
 	} else {
 		callbacks.onConnectResumedCallback = onConnectResumedCallback;
-		MQTTAsync_setConnected(client, context, onConnectResumedCallback);
+		MQTTAsync_setConnected(client, context, onConnectionResumed);
 	}
 
-	MQTTAsync_setCallbacks(client, NULL, onConnectionLost, onMessageArrived, NULL);
+	MQTTAsync_setCallbacks(client, context, onConnectionLost, onMessageArrived, NULL);
 
 	conn_opts.keepAliveInterval = options->keepAliveInterval;
 	conn_opts.cleansession = options->cleanSession;
