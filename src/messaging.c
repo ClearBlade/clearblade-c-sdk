@@ -283,16 +283,16 @@ void connectCbMQTT(void* context, char *clientId, CbMqttConnectOptions *options,
 	conn_opts.maxInflight = options->maxInFlight;
 
 	//Add the last will and testament options
-	// if(options->will != NULL) {
-	// 	conn_opts.will = options->will;
-	// }
+	if(options->will != NULL) {
+		conn_opts.will = options->will;
+	}
 
 	conn_opts.username = username;
 	conn_opts.password = password;
 	conn_opts.connectTimeout = options->connectTimeout;
 	conn_opts.retryInterval = options->retryInterval;
 
-		// If protocol is 'ssl' TLS is desired
+	// If protocol is 'ssl' TLS is desired
 	MQTTAsync_SSLOptions ssl_opts = MQTTAsync_SSLOptions_initializer;
 	if (strstr(messagingurl, "ssl://") == messagingurl) {
 		conn_opts.ssl = &ssl_opts;
