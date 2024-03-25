@@ -5,6 +5,7 @@
 #include "request_engine.h"
 #include "util.h"
 #include "concat_strings.h"
+#include "die.h"
 
 
 /**
@@ -45,6 +46,17 @@ size_t writefunc(void *ptr, size_t size, size_t nmemb, struct string *s) {
   * It uses the libCURL library to make the HTTP requests.
 */
 char *executeRequest(struct Header *header) {
+	printf("C SDK - executeRequest\n");
+	return makeRequest(header, "", "");
+}
+
+char *executex509MtlsRequest(struct Header *header, char *certFile, char *keyFile) {
+	printf("C SDK - executex509MtlsRequest\n");
+	return makeRequest(header, certFile, keyFile);
+}
+
+char*makeRequest(struct Header *header, char *certFile, char *keyFile) {
+	printf("C SDK - makeRequest\n");
 	char *systemKeyHeader = getConcatString("ClearBlade-SystemKey: ", header->systemKey); // This is a required header for all calls
 	char *systemSecretHeader = NULL;
 	char *userTokenHeader = NULL;
@@ -99,7 +111,7 @@ char *executeRequest(struct Header *header) {
 		if (collectionIDHeader != NULL) {
 			headers = curl_slist_append(headers, collectionIDHeader);
 		}
-		res = curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
+		curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headers);
 		curl_easy_setopt(curl, CURLOPT_URL, header->url);
 		if (strcmp("POST", header->requestType) == 0) {
 			curl_easy_setopt(curl, CURLOPT_POST, 1L);
@@ -109,16 +121,75 @@ char *executeRequest(struct Header *header) {
 				curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0L); // Send POST without body
 			}
 		}
-		//curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+
+		curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 	  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writefunc);
    	curl_easy_setopt(curl, CURLOPT_WRITEDATA, &s);
    	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
    	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
-		res = curl_easy_perform(curl); // Execute the request
+		if (certFile && certFile[0] != '\0') {
+			// TODO - LEAVE COMMENTED, This requires curl version 7.71.0
+    	// char *substrPtr = strstr(certFile, "BEGIN CERTIFICATE");
+    	// if (substrPtr) {
+			// 	struct curl_blob blob;
 
+			// 	blob.data = certFile;
+  		// 	blob.len = strlen(certFile);
+  		// 	blob.flags = CURL_BLOB_COPY;
+
+			// 	curl_easy_setopt(curl, CURLOPT_SSLCERT_BLOB, &blob);
+			// } else {
+			//END TODO
+				//See if we have a file path
+
+				FILE* filePtr = fopen(certFile, "r");
+    		if (filePtr) {
+					curl_easy_setopt(curl, CURLOPT_SSLCERT, certFile);
+    			fclose(filePtr);
+    		} else {
+    			die("certFile parameter must contain either the contents of an SSL certificate file or the path to the certificate file");
+    		}
+			// TODO - LEAVE COMMENTED
+		 	//}
+			//END TODO
+			curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
+		}
+
+		if (keyFile && keyFile[0] != '\0') {
+			//See if keyFile contains the private key or the path to the private key
+
+			// TODO - LEAVE COMMENTED, This requires curl version 7.71.0
+    	// char *substrPtr = strstr(keyFile, "PRIVATE KEY");
+    	// if (substrPtr) {
+			// 	struct curl_blob blob;
+
+			// 	blob.data = keyFile;
+  		// 	blob.len = strlen(keyFile);
+  		// 	blob.flags = CURL_BLOB_COPY;
+
+			// 	curl_easy_setopt(curl, CURLOPT_SSLKEY_BLOB, &blob);
+			// } else {
+			//END TODO
+				//See if we have a file path
+
+				FILE* filePtr = fopen(keyFile, "r");
+    		if (filePtr) {
+					curl_easy_setopt(curl, CURLOPT_SSLKEY, keyFile);
+    			fclose(filePtr);
+    		} else {
+    			die("keyFile parameter must contain either the contents of a private key file or the path to the private key file");
+    		}
+		// TODO - LEAVE COMMENTED
+		// 	}
+		//END TODO
+			curl_easy_setopt(curl, CURLOPT_SSLKEYTYPE, "PEM");
+		}
+
+		res = curl_easy_perform(curl); // Execute the request
+		
 		if(res != CURLE_OK)
-      		fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+       	fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
 
   	free(systemKeyHeader);
   	if (systemSecretHeader != NULL) {

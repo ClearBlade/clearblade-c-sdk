@@ -1,7 +1,6 @@
 #ifndef _code_h
 #define _code_h
 
-
 /**
   * Function to execute code service without parameters. Service name and codeCallback are required parameters
 */

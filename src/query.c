@@ -166,12 +166,8 @@ void fetch(void (*queryResponse)(bool error, char *result)) {
 		queryResponse(true, "Cannot execute query. Collection ID is NULL. Please initialize the query object first\n");
 	} else {
 		char *param = getFetchURLParameter();
-		char *restEndpointMiddle = "/api/v/1/data/";
-		char *restEndpointTmp1 = getConcatString(getPlatformURL(), restEndpointMiddle);
-		char *restEndpointTmp2 = getConcatString(restEndpointTmp1, queryObj.collectionID);
-		free(restEndpointTmp1);
-		char *restEndpoint = getConcatString(restEndpointTmp2, param);
-		free(restEndpointTmp2);
+		char *restEndpoint = getRestEndpoint();
+		restEndpoint = getConcatString(restEndpoint, param);
 
 		struct Header headers = createHeaders();
 		headers.url = restEndpoint;
@@ -207,11 +203,7 @@ void createItem(char *jsonBody, void (*queryResponse)(bool error, char *result))
 	} else if (queryObj.collectionID == NULL && queryObj.collectionName == NULL) {
 		queryResponse(true, "Cannot execute query. Collection ID and Collection Name are NULL. Please initialize the query object first\n");
 	} else {
-		char *restEndpointMiddle = "/api/v/1/data/";
-		char *restEndpointTmp = getConcatString(getPlatformURL(), restEndpointMiddle);
-		char *restEndpoint = getConcatString(restEndpointTmp, queryObj.collectionID);
-		free(restEndpointTmp);
-
+		char *restEndpoint = getRestEndpoint();
 		struct Header headers = createHeaders();
 		headers.url = restEndpoint;
 		headers.body = jsonBody;
