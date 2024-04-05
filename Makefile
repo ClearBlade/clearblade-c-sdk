@@ -3,11 +3,11 @@ ifndef CC
 endif
 
 ifndef CFLAGS
-    CFLAGS = -g -Wall -fPIC -Wno-error=implicit-function-declaration
+    CFLAGS = -g -Wall -fPIC
 endif
 
 LDFLAGS ?= -shared
-LIBS ?= -lpthread  -ljansson -lcurl -lpaho-mqtt3as
+LIBS ?= -lpthread  -ljson-c -lcurl -lpaho-mqtt3as
 SRC = src
 
 SRCS = $(wildcard $(SRC)/*.c)
@@ -25,12 +25,13 @@ $(TARGET_LIB): $(OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LIBS)
 
 clean:
-	$(RM) $(TARGET_LIB) $(OBJS) $(SRCS:.c=.d)
+	$(RM) $(TARGET_LIB) $(OBJS) $(SRCS:.c=.d) $(PREFIX)/lib/$(TARGET_LIB)
 
 install: $(TARGET_LIB)
 	mkdir -p $(PREFIX)/lib
 	mkdir -p $(PREFIX)/include
 	cp $(TARGET_LIB) $(PREFIX)/lib/$(TARGET_LIB)
-	cp $(SRC)/*.h $(PREFIX)/include/
+	cp $(SRC)/*.h $(PREFIX)/include
 	ldconfig $(PREFIX)/lib
-	rm $(TARGET_LIB)
+	$(RM) $(TARGET_LIB)
+	$(RM) $(OBJS)

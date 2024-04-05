@@ -1,7 +1,6 @@
 #ifndef _query_h
 #define _query_h
 
-
 /**
   * The Query struct which essentially is a query object that holds the collection ID and pointers to query manupulation functions
   * This object is used by the user to call the query functions
@@ -32,5 +31,7 @@ void filters(char *filter);
   * Without this, the user will not be able to call any of the query functions
 */
 struct Query initializeQueryObject(char *collectionID);
+
+struct Query initializeQueryObjectWithCollectionName(char *collectionName);
 
 #endif
