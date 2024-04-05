@@ -1,7 +1,6 @@
 #ifndef _json_parser_h
 #define _json_parser_h
 
-
 /**
   * This functions returns the property value of the passed in property and json string.
   * It uses the Jansson library to parse the JSON.

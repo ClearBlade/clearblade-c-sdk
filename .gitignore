@@ -4,3 +4,5 @@
 # Object files
 *.o
 *.so
+
+.DS_Store
