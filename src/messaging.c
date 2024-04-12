@@ -6,6 +6,7 @@
 #include "MQTTAsync.h"
 #include "util.h"
 #include "messaging.h"
+#include "logger.h"
 
 // TODO - Ideally, we would want separate callbacks for each client. In addition, we would want
 //separate subscribe and publish callbacks for each topic.
@@ -78,7 +79,7 @@ void waitForOperation() {
 }
 
 int onMessageArrived(void *context, char *topicName, int topicLen, MQTTAsync_message *message) {
-	printf("C SDK - onMessageArrived\n");
+	logDebug("C SDK - onMessageArrived\n");
 	if (callbacks.messageArrived != NULL) {
 		return callbacks.messageArrived(context, topicName, topicLen, message);
 	} else {
@@ -87,7 +88,7 @@ int onMessageArrived(void *context, char *topicName, int topicLen, MQTTAsync_mes
 }
 
 void onConnectSuccess(void *context, MQTTAsync_successData *response) {
-	printf("C SDK - onConnectSuccess\n");
+	logDebug("C SDK - onConnectSuccess\n");
 
 	operationInProgress = false;
 
@@ -101,7 +102,7 @@ void onConnectSuccess(void *context, MQTTAsync_successData *response) {
 }
 
 void onConnectFailure(void* context, MQTTAsync_failureData* response) {
-	printf("C SDK - onConnectFailure\n");
+	logError("C SDK - onConnectFailure\n");
 	operationInProgress = false;
 
 	if (context != NULL) {
@@ -114,33 +115,33 @@ void onConnectFailure(void* context, MQTTAsync_failureData* response) {
 }
 
 void onConnectionLost(void *context, char *cause) {
-	printf("\nC SDK - onConnectionLost: MQTT Connection lost, Cause: %s\n", cause);
+	logInfo("\nC SDK - onConnectionLost: MQTT Connection lost, Cause: %s\n", cause);
 	if (callbacks.onConnectionLost != NULL) callbacks.onConnectionLost(context, cause);
 }
 
 void onConnectionResumed(void *context, char *cause) {
-	printf("C SDK - onConnectionResumed\n");
+	logInfo("C SDK - onConnectionResumed\n");
 
 	if (callbacks.onConnectResumedCallback != NULL) callbacks.onConnectResumedCallback(context, cause);
 }
 
 
 void connectToMQTT(char *clientId, int qualityOfService, MQTTAsync_onSuccess* mqttOnConnect, MQTTAsync_messageArrived* messageArrivedCallback) {
-	printf("C SDK - connectToMQTT\n");
+	logDebug("C SDK - connectToMQTT\n");
 	connectToMQTTAdvanced(clientId, qualityOfService, mqttOnConnect, messageArrivedCallback, NULL, false);
 }
 
 void connectToMQTTAdvanced(char *clientId, int qualityOfService, MQTTAsync_onSuccess* mqttOnConnect,
  		MQTTAsync_messageArrived* messageArrivedCallback, MQTTAsync_connectionLost* onConnLostCallback, bool autoReconnect) {
 	
-	printf("C SDK - connectToMQTTAdvanced\n");
+	logDebug("C SDK - connectToMQTTAdvanced\n");
 
 	if (getUserToken() == NULL && getDeviceToken() == NULL) {
-		fprintf(stderr, "connectToMQTT called with unset auth token\n");
+		logError("connectToMQTT called with unset auth token\n");
 		return;
 	}
 	if (qualityOfService < 0 || qualityOfService > 2) {
-		fprintf(stderr, "Quality of service cannot be less than 0 or greater than 2\n");
+		logError("Quality of service cannot be less than 0 or greater than 2\n");
 		return;
 	}
 
@@ -167,7 +168,7 @@ void connectToMQTTAdvanced(char *clientId, int qualityOfService, MQTTAsync_onSuc
 	contextWrapper->onFailure = NULL;
 
 	if (mqttOnConnect == NULL) {
-		printf("mqttOnConnect NULL\n");
+		logError("mqttOnConnect NULL\n");
 		contextWrapper->onSuccess = NULL;
 	} else {
 		contextWrapper->onSuccess = mqttOnConnect;
@@ -206,7 +207,7 @@ void connectToMQTTAdvanced(char *clientId, int qualityOfService, MQTTAsync_onSuc
 	};
 
   if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS) {
-  	printf("Failed to start connect, return code %d\n", rc);
+  	logError("Failed to start connect, return code %d\n", rc);
 		MQTTAsync_destroy(&client);
     return;
   }
@@ -218,11 +219,11 @@ void connectToMQTTAdvanced(char *clientId, int qualityOfService, MQTTAsync_onSuc
 void connectCbMQTT(void* context, char *clientId, CbMqttConnectOptions *options,
  		MQTTAsync_messageArrived* messageArrivedCallback, MQTTAsync_connectionLost* onConnLostCallback, MQTTAsync_connected* onConnectResumedCallback) {
 
-	printf("C SDK - connectCbMQTT\n");
+	logError("C SDK - connectCbMQTT\n");
 
 	//Use https://github.com/hivemq-cloud/paho-C-mqtt-client-example/blob/master/main.c as sample code
 	if (getUserToken() == NULL && getDeviceToken() == NULL) {
-		fprintf(stderr, "connectToMQTT called with unset auth token\n");
+		logError("connectToMQTT called with unset auth token\n");
 		return;
 	}
 
@@ -306,7 +307,7 @@ void connectCbMQTT(void* context, char *clientId, CbMqttConnectOptions *options,
 	//Try to connect to the MQTT client
 	int rc;
   if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS) {
-  	printf("C SDK - Failed to connect to MQTT, return code %d\n", rc);
+  	logError("C SDK - Failed to connect to MQTT, return code %d\n", rc);
 
 		//invoke the callback so that the client is aware of the failure
 		MQTTAsync_failureData* failureData = malloc(sizeof(MQTTAsync_failureData));
@@ -325,7 +326,7 @@ void connectCbMQTT(void* context, char *clientId, CbMqttConnectOptions *options,
 }
 
 void onSubscribeSuccess(void* context, MQTTAsync_successData* response) {
-	printf("C SDK - onSubscribeSuccess\n");
+	logDebug("C SDK - onSubscribeSuccess\n");
 
 	if (context != NULL) {
 		ContextWrapper* contextWrapper = (ContextWrapper*)context;
@@ -337,7 +338,7 @@ void onSubscribeSuccess(void* context, MQTTAsync_successData* response) {
 }
 
 void onSubscribeFailure(void* context, MQTTAsync_failureData* response) {
-	printf("C SDK - onSubscribeFailure\n");
+	logDebug("C SDK - onSubscribeFailure\n");
 	printf("C SDK - Subscribe failed, rc %d\n", response ? response->code : 0);
 
 	if (context != NULL) {
@@ -350,10 +351,10 @@ void onSubscribeFailure(void* context, MQTTAsync_failureData* response) {
 }
 
 void subscribeCbMQTT(void* context, char *topic, int qos, CbMqttResponseOptions* options) {
-	printf("C SDK - cbMQTTSubscribe\n");
+	logDebug("C SDK - cbMQTTSubscribe\n");
 
 	if(mqttClient == NULL) {
-		printf("C SDK - You are not connected to the MQTT Broker. Please invoke connectCbMQTT() first and then try to subscribe\n");
+		logError("C SDK - You are not connected to the MQTT Broker. Please invoke connectCbMQTT() first and then try to subscribe\n");
 		return;
 	}
 
@@ -387,7 +388,7 @@ void subscribeCbMQTT(void* context, char *topic, int qos, CbMqttResponseOptions*
 	responseOpts.onSuccess = onSubscribeSuccess;
 	responseOpts.onFailure = onSubscribeFailure;
 
-	printf("C SDK - Invoking MQTTAsync_subscribe\n");
+	logDebug("C SDK - Invoking MQTTAsync_subscribe\n");
 
 	int rc;
 	if((rc = MQTTAsync_subscribe(mqttClient, topic, qos, &responseOpts)) != MQTTASYNC_SUCCESS) {
@@ -397,13 +398,13 @@ void subscribeCbMQTT(void* context, char *topic, int qos, CbMqttResponseOptions*
 }
 
 void subscribeToTopic(char *topic, int qos) {
-	printf("C SDK - subscribeToTopic\n");
+	logDebug("C SDK - subscribeToTopic\n");
 
 	subscribeCbMQTT(NULL, topic, qos, NULL);
 }
 
 void onPublishSuccess(void* context, MQTTAsync_successData* response) {
-	printf("C SDK - onPublishSuccess\n");
+	logDebug("C SDK - onPublishSuccess\n");
 	operationInProgress = false;
 
 	if (context != NULL) {
@@ -416,7 +417,7 @@ void onPublishSuccess(void* context, MQTTAsync_successData* response) {
 }
 
 void onPublishFailure(void* context, MQTTAsync_failureData* response) {
-	printf("C SDK - onPublishFailure\n");
+	logDebug("C SDK - onPublishFailure\n");
 	printf("C SDK - Publish failed, rc %d\n", response ? response->code : 0);
 	operationInProgress = false;
 
@@ -430,9 +431,9 @@ void onPublishFailure(void* context, MQTTAsync_failureData* response) {
 }
 
 void publishCbMQTT(void* context, char *message, char *topic, int qos, int retained, CbMqttResponseOptions* options) {
-	printf("C SDK - publishCbMQTT\n");
+	logDebug("C SDK - publishCbMQTT\n");
 	if(mqttClient == NULL) {
-		printf("C SDK - You are not connected to the MQTT Broker. Please invoke connectCbMQTT() first and then try to publish\n");
+		logError("C SDK - You are not connected to the MQTT Broker. Please invoke connectCbMQTT() first and then try to publish\n");
 		return;
 	}
 
@@ -476,12 +477,12 @@ void publishCbMQTT(void* context, char *message, char *topic, int qos, int retai
 }
 
 void publishMessage(char *message, char *topic, int qos, int retained) {
-	printf("C SDK - publishMessage\n");
+	logDebug("C SDK - publishMessage\n");
 	publishCbMQTT(NULL, message, topic, qos, retained, NULL);
 }
 
 void onUnsubscribeSuccess(void* context, MQTTAsync_successData* response) {
-	printf("C SDK - onUnsubscribeSuccess\n");
+	logDebug("C SDK - onUnsubscribeSuccess\n");
 
 	if (context != NULL) {
 		ContextWrapper* contextWrapper = (ContextWrapper*)context;
@@ -493,7 +494,7 @@ void onUnsubscribeSuccess(void* context, MQTTAsync_successData* response) {
 }
 
 void onUnsubscribeFailure(void* context, MQTTAsync_failureData* response) {
-	printf("C SDK - onUnsubscribeFailure\n");
+	logDebug("C SDK - onUnsubscribeFailure\n");
 	printf("C SDK - Unsubscribe failed, rc %d\n", response ? response->code : 0);
 
 	if (context != NULL) {
@@ -506,7 +507,7 @@ void onUnsubscribeFailure(void* context, MQTTAsync_failureData* response) {
 }
 
 void unsubscribeCbMQTT(void* context, char *topic, CbMqttResponseOptions* options) {
-	printf("C SDK - unsubscribeCbMQTT\n");
+	logDebug("C SDK - unsubscribeCbMQTT\n");
 	if(mqttClient == NULL) {
 		printf("C SDK - You are not connected to the MQTT Broker. Please call connectCbMQTT() first and then try to unsubscribe\n");
 		return;
@@ -545,12 +546,12 @@ void unsubscribeCbMQTT(void* context, char *topic, CbMqttResponseOptions* option
 }
 
 void unsubscribeFromTopic(char *topic) {
-	printf("C SDK - unsubscribeFromTopic\n");
+	logDebug("C SDK - unsubscribeFromTopic\n");
 	unsubscribeCbMQTT(NULL, topic, NULL);
 }
 
 void onDisconnectSuccess(void* context, MQTTAsync_successData* response) {
-	printf("C SDK - onDisconnectSuccess\n");
+	logDebug("C SDK - onDisconnectSuccess\n");
 	operationInProgress = false;
 
 	if (context != NULL) {
@@ -563,7 +564,7 @@ void onDisconnectSuccess(void* context, MQTTAsync_successData* response) {
 }
 
 void onDisconnectFailure(void* context, MQTTAsync_failureData* response) {
-	printf("C SDK - onDisconnectFailure\n");
+	logDebug("C SDK - onDisconnectFailure\n");
 	printf("MQTT disconnect failed, rc %d\n", response ? response->code : 0);
 	operationInProgress = false;
 
@@ -577,9 +578,9 @@ void onDisconnectFailure(void* context, MQTTAsync_failureData* response) {
 }
 
 void disconnectMQTTClient() {
-	printf("C SDK - disconnectMQTTClient\n");
+	logDebug("C SDK - disconnectMQTTClient\n");
 	if(mqttClient == NULL) {
-		printf("C SDK - You are not connected to the MQTT Broker. Please call connectToMQTT() first and then try to disconnect\n");
+		logError("C SDK - You are not connected to the MQTT Broker. Please call connectToMQTT() first and then try to disconnect\n");
 		exit(-1);
 	}
 
@@ -599,10 +600,10 @@ void disconnectMQTTClient() {
 }
 
 void disconnectCbMQTT(void* context, CbMqttDisconnectOptions *options) {
-	printf("C SDK - disconnectCbMQTT\n");
+	logDebug("C SDK - disconnectCbMQTT\n");
 
 	if(mqttClient == NULL) {
-		printf("C SDK - You are not connected to the MQTT Broker. Please call connectCbMQTT() first and then try to disconnect\n");
+		logError("C SDK - You are not connected to the MQTT Broker. Please call connectCbMQTT() first and then try to disconnect\n");
 		exit(-1);
 	}
 

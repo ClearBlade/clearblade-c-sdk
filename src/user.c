@@ -8,6 +8,7 @@
 #include "util.h"
 #include "request_engine.h"
 #include "concat_strings.h"
+#include "logger.h"
 
 
 /**
@@ -15,7 +16,7 @@
 */
 __attribute__ ((deprecated))
 void parseAuthToken(char *response, void callback(bool error, char *message)) {
-	printf("C SDK - parseAuthToken\n");
+	logDebug("C SDK - parseAuthToken\n");
 
 	char *authToken = (char *) getPropertyValueFromJson(response, "user_token"); // Gets the auth token string from the response json object
     	if (authToken == NULL)
@@ -30,7 +31,7 @@ void parseAuthToken(char *response, void callback(bool error, char *message)) {
   * This function parses the response received from the REST call to authenticate the user to get the auth token.
 */
 void parseCbAuthToken(void* context, char *response, void callback(void* context, bool error, char *message)) {
-	printf("C SDK - parseAuthToken\n");
+	logDebug("C SDK - parseAuthToken\n");
 
 	char *authToken = (char *) getPropertyValueFromJson(response, "user_token"); // Gets the auth token string from the response json object
     	if (authToken == NULL)
@@ -46,7 +47,7 @@ void parseCbAuthToken(void* context, char *response, void callback(void* context
 */
 __attribute__ ((deprecated))
 void authenticateAnonUser(void (*callback)(bool error, char *result)) {
-	printf("C SDK - authenticateAnonUser\n");
+	logDebug("C SDK - authenticateAnonUser\n");
 
 	char *restURL = "/api/v/1/user/anon"; // Anonymous auth REST endpoint
 	restURL = getConcatString(getPlatformURL(), restURL); // Construct complete URL for making the REST call
@@ -71,7 +72,7 @@ void authenticateAnonUser(void (*callback)(bool error, char *result)) {
   * This function gathers all the information required to make a REST call to authenticate the user anonymously
 */
 void authenticateAnonCbUser(void* context, void (*callback)(void* context, bool error, char *result)) {
-	printf("C SDK - authenticateAnonUser\n");
+	logDebug("C SDK - authenticateAnonCbUser\n");
 
 	char *restURL = "/api/v/1/user/anon"; // Anonymous auth REST endpoint
 	restURL = getConcatString(getPlatformURL(), restURL); // Construct complete URL for making the REST call
@@ -97,7 +98,7 @@ void authenticateAnonCbUser(void* context, void (*callback)(void* context, bool 
 */
 __attribute__ ((deprecated))
 void authenticateAuthUser(void (*callback)(bool error, char *result)) {
-	printf("C SDK - authenticateAuthUser\n");
+	logDebug("C SDK - authenticateAuthUser\n");
 
 	char *restEndpoint = "/api/v/1/user/auth"; // Authenticated auth REST endpoint
 	char *platformurl = getPlatformURL();
@@ -139,7 +140,7 @@ void authenticateAuthUser(void (*callback)(bool error, char *result)) {
   * This function gathers all the information required to make a REST call to authenticate the user as a auth user
 */
 void authenticateAuthCbUser(void* context, void (*callback)(void* context, bool error, char *result)) {
-	printf("C SDK - authenticateAuthUser\n");
+	logDebug("C SDK - authenticateAuthCbUser\n");
 
 	char *restEndpoint = "/api/v/1/user/auth"; // Authenticated auth REST endpoint
 	char *platformurl = getPlatformURL();
@@ -182,7 +183,7 @@ void authenticateAuthCbUser(void* context, void (*callback)(void* context, bool 
 */
 __attribute__ ((deprecated))
 void logoutUser(void (*logoutCallback)(bool error, char *result)) {
-	printf("C SDK - logoutUser\n");
+	logDebug("C SDK - logoutUser\n");
 
 	char *restEndpoint = "/api/v/1/user/logout"; // Logout REST endpoint
 	char *platformurl = getPlatformURL();
@@ -212,7 +213,7 @@ void logoutUser(void (*logoutCallback)(bool error, char *result)) {
   * This function logs the user out of the ClearBlade platform. The logout callback is a required parameter and the user has to implement it
 */
 void logoutCbUser(void* context, void (*logoutCallback)(void* context, bool error, char *result)) {
-	printf("C SDK - logoutUser\n");
+	logDebug("C SDK - logoutUser\n");
 
 	char *restEndpoint = "/api/v/1/user/logout"; // Logout REST endpoint
 	char *platformurl = getPlatformURL();
@@ -243,7 +244,7 @@ void logoutCbUser(void* context, void (*logoutCallback)(void* context, bool erro
 */
 __attribute__ ((deprecated))
 void checkAuth(void (*checkAuthCallback)(bool error, char *result)) {
-	printf("C SDK - checkAuth\n");
+	logDebug("C SDK - checkAuth\n");
 
 	char *restEndpoint = "/api/v/1/user/checkauth"; // Checkauth REST endpoint
 	char *platformurl = getPlatformURL();
@@ -274,7 +275,7 @@ void checkAuth(void (*checkAuthCallback)(bool error, char *result)) {
   * This function checks whether the user is authenticated
 */
 void checkCbAuth(void* context, void (*checkAuthCallback)(void* context, bool error, char *result)) {
-	printf("C SDK - checkAuth\n");
+	logDebug("C SDK - checkAuth\n");
 
 	char *restEndpoint = "/api/v/1/user/checkauth"; // Checkauth REST endpoint
 	char *platformurl = getPlatformURL();

@@ -6,6 +6,7 @@
 #include "util.h"
 #include "concat_strings.h"
 #include "die.h"
+#include "logger.h"
 
 
 /**
@@ -15,7 +16,7 @@ void init_string(struct string *s) {
   s->len = 0;
   s->ptr = malloc(s->len+1);
   if (s->ptr == NULL) {
-    fprintf(stderr, "malloc() failed\n");
+		logFatal("malloc() failed\n");
     exit(EXIT_FAILURE);
   }
   s->ptr[0] = '\0';
@@ -29,7 +30,7 @@ size_t writefunc(void *ptr, size_t size, size_t nmemb, struct string *s) {
   size_t new_len = s->len + size*nmemb;
   s->ptr = realloc(s->ptr, new_len+1);
   if (s->ptr == NULL) {
-    fprintf(stderr, "realloc() failed\n");
+		logFatal("malloc() failed\n");
     exit(EXIT_FAILURE);
   }
   memcpy(s->ptr+s->len, ptr, size*nmemb);
@@ -46,17 +47,17 @@ size_t writefunc(void *ptr, size_t size, size_t nmemb, struct string *s) {
   * It uses the libCURL library to make the HTTP requests.
 */
 char *executeRequest(struct Header *header) {
-	printf("C SDK - executeRequest\n");
+	logDebug("C SDK - executeRequest\n");
 	return makeRequest(header, "", "");
 }
 
 char *executex509MtlsRequest(struct Header *header, char *certFile, char *keyFile) {
-	printf("C SDK - executex509MtlsRequest\n");
+	logDebug("C SDK - executex509MtlsRequest\n");
 	return makeRequest(header, certFile, keyFile);
 }
 
 char*makeRequest(struct Header *header, char *certFile, char *keyFile) {
-	printf("C SDK - makeRequest\n");
+	logDebug("C SDK - makeRequest\n");
 	char *systemKeyHeader = getConcatString("ClearBlade-SystemKey: ", header->systemKey); // This is a required header for all calls
 	char *systemSecretHeader = NULL;
 	char *userTokenHeader = NULL;
@@ -189,7 +190,7 @@ char*makeRequest(struct Header *header, char *certFile, char *keyFile) {
 		res = curl_easy_perform(curl); // Execute the request
 		
 		if(res != CURLE_OK)
-       	fprintf(stderr, "curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+       	logError("curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
 
   	free(systemKeyHeader);
   	if (systemSecretHeader != NULL) {

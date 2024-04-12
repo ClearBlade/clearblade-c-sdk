@@ -8,9 +8,10 @@
 #include "util.h"
 #include "request_engine.h"
 #include "concat_strings.h"
+#include "logger.h"
 
 void authenticateDevice(void callback(bool error, char *result)) {
-	printf("C SDK - authenticateDevice\n");
+	logDebug("C SDK - authenticateDevice\n");
 
 	char *restURLTmp1 = getConcatString("/api/v/2/devices/", getSystemKey());
 	char *restURLTmp2 = getConcatString(restURLTmp1, "/auth");
@@ -55,7 +56,7 @@ void authenticateDevice(void callback(bool error, char *result)) {
 }
 
 void authenticateCbDevice(void *context, void callback(void *context, bool error, char *result)) {
-	printf("C SDK - authenticateCbDevice\n");
+	logDebug("C SDK - authenticateCbDevice\n");
 
 	char *restURLTmp1 = getConcatString("/api/v/2/devices/", getSystemKey());
 	char *restURLTmp2 = getConcatString(restURLTmp1, "/auth");
@@ -101,7 +102,7 @@ void authenticateCbDevice(void *context, void callback(void *context, bool error
 }
 
 void authenticateDeviceX509(void *context, void callback(void *context, bool error, char *result)) {
-	printf("C SDK - authenticateDeviceX509\n");
+	logDebug("C SDK - authenticateDeviceX509\n");
 	char *restURL = getConcatString(getPlatformURL(), ":444/api/v/4/devices/mtls/auth");
 
 	char *deviceNameParam = getConcatString("{\"name\":\"", getUserEmail());

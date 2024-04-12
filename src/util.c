@@ -16,6 +16,7 @@ char *PASSWORD = NULL;
 char *CERT_FILE = NULL;
 char *KEY_FILE = NULL;
 char *DEVICE_TOKEN = NULL;
+char *LOG_LEVEL = "NONE"; //DEBUG, INFO, ERROR, FATAL, NONE
 
 void setSystemKey(char *systemKey) {
 	SYSTEM_KEY = systemKey;
@@ -57,6 +58,10 @@ void setDeviceToken(char *token) {
 	DEVICE_TOKEN = token;
 }
 
+void setLogLevel(char *level) {
+	LOG_LEVEL = level;
+}
+
 char *getSystemKey() {
 	return SYSTEM_KEY;
 }
@@ -95,4 +100,8 @@ char *getUserToken() {
 
 char *getDeviceToken() {
 	return DEVICE_TOKEN;
+}
+
+char *getLogLevel() {
+	return LOG_LEVEL;
 }
