@@ -14,6 +14,7 @@ extern char *PLATFORM_URL;
 extern char *MESSAGING_URL;
 extern char *EMAIL;
 extern char *PASSWORD;
+extern char *LOG_LEVEL;
 
 void setSystemKey(char *systemKey);
 void setSystemSecret(char *systemSecret);
@@ -25,6 +26,7 @@ void setCertFile(char *certFile);
 void setKeyFile(char *keyFile);
 void setUserToken(char *token);
 void setDeviceToken(char *token);
+void setLogLevel(char *level);
 char *getSystemKey();
 char *getSystemSecret();
 char *getPlatformURL();
@@ -35,5 +37,6 @@ char *getCertFile();
 char *getKeyFile();
 char *getUserToken();
 char *getDeviceToken();
+char *getLogLevel();
 
 #endif
