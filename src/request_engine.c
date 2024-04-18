@@ -155,18 +155,16 @@ char*makeRequest(struct Header *header, char *certFile, char *keyFile) {
 		if (keyFile && keyFile[0] != '\0') {
 			//See if keyFile contains the private key or the path to the private key
 
-			// TODO - LEAVE COMMENTED, This requires curl version 7.71.0
-    	// char *substrPtr = strstr(keyFile, "PRIVATE KEY");
-    	// if (substrPtr) {
-			// 	struct curl_blob blob;
+    	char *substrPtr = strstr(keyFile, "PRIVATE KEY");
+    	if (substrPtr) {
+				struct curl_blob blob;
 
-			// 	blob.data = keyFile;
-  		// 	blob.len = strlen(keyFile);
-  		// 	blob.flags = CURL_BLOB_COPY;
+				blob.data = keyFile;
+  			blob.len = strlen(keyFile);
+  			blob.flags = CURL_BLOB_COPY;
 
-			// 	curl_easy_setopt(curl, CURLOPT_SSLKEY_BLOB, &blob);
-			// } else {
-			//END TODO
+				curl_easy_setopt(curl, CURLOPT_SSLKEY_BLOB, &blob);
+			} else {
 				//See if we have a file path
 
 				FILE* filePtr = fopen(keyFile, "r");
@@ -176,9 +174,7 @@ char*makeRequest(struct Header *header, char *certFile, char *keyFile) {
     		} else {
     			die("keyFile parameter must contain either the contents of a private key file or the path to the private key file");
     		}
-		// TODO - LEAVE COMMENTED
-		// 	}
-		//END TODO
+		 	}
 			curl_easy_setopt(curl, CURLOPT_SSLKEYTYPE, "PEM");
 		}
 
