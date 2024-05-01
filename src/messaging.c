@@ -86,7 +86,9 @@ void _sdk_onConnectionSuccess(void *context, MQTTAsync_successData *response) {
 		if (contextWrapper->onSuccess != NULL) {
 			contextWrapper->onSuccess(contextWrapper->context, response);
 		}
-		free(contextWrapper);
+		//TODO - The context passed to the MQTTAsync_connect function appears to be passed to
+		//all of the connect callbacks. We need to figure out how and when to free it.
+		//free(contextWrapper);
 	}
 }
 
@@ -98,41 +100,38 @@ void _sdk_onConnectionFailure(void* context, MQTTAsync_failureData* response) {
 		if (contextWrapper->onFailure != NULL) {
 			contextWrapper->onFailure(contextWrapper->context, response);
 		}
-		free(contextWrapper);
+		//TODO - The context passed to the MQTTAsync_connect function appears to be passed to
+		//all of the connect callbacks. We need to figure out how and when to free it.
+		//free(contextWrapper);
 	}
 }
 
 void _sdk_onConnectionLost(void *context, char *cause) {
 	printf("\nC SDK - _sdk_onConnectionLost: MQTT Connection lost, Cause: %s\n", cause);
 
-	void *theContext = NULL;
-
-	if (context != NULL) {
-		ContextWrapper* contextWrapper = (ContextWrapper*)context;
-		if(contextWrapper->context != NULL) theContext = contextWrapper->context;
-		free(contextWrapper);
-	}
-
 	if (callbacks.onConnectionLost != NULL) {
-		if (theContext != NULL) callbacks.onConnectionLost(theContext, cause);
+		ContextWrapper* contextWrapper = (ContextWrapper*)context;
+		if(contextWrapper->context != NULL) callbacks.onConnectionLost(contextWrapper->context, cause);
 		else callbacks.onConnectionLost(NULL, cause);
+
+		//TODO - The context passed to the MQTTAsync_connect function appears to be passed to
+		//all of the connect callbacks. We need to figure out how and when to free it.
+		//free(contextWrapper);
 	}
 }
 
 void _sdk_onConnectionResumed(void *context, char *cause) {
 	printf("C SDK - _sdk_onConnectionResumed\n");
-	void *theContext = NULL;
-
-	if (context != NULL) {
-		ContextWrapper* contextWrapper = (ContextWrapper*)context;
-		if(contextWrapper->context != NULL) theContext = contextWrapper->context;
-		printf("Context received: %s\n", (char*)theContext);
-		//free(contextWrapper); //This causes malloc: *** error for object 0x1369040c0: pointer being freed was not allocated
-	}
 
 	if (callbacks.onConnectResumedCallback != NULL) {
-		if (theContext != NULL) callbacks.onConnectResumedCallback(theContext, cause);
+		ContextWrapper* contextWrapper = (ContextWrapper*)context;
+
+		if (contextWrapper->context != NULL) callbacks.onConnectResumedCallback(contextWrapper->context, cause);
 		else callbacks.onConnectResumedCallback(NULL, cause);
+
+		//TODO - The context passed to the MQTTAsync_connect function appears to be passed to
+		//all of the connect callbacks. We need to figure out how and when to free it.
+		//free(contextWrapper);
 	}
 }
 
@@ -345,14 +344,11 @@ void connectCbMQTT(void* context, char *clientId, CbMqttConnectOptions *options,
 void _sdk_onSubscribeSuccess(void* context, MQTTAsync_successData* response) {
 	printf("C SDK - _sdk_onSubscribeSuccess\n");
 
-	void *theContext = NULL;
-
 	if (context != NULL) {
 		ContextWrapper* contextWrapper = (ContextWrapper*)context;
-		if(contextWrapper->context != NULL) theContext = contextWrapper->context;
 
 		if (contextWrapper->onSuccess != NULL) {
-			contextWrapper->onSuccess(theContext, response);
+			contextWrapper->onSuccess(contextWrapper->context, response);
 		}
 		free(contextWrapper);
 	}
@@ -362,14 +358,11 @@ void _sdk_onSubscribeFailure(void* context, MQTTAsync_failureData* response) {
 	printf("C SDK - _sdk_onSubscribeFailure\n");
 	printf("C SDK - Subscribe failed, rc %d\n", response ? response->code : 0);
 
-	void *theContext = NULL;
-
 	if (context != NULL) {
 		ContextWrapper* contextWrapper = (ContextWrapper*)context;
-		if(contextWrapper->context != NULL) theContext = contextWrapper->context;
 
 		if (contextWrapper->onFailure != NULL) {
-			contextWrapper->onFailure(theContext, response);
+			contextWrapper->onFailure(contextWrapper->context, response);
 		}
 		free(contextWrapper);
 	}
@@ -431,14 +424,10 @@ void subscribeToTopic(char *topic, int qos) {
 void _sdk_onPublishSuccess(void* context, MQTTAsync_successData* response) {
 	printf("C SDK - _sdk_onPublishSuccess\n");
 
-	void *theContext = NULL;
-
 	if (context != NULL) {
 		ContextWrapper* contextWrapper = (ContextWrapper*)context;
-		if(contextWrapper->context != NULL) theContext = contextWrapper->context;
-
 		if (contextWrapper->onSuccess != NULL) {
-			contextWrapper->onSuccess(theContext, response);
+			contextWrapper->onSuccess(contextWrapper->context, response);
 		}
 		free(contextWrapper);
 	}
@@ -448,14 +437,10 @@ void _sdk_onPublishFailure(void* context, MQTTAsync_failureData* response) {
 	printf("C SDK - _sdk_onPublishFailure\n");
 	printf("C SDK - Publish failed, rc %d\n", response ? response->code : 0);
 
-	void *theContext = NULL;
-
 	if (context != NULL) {
 		ContextWrapper* contextWrapper = (ContextWrapper*)context;
-		if(contextWrapper->context != NULL) theContext = contextWrapper->context;
-
 		if (contextWrapper->onFailure != NULL) {
-			contextWrapper->onFailure(theContext, response);
+			contextWrapper->onFailure(contextWrapper->context, response);
 		}
 		free(contextWrapper);
 	}
