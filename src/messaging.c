@@ -16,7 +16,6 @@ typedef struct {
 } ContextWrapper;
 
 MQTTAsync mqttClient = NULL;
-bool operationInProgress = false;
 int qos = 0;
 
 CbMqttCallbacks callbacks = {NULL, NULL, NULL};
@@ -63,18 +62,11 @@ CbMqttSubscribeOptions* getDefaultCbMQTTSubscribeOptions() {
 
 CbMqttResponseOptions* getDefaultCbMQTTResponseOptions() {
 	CbMqttResponseOptions* options = malloc(sizeof(CbMqttResponseOptions));
-
 	options->onSuccess = NULL;
 	options->onFailure = NULL;
 	options->subscribeOptions = NULL;
 
 	return options;
-}
-
-void waitForOperation() {
-	while(operationInProgress == true) {
-	}
-	operationInProgress = true;
 }
 
 int _sdk_onMessageArrived(void *context, char *topicName, int topicLen, MQTTAsync_message *message) {
@@ -89,31 +81,24 @@ int _sdk_onMessageArrived(void *context, char *topicName, int topicLen, MQTTAsyn
 void _sdk_onConnectionSuccess(void *context, MQTTAsync_successData *response) {
 	printf("C SDK - _sdk_onConnectionSuccess\n");
 
-printf("context address: %p\n", (void *)context);
-
-	operationInProgress = false;
-
 	if (context != NULL) {
 		ContextWrapper* contextWrapper = (ContextWrapper*)context;
-		printf("contextWrapper->context address: %p\n", (void *)contextWrapper->context);
-
 		if (contextWrapper->onSuccess != NULL) {
 			contextWrapper->onSuccess(contextWrapper->context, response);
 		}
-		//free(contextWrapper);
+		free(contextWrapper);
 	}
 }
 
 void _sdk_onConnectionFailure(void* context, MQTTAsync_failureData* response) {
 	printf("C SDK - _sdk_onConnectionFailure\n");
-	operationInProgress = false;
 
 	if (context != NULL) {
 		ContextWrapper* contextWrapper = (ContextWrapper*)context;
 		if (contextWrapper->onFailure != NULL) {
 			contextWrapper->onFailure(contextWrapper->context, response);
 		}
-		//free(contextWrapper);
+		free(contextWrapper);
 	}
 }
 
@@ -125,7 +110,7 @@ void _sdk_onConnectionLost(void *context, char *cause) {
 	if (context != NULL) {
 		ContextWrapper* contextWrapper = (ContextWrapper*)context;
 		if(contextWrapper->context != NULL) theContext = contextWrapper->context;
-		//free(contextWrapper);
+		free(contextWrapper);
 	}
 
 	if (callbacks.onConnectionLost != NULL) {
@@ -142,7 +127,7 @@ void _sdk_onConnectionResumed(void *context, char *cause) {
 		ContextWrapper* contextWrapper = (ContextWrapper*)context;
 		if(contextWrapper->context != NULL) theContext = contextWrapper->context;
 		printf("Context received: %s\n", (char*)theContext);
-		//free(contextWrapper);
+		//free(contextWrapper); //This causes malloc: *** error for object 0x1369040c0: pointer being freed was not allocated
 	}
 
 	if (callbacks.onConnectResumedCallback != NULL) {
@@ -188,7 +173,12 @@ void connectToMQTTAdvanced(char *clientId, int qualityOfService, MQTTAsync_onSuc
 	MQTTAsync_create(&client, messagingurl, clientId, MQTTCLIENT_PERSISTENCE_NONE, NULL);
 	
 	//Set callbacks
-	ContextWrapper* contextWrapper = &(ContextWrapper){NULL, NULL, NULL};
+	//We have to use malloc so that the struct is allocated on the heap and not lost when the
+	//function exits
+	ContextWrapper* contextWrapper = (ContextWrapper*)malloc(sizeof(ContextWrapper));
+	contextWrapper->context = NULL;
+	contextWrapper->onSuccess = NULL;
+	contextWrapper->onFailure = NULL;
 
 	if (mqttOnConnect != NULL) {
 		contextWrapper->onSuccess = mqttOnConnect;
@@ -225,13 +215,12 @@ void connectToMQTTAdvanced(char *clientId, int qualityOfService, MQTTAsync_onSuc
 		conn_opts.ssl = &ssl_opts;
 	};
 
-  	if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS) {
-  		printf("Failed to start connect, return code %d\n", rc);
+  if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS) {
+  	printf("Failed to start connect, return code %d\n", rc);
 		MQTTAsync_destroy(&client);
-    	return;
-  	}
+    return;
+  }
 
-	waitForOperation();
 	mqttClient = client;
 }
 
@@ -254,15 +243,16 @@ void connectCbMQTT(void* context, char *clientId, CbMqttConnectOptions *options,
 	}
 
 	//Populate context wrapper
-	ContextWrapper* contextWrapper = &(ContextWrapper){NULL, NULL, NULL};
-	printf("context address: %p\n", (void *)context);
-
+	//We have to use malloc so that the struct is allocated on the heap and not lost when the
+	//function exits
+	ContextWrapper* contextWrapper = (ContextWrapper*)malloc(sizeof(ContextWrapper));
+	contextWrapper->context = NULL;
+	contextWrapper->onSuccess = NULL;
+	contextWrapper->onFailure = NULL;
 
 	if (context != NULL) {
 		contextWrapper->context = context;
 	}
-
-printf("contextWrapper->context address: %p\n", (void *)contextWrapper->context);
 
 	if (options->onSuccess != NULL) {
 		contextWrapper->onSuccess = options->onSuccess;
@@ -272,10 +262,10 @@ printf("contextWrapper->context address: %p\n", (void *)contextWrapper->context)
 		contextWrapper->onFailure = options->onFailure;
 	}
 
-  	if ((rc = MQTTAsync_create(&client, messagingurl, clientId, MQTTCLIENT_PERSISTENCE_NONE, NULL)) != MQTTASYNC_SUCCESS) {
-    	printf("Failed to create client, return code %d\n", rc);
-    	return;
-  	}
+  if ((rc = MQTTAsync_create(&client, messagingurl, clientId, MQTTCLIENT_PERSISTENCE_NONE, NULL)) != MQTTASYNC_SUCCESS) {
+    printf("Failed to create client, return code %d\n", rc);
+  	return;
+  }
 
 	//Populate the callbacks
 	if(onConnLostCallback == NULL) {
@@ -297,11 +287,11 @@ printf("contextWrapper->context address: %p\n", (void *)contextWrapper->context)
 		MQTTAsync_setConnected(client, contextWrapper, _sdk_onConnectionResumed);
 	}
 
-  	if ((rc = MQTTAsync_setCallbacks(client, contextWrapper, _sdk_onConnectionLost, _sdk_onMessageArrived, NULL)) != MQTTASYNC_SUCCESS) {
-    	printf("Failed to set callbacks, return code %d\n", rc);
-    	MQTTAsync_destroy(&client);
+  if ((rc = MQTTAsync_setCallbacks(client, contextWrapper, _sdk_onConnectionLost, _sdk_onMessageArrived, NULL)) != MQTTASYNC_SUCCESS) {
+    printf("Failed to set callbacks, return code %d\n", rc);
+  	MQTTAsync_destroy(&client);
 		return;
-  	}
+	}
 
 	//Create MQTT connection options
 	MQTTAsync_connectOptions conn_opts = MQTTAsync_connectOptions_initializer;
@@ -334,8 +324,8 @@ printf("contextWrapper->context address: %p\n", (void *)contextWrapper->context)
 	conn_opts.maxRetryInterval = options->maxRetryInterval;
 
 	//Try to connect to the MQTT client
-  	if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS) {
-  		printf("C SDK - Failed to connect to MQTT, return code %d\n", rc);
+  if ((rc = MQTTAsync_connect(client, &conn_opts)) != MQTTASYNC_SUCCESS) {
+  	printf("C SDK - Failed to connect to MQTT, return code %d\n", rc);
 
 		//invoke the callback so that the client is aware of the failure
 		MQTTAsync_failureData* failureData = malloc(sizeof(MQTTAsync_failureData));
@@ -345,32 +335,26 @@ printf("contextWrapper->context address: %p\n", (void *)contextWrapper->context)
 
 		_sdk_onConnectionFailure(contextWrapper, failureData);
 
-		MQTTAsync_destroy(&client);
-		//free(failureData);
-    	return;
-  	}
+		MQTTAsync_destroy(&client);		
+    return;
+  }
 	
-	waitForOperation();
 	mqttClient = client;
 }
 
 void _sdk_onSubscribeSuccess(void* context, MQTTAsync_successData* response) {
 	printf("C SDK - _sdk_onSubscribeSuccess\n");
-	printf("context address: %p\n", (void *)context);
 
 	void *theContext = NULL;
 
 	if (context != NULL) {
 		ContextWrapper* contextWrapper = (ContextWrapper*)context;
-		printf("contextWrapper->context address: %p\n", (void *)(contextWrapper->context));
-
 		if(contextWrapper->context != NULL) theContext = contextWrapper->context;
-		printf("Context in theContext: %s\n", (char*)theContext);
 
 		if (contextWrapper->onSuccess != NULL) {
 			contextWrapper->onSuccess(theContext, response);
 		}
-		//free(contextWrapper);
+		free(contextWrapper);
 	}
 }
 
@@ -387,7 +371,7 @@ void _sdk_onSubscribeFailure(void* context, MQTTAsync_failureData* response) {
 		if (contextWrapper->onFailure != NULL) {
 			contextWrapper->onFailure(theContext, response);
 		}
-		//free(contextWrapper);
+		free(contextWrapper);
 	}
 }
 
@@ -400,16 +384,16 @@ void subscribeCbMQTT(void* context, char *topic, int qos, CbMqttResponseOptions*
 	}
 
 	MQTTAsync_responseOptions responseOpts = MQTTAsync_responseOptions_initializer;
-	ContextWrapper* contextWrapper = &(ContextWrapper){NULL, NULL, NULL};
-
-	printf("context address: %p\n", (void *)context);
-	printf("contextWrapper address: %p\n", (void *)contextWrapper);
+	//We have to use malloc so that the struct is allocated on the heap and not lost when the
+	//function exits
+	ContextWrapper* contextWrapper = (ContextWrapper*)malloc(sizeof(ContextWrapper));
+	contextWrapper->context = NULL;
+	contextWrapper->onSuccess = NULL;
+	contextWrapper->onFailure = NULL;
 
 	if (context != NULL) {
 		contextWrapper->context = context;
 	}
-
-	printf("contextWrapper->context address: %p\n", (void *)contextWrapper->context);
 
 	//Set callbacks
 	if (options != NULL) {
@@ -431,10 +415,6 @@ void subscribeCbMQTT(void* context, char *topic, int qos, CbMqttResponseOptions*
 	responseOpts.onSuccess = _sdk_onSubscribeSuccess;
 	responseOpts.onFailure = _sdk_onSubscribeFailure;
 
-	printf("responseOpts.context address: %p\n", (void *)responseOpts.context);
-
-	printf("Context in responseOpts: %s\n", (char*)(((ContextWrapper*)responseOpts.context)->context));
-
 	int rc;
 	if((rc = MQTTAsync_subscribe(mqttClient, topic, qos, &responseOpts)) != MQTTASYNC_SUCCESS) {
 		printf("Failed to subscribe to topic, return code %d\n", rc);
@@ -450,40 +430,34 @@ void subscribeToTopic(char *topic, int qos) {
 
 void _sdk_onPublishSuccess(void* context, MQTTAsync_successData* response) {
 	printf("C SDK - _sdk_onPublishSuccess\n");
-	operationInProgress = false;
-
-	printf("context address: %p\n", (void *)context);
 
 	void *theContext = NULL;
 
 	if (context != NULL) {
 		ContextWrapper* contextWrapper = (ContextWrapper*)context;
 		if(contextWrapper->context != NULL) theContext = contextWrapper->context;
-		printf("Context in context wrapper: %s\n", (char*)theContext);
 
 		if (contextWrapper->onSuccess != NULL) {
 			contextWrapper->onSuccess(theContext, response);
 		}
-		//free(contextWrapper);
+		free(contextWrapper);
 	}
 }
 
 void _sdk_onPublishFailure(void* context, MQTTAsync_failureData* response) {
 	printf("C SDK - _sdk_onPublishFailure\n");
 	printf("C SDK - Publish failed, rc %d\n", response ? response->code : 0);
-	operationInProgress = false;
 
 	void *theContext = NULL;
 
 	if (context != NULL) {
 		ContextWrapper* contextWrapper = (ContextWrapper*)context;
 		if(contextWrapper->context != NULL) theContext = contextWrapper->context;
-		printf("Context in context wrapper: %s\n", (char*)theContext);
 
 		if (contextWrapper->onFailure != NULL) {
 			contextWrapper->onFailure(theContext, response);
 		}
-		//free(contextWrapper);
+		free(contextWrapper);
 	}
 }
 
@@ -502,17 +476,16 @@ void publishCbMQTT(void* context, char *message, char *topic, int qos, int retai
 	pubmsg.qos = qos;
 	pubmsg.retained = retained;
 
-	ContextWrapper* contextWrapper = &(ContextWrapper){NULL, NULL, NULL};
-
-	printf("context address: %p\n", (void *)context);
-	printf("contextWrapper address: %p\n", (void *)contextWrapper);
+	//We have to use malloc so that the struct is allocated on the heap and not lost when the
+	//function exits
+	ContextWrapper* contextWrapper = (ContextWrapper*)malloc(sizeof(ContextWrapper));
+	contextWrapper->context = NULL;
+	contextWrapper->onSuccess = NULL;
+	contextWrapper->onFailure = NULL;
 
 	if (context != NULL) {
 		contextWrapper->context = context;
-		printf("Context in context wrapper: %s\n", (char*)contextWrapper->context);
 	}
-
-	printf("context address: %p\n", (void *)context);
 
 	//Set callbacks
 	if (options != NULL) {
@@ -528,10 +501,6 @@ void publishCbMQTT(void* context, char *message, char *topic, int qos, int retai
 	opts.context = contextWrapper;
 	opts.onSuccess = _sdk_onPublishSuccess;
 	opts.onFailure = _sdk_onPublishFailure;
-
-	printf("opts.context address: %p\n", (void *)opts.context);
-
-	printf("Context in opts: %s\n", (char*)((ContextWrapper*)opts.context)->context);
 
 	int rc;
 	if ((rc = MQTTAsync_sendMessage(mqttClient, topic, &pubmsg, &opts)) != MQTTASYNC_SUCCESS) {
@@ -553,7 +522,7 @@ void _sdk_onUnsubscribeSuccess(void* context, MQTTAsync_successData* response) {
 		if (contextWrapper->onSuccess != NULL) {
 			contextWrapper->onSuccess(contextWrapper->context, response);
 		}
-		//free(contextWrapper);
+		free(contextWrapper);
 	}
 }
 
@@ -566,7 +535,7 @@ void _sdk_onUnsubscribeFailure(void* context, MQTTAsync_failureData* response) {
 		if (contextWrapper->onFailure != NULL) {
 			contextWrapper->onFailure(contextWrapper->context, response);
 		}
-		//free(contextWrapper);
+		free(contextWrapper);
 	}
 }
 
@@ -578,7 +547,12 @@ void unsubscribeCbMQTT(void* context, char *topic, CbMqttResponseOptions* option
 	}
 
 	MQTTAsync_responseOptions opts = MQTTAsync_responseOptions_initializer;
-	ContextWrapper* contextWrapper = &(ContextWrapper){NULL, NULL, NULL};
+	//We have to use malloc so that the struct is allocated on the heap and not lost when the
+	//function exits
+	ContextWrapper* contextWrapper = (ContextWrapper*)malloc(sizeof(ContextWrapper));
+	contextWrapper->context = NULL;
+	contextWrapper->onSuccess = NULL;
+	contextWrapper->onFailure = NULL;
 
 	if (context != NULL) {
 		contextWrapper->context = context;
@@ -601,8 +575,8 @@ void unsubscribeCbMQTT(void* context, char *topic, CbMqttResponseOptions* option
 
 	int rc;
 	if((rc = MQTTAsync_unsubscribe(mqttClient, topic, &opts)) != MQTTASYNC_SUCCESS) {
-	        printf("Failed to start unsubscribe, return code %d\n", rc);
-	        return;
+	  printf("Failed to start unsubscribe, return code %d\n", rc);
+	  return;
 	}
 }
 
@@ -613,28 +587,27 @@ void unsubscribeFromTopic(char *topic) {
 
 void _sdk_onDisconnectSuccess(void* context, MQTTAsync_successData* response) {
 	printf("C SDK - _sdk_onDisconnectSuccess\n");
-	operationInProgress = false;
 
 	if (context != NULL) {
 		ContextWrapper* contextWrapper = (ContextWrapper*)context;
 		if (contextWrapper->onSuccess != NULL) {
 			contextWrapper->onSuccess(contextWrapper->context, response);
 		}
-		//free(contextWrapper);
+		free(contextWrapper);
+		MQTTAsync_destroy(&mqttClient);
 	}
 }
 
 void _sdk_onDisconnectFailure(void* context, MQTTAsync_failureData* response) {
 	printf("C SDK - _sdk_onDisconnectFailure\n");
 	printf("MQTT disconnect failed, rc %d\n", response ? response->code : 0);
-	operationInProgress = false;
 
 	if (context != NULL) {
 		ContextWrapper* contextWrapper = (ContextWrapper*)context;
 		if (contextWrapper->onFailure != NULL) {
 			contextWrapper->onFailure(contextWrapper->context, response);
 		}
-		//free(contextWrapper);
+		free(contextWrapper);
 	}
 }
 
@@ -654,10 +627,6 @@ void disconnectMQTTClient() {
 	        printf("Failed to start disconnect, return code %d\n", rc);
 	        return;
 	}
-
-	//waitForOperation();
-	MQTTAsync_destroy(&mqttClient); //This causes a segmentation fault. Not sure why.
-	//mqttClient = NULL;
 }
 
 void disconnectCbMQTT(void* context, CbMqttDisconnectOptions *options) {
@@ -670,7 +639,12 @@ void disconnectCbMQTT(void* context, CbMqttDisconnectOptions *options) {
 
 	int rc;
 	MQTTAsync_disconnectOptions disc_opts = MQTTAsync_disconnectOptions_initializer;
-	ContextWrapper* contextWrapper = &(ContextWrapper){NULL, NULL, NULL};
+	//We have to use malloc so that the struct is allocated on the heap and not lost when the
+	//function exits
+	ContextWrapper* contextWrapper = (ContextWrapper*)malloc(sizeof(ContextWrapper));
+	contextWrapper->context = NULL;
+	contextWrapper->onSuccess = NULL;
+	contextWrapper->onFailure = NULL;
 
 	if (context != NULL) {
 		contextWrapper->context = context;
@@ -688,15 +662,9 @@ void disconnectCbMQTT(void* context, CbMqttDisconnectOptions *options) {
 	}
 	disc_opts.onFailure = _sdk_onDisconnectFailure;
 	disc_opts.context = contextWrapper;
-
-	operationInProgress = true;
 	
 	if((rc = MQTTAsync_disconnect(mqttClient, &disc_opts)) != MQTTASYNC_SUCCESS) {
 	  printf("C SDK - Failed to start disconnect, return code %d\n", rc);
 	  return;
 	}
-
-	//waitForOperation();
-	MQTTAsync_destroy(&mqttClient); //This causes a segmentation fault. Not sure why.
-	//mqttClient = NULL;
 }
