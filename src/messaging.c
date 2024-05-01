@@ -286,7 +286,7 @@ void connectCbMQTT(void* context, char *clientId, CbMqttConnectOptions *options,
 		MQTTAsync_setConnected(client, contextWrapper, _sdk_onConnectionResumed);
 	}
 
-  if ((rc = MQTTAsync_setCallbacks(client, contextWrapper, _sdk_onConnectionLost, _sdk_onMessageArrived, NULL)) != MQTTASYNC_SUCCESS) {
+	if ((rc = MQTTAsync_setCallbacks(client, contextWrapper, _sdk_onConnectionLost, _sdk_onMessageArrived, NULL)) != MQTTASYNC_SUCCESS) {
     printf("Failed to set callbacks, return code %d\n", rc);
   	MQTTAsync_destroy(&client);
 		return;
@@ -336,9 +336,10 @@ void connectCbMQTT(void* context, char *clientId, CbMqttConnectOptions *options,
 
 		MQTTAsync_destroy(&client);		
     return;
-  }
+	}
 	
 	mqttClient = client;
+	free(options);
 }
 
 void _sdk_onSubscribeSuccess(void* context, MQTTAsync_successData* response) {
@@ -413,6 +414,7 @@ void subscribeCbMQTT(void* context, char *topic, int qos, CbMqttResponseOptions*
 		printf("Failed to subscribe to topic, return code %d\n", rc);
 		return;
 	}
+	free(options);
 }
 
 void subscribeToTopic(char *topic, int qos) {
@@ -492,6 +494,7 @@ void publishCbMQTT(void* context, char *message, char *topic, int qos, int retai
 		printf("Failed to publish message, return code %d\n", rc);
 		return;
 	}
+	free(options);
 }
 
 void publishMessage(char *message, char *topic, int qos, int retained) {
@@ -563,6 +566,7 @@ void unsubscribeCbMQTT(void* context, char *topic, CbMqttResponseOptions* option
 	  printf("Failed to start unsubscribe, return code %d\n", rc);
 	  return;
 	}
+	free(options);
 }
 
 void unsubscribeFromTopic(char *topic) {
@@ -649,7 +653,8 @@ void disconnectCbMQTT(void* context, CbMqttDisconnectOptions *options) {
 	disc_opts.context = contextWrapper;
 	
 	if((rc = MQTTAsync_disconnect(mqttClient, &disc_opts)) != MQTTASYNC_SUCCESS) {
-	  printf("C SDK - Failed to start disconnect, return code %d\n", rc);
-	  return;
+		printf("C SDK - Failed to start disconnect, return code %d\n", rc);
+		free(contextWrapper);
 	}
+	free(options);
 }
