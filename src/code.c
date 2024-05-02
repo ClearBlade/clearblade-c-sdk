@@ -7,12 +7,13 @@
 #include "concat_strings.h"
 #include "json_parser.h"
 #include "code.h"
+#include "log.h"
 
 /**
   * This function makes a REST call to execute the code service specified by the user and returns the response to the codeCallback
 */
 void execute(char *name, char *params, void codeCallback(bool error, char *result)) {
-	printf("C SDK - execute\n");
+	log_trace("C SDK - execute\n");
 
 	char *restURLTmp1 = getConcatString("/api/v/1/code/", getSystemKey()); // REST endpoint to execute code service
 	char *restURLTmp2 = getConcatString(restURLTmp1, "/");
@@ -54,7 +55,7 @@ void execute(char *name, char *params, void codeCallback(bool error, char *resul
   * Function to execute code service without parameters. Service name and codeCallback are required parameters
 */
 void executeCodeServiceWithoutParams(char *serviceName, void (*codeCallback)(bool error, char *result)) {
-	printf("C SDK - executeCodeServiceWithoutParams\n");
+	log_trace("C SDK - executeCodeServiceWithoutParams\n");
 
 	char *userAuthToken = getUserToken();
 	char *deviceAuthToken = getDeviceToken();
@@ -71,7 +72,7 @@ void executeCodeServiceWithoutParams(char *serviceName, void (*codeCallback)(boo
   * Params need to be passes as a json string
 */
 void executeCodeServiceWithParams(char *serviceName, char *params, void (*codeCallback)(bool error, char *result)) {
-	printf("C SDK - executeCodeServiceWithParams\n");
+	log_trace("C SDK - executeCodeServiceWithParams\n");
 
 	char *userAuthToken = getUserToken();
 	char *deviceAuthToken = getDeviceToken();
