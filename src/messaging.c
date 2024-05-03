@@ -340,7 +340,7 @@ void connectCbMQTT(void* context, char *clientId, CbMqttConnectOptions *options,
 	}
 	
 	mqttClient = client;
-	free(options);
+	//free(options);
 }
 
 void _sdk_onSubscribeSuccess(void* context, MQTTAsync_successData* response) {
