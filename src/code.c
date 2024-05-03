@@ -7,7 +7,7 @@
 #include "concat_strings.h"
 #include "json_parser.h"
 #include "code.h"
-#include "log.h"
+#include "cb_log.h"
 
 /**
   * This function makes a REST call to execute the code service specified by the user and returns the response to the codeCallback

@@ -2,7 +2,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include "die.h"
-#include "log.h"
+#include "cb_log.h"
 
 /**
   * Function to stop execution of the program if things go bad gonna go down!

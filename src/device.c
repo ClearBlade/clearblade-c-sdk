@@ -8,7 +8,7 @@
 #include "util.h"
 #include "request_engine.h"
 #include "concat_strings.h"
-#include "log.h"
+#include "cb_log.h"
 
 void authenticateDevice(void callback(bool error, char *result)) {
 	log_trace("C SDK - authenticateDevice\n");

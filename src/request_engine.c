@@ -6,7 +6,7 @@
 #include "util.h"
 #include "concat_strings.h"
 #include "die.h"
-#include "log.h"
+#include "cb_log.h"
 
 
 /**

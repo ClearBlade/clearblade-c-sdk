@@ -6,7 +6,7 @@
 #include "MQTTAsync.h"
 #include "util.h"
 #include "messaging.h"
-#include "log.h"
+#include "cb_log.h"
 
 // TODO - Ideally, we would want separate callbacks for each client. In addition, we would want
 //separate subscribe and publish callbacks for each topic.

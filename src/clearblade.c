@@ -9,7 +9,7 @@
 #include "util.h"
 #include "user.h"
 #include "clearblade.h"
-#include "log.h"
+#include "cb_log.h"
 
 struct ClearBladeInitParms CBGlobal;
 

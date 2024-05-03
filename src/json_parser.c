@@ -4,7 +4,7 @@
 //#include <jansson.h>
 #include <json-c/json.h>
 #include "json_parser.h"
-#include "log.h"
+#include "cb_log.h"
 
 /**
   * This functions returns the property value of the passed in property and json string.

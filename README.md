@@ -71,18 +71,18 @@ sudo make install
 The ClearBlade C SDK utilizes the log.c library https://github.com/rxi/log.c to enable log levels.
 
 The log levels supported are:
-  * LOG_TRACE
-  * LOG_DEBUG
-  * LOG_INFO
-  * LOG_WARN
-  * LOG_ERROR
-  * LOG_FATAL
+  * CB_LOG_TRACE
+  * CB_LOG_DEBUG
+  * CB_LOG_INFO
+  * CB_LOG_WARN
+  * CB_LOG_ERROR
+  * CB_LOG_FATAL
 
 ### Enabling log levels
-By default, the SDK will log at the __LOG_TRACE__ level. To enable a different level of logging, invoke the __log_set_level(int level)__ function in your code and supply one of the log levels listed above.
+By default, the SDK will log at the __CB_LOG_TRACE__ level. To enable a different level of logging, invoke the __cb_log_set_level(int level)__ function in your code and supply one of the log levels listed above.
 
 ### Turning off logging
-Logging can be disabled and turned off completely by invoking the __log_set_quiet(bool enable)__ function and passing __true__ as the parameter.
+Logging can be disabled and turned off completely by invoking the __cb_log_set_quiet(bool enable)__ function and passing __true__ as the parameter.
 
 ## Initialize and authenticate
 
