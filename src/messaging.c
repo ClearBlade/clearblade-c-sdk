@@ -340,7 +340,6 @@ void connectCbMQTT(void* context, char *clientId, CbMqttConnectOptions *options,
 	}
 	
 	mqttClient = client;
-	//free(options);
 }
 
 void _sdk_onSubscribeSuccess(void* context, MQTTAsync_successData* response) {
@@ -415,7 +414,6 @@ void subscribeCbMQTT(void* context, char *topic, int qos, CbMqttResponseOptions*
 		log_error("C SDK - Failed to subscribe to topic, return code %d\n", rc);
 		return;
 	}
-	free(options);
 }
 
 void subscribeToTopic(char *topic, int qos) {
@@ -495,7 +493,6 @@ void publishCbMQTT(void* context, char *message, char *topic, int qos, int retai
 		log_error("C SDK - Failed to publish message, return code %d\n", rc);
 		return;
 	}
-	free(options);
 }
 
 void publishMessage(char *message, char *topic, int qos, int retained) {
@@ -567,7 +564,6 @@ void unsubscribeCbMQTT(void* context, char *topic, CbMqttResponseOptions* option
 	  log_error("C SDK - Failed to start unsubscribe, return code %d\n", rc);
 	  return;
 	}
-	free(options);
 }
 
 void unsubscribeFromTopic(char *topic) {
@@ -657,5 +653,4 @@ void disconnectCbMQTT(void* context, CbMqttDisconnectOptions *options) {
 		log_error("C SDK - Failed to start disconnect, return code %d\n", rc);
 		free(contextWrapper);
 	}
-	free(options);
 }
