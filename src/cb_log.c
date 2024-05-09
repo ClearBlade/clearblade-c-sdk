@@ -64,7 +64,6 @@ static void stdout_callback(cb_log_Event *ev) {
     buf, cb_level_strings[ev->level], ev->file, ev->line);
 #endif
   vfprintf(ev->udata, ev->fmt, ev->ap);
-  fprintf(ev->udata, "\n");
   fflush(ev->udata);
 }
 
@@ -76,7 +75,6 @@ static void file_callback(cb_log_Event *ev) {
     ev->udata, "%s %-5s %s:%d: ",
     buf, cb_level_strings[ev->level], ev->file, ev->line);
   vfprintf(ev->udata, ev->fmt, ev->ap);
-  fprintf(ev->udata, "\n");
   fflush(ev->udata);
 }
 
