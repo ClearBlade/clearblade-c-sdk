@@ -184,7 +184,7 @@ void connectToMQTTAdvanced(char *clientId, int qualityOfService, MQTTAsync_onSuc
 		contextWrapper->onSuccess = mqttOnConnect;
 	}
 
-	if(onConnLostCallback != NULL) {
+	if(onConnLostCallback == NULL) {
 		callbacks.onConnectionLost = NULL;
 	} else {
 		callbacks.onConnectionLost = onConnLostCallback;
