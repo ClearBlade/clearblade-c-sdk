@@ -4,8 +4,7 @@
 //#include <jansson.h>
 #include <json-c/json.h>
 #include "json_parser.h"
-#include "logger.h"
-
+#include "cb_log.h"
 
 /**
   * This functions returns the property value of the passed in property and json string.
@@ -16,7 +15,7 @@
 // jansson version
 //
 // char const *getPropertyValueFromJson(char *jsonString, char *property) {
-// 	logDebug("C SDK - getPropertyValueFromJson\n");
+// 	log_trace("C SDK - getPropertyValueFromJson\n");
 
 // 	const char *value = NULL;
 // 	json_t *root, *jsonValue;
@@ -48,7 +47,7 @@
 // json-c version
 //
 char const *getPropertyValueFromJson(char *jsonString, char *property) {
-	logDebug("C SDK - getPropertyValueFromJson\n");
+	log_trace("C SDK - getPropertyValueFromJson\n");
 
 	const char *value = NULL;
 	json_object *root = json_tokener_parse(jsonString);
@@ -86,7 +85,7 @@ char const *getPropertyValueFromJson(char *jsonString, char *property) {
 // jansson version
 //
 // bool checkIfJsonArray(char *jsonString) {
-// 	logDebug("C SDK - checkIfJsonArray\n");
+// 	log_trace("C SDK - checkIfJsonArray\n");
 
 // 	json_t *root;
 // 	json_error_t error;
@@ -105,7 +104,7 @@ char const *getPropertyValueFromJson(char *jsonString, char *property) {
 // json-c version
 //
 bool checkIfJsonArray(char *jsonString) {
-	logDebug("C SDK - checkIfJsonArray\n");
+	log_trace("C SDK - checkIfJsonArray\n");
 
 	json_object *root = json_tokener_parse(jsonString);
 

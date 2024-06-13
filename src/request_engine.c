@@ -6,7 +6,7 @@
 #include "util.h"
 #include "concat_strings.h"
 #include "die.h"
-#include "logger.h"
+#include "cb_log.h"
 
 
 /**
@@ -16,7 +16,7 @@ void init_string(struct string *s) {
   s->len = 0;
   s->ptr = malloc(s->len+1);
   if (s->ptr == NULL) {
-		logFatal("malloc() failed\n");
+    log_error("C SDK - malloc() failed\n");
     exit(EXIT_FAILURE);
   }
   s->ptr[0] = '\0';
@@ -30,7 +30,7 @@ size_t writefunc(void *ptr, size_t size, size_t nmemb, struct string *s) {
   size_t new_len = s->len + size*nmemb;
   s->ptr = realloc(s->ptr, new_len+1);
   if (s->ptr == NULL) {
-		logFatal("malloc() failed\n");
+    log_error("C SDK - realloc() failed\n");
     exit(EXIT_FAILURE);
   }
   memcpy(s->ptr+s->len, ptr, size*nmemb);
@@ -47,17 +47,17 @@ size_t writefunc(void *ptr, size_t size, size_t nmemb, struct string *s) {
   * It uses the libCURL library to make the HTTP requests.
 */
 char *executeRequest(struct Header *header) {
-	logDebug("C SDK - executeRequest\n");
+	log_trace("C SDK - executeRequest\n");
 	return makeRequest(header, "", "");
 }
 
 char *executex509MtlsRequest(struct Header *header, char *certFile, char *keyFile) {
-	logDebug("C SDK - executex509MtlsRequest\n");
+	log_trace("C SDK - executex509MtlsRequest\n");
 	return makeRequest(header, certFile, keyFile);
 }
 
 char*makeRequest(struct Header *header, char *certFile, char *keyFile) {
-	logDebug("C SDK - makeRequest\n");
+	log_trace("C SDK - makeRequest\n");
 	char *systemKeyHeader = getConcatString("ClearBlade-SystemKey: ", header->systemKey); // This is a required header for all calls
 	char *systemSecretHeader = NULL;
 	char *userTokenHeader = NULL;
@@ -130,18 +130,16 @@ char*makeRequest(struct Header *header, char *certFile, char *keyFile) {
    	curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
 
 		if (certFile && certFile[0] != '\0') {
-			// TODO - LEAVE COMMENTED, This requires curl version 7.71.0
-    	// char *substrPtr = strstr(certFile, "BEGIN CERTIFICATE");
-    	// if (substrPtr) {
-			// 	struct curl_blob blob;
+    	char *substrPtr = strstr(certFile, "BEGIN CERTIFICATE");
+    	if (substrPtr) {
+				struct curl_blob blob;
 
-			// 	blob.data = certFile;
-  		// 	blob.len = strlen(certFile);
-  		// 	blob.flags = CURL_BLOB_COPY;
+				blob.data = certFile;
+  			blob.len = strlen(certFile);
+  			blob.flags = CURL_BLOB_COPY;
 
-			// 	curl_easy_setopt(curl, CURLOPT_SSLCERT_BLOB, &blob);
-			// } else {
-			//END TODO
+				curl_easy_setopt(curl, CURLOPT_SSLCERT_BLOB, &blob);
+			} else {
 				//See if we have a file path
 
 				FILE* filePtr = fopen(certFile, "r");
@@ -151,27 +149,23 @@ char*makeRequest(struct Header *header, char *certFile, char *keyFile) {
     		} else {
     			die("certFile parameter must contain either the contents of an SSL certificate file or the path to the certificate file");
     		}
-			// TODO - LEAVE COMMENTED
-		 	//}
-			//END TODO
+		 	}
 			curl_easy_setopt(curl, CURLOPT_SSLCERTTYPE, "PEM");
 		}
 
 		if (keyFile && keyFile[0] != '\0') {
 			//See if keyFile contains the private key or the path to the private key
 
-			// TODO - LEAVE COMMENTED, This requires curl version 7.71.0
-    	// char *substrPtr = strstr(keyFile, "PRIVATE KEY");
-    	// if (substrPtr) {
-			// 	struct curl_blob blob;
+    	char *substrPtr = strstr(keyFile, "PRIVATE KEY");
+    	if (substrPtr) {
+				struct curl_blob blob;
 
-			// 	blob.data = keyFile;
-  		// 	blob.len = strlen(keyFile);
-  		// 	blob.flags = CURL_BLOB_COPY;
+				blob.data = keyFile;
+  			blob.len = strlen(keyFile);
+  			blob.flags = CURL_BLOB_COPY;
 
-			// 	curl_easy_setopt(curl, CURLOPT_SSLKEY_BLOB, &blob);
-			// } else {
-			//END TODO
+				curl_easy_setopt(curl, CURLOPT_SSLKEY_BLOB, &blob);
+			} else {
 				//See if we have a file path
 
 				FILE* filePtr = fopen(keyFile, "r");
@@ -181,16 +175,14 @@ char*makeRequest(struct Header *header, char *certFile, char *keyFile) {
     		} else {
     			die("keyFile parameter must contain either the contents of a private key file or the path to the private key file");
     		}
-		// TODO - LEAVE COMMENTED
-		// 	}
-		//END TODO
+		 	}
 			curl_easy_setopt(curl, CURLOPT_SSLKEYTYPE, "PEM");
 		}
 
 		res = curl_easy_perform(curl); // Execute the request
 		
 		if(res != CURLE_OK)
-       	logError("curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
+       	log_error("C SDK - curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
 
   	free(systemKeyHeader);
   	if (systemSecretHeader != NULL) {
